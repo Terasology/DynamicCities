@@ -62,8 +62,8 @@ public class Grid2DObjectFacetTest {
         Assert.assertEquals(new Vector2i(1, 1), facet.getRelativeGridPoint(4, 4));
         Assert.assertEquals(new Vector2i(2, 1), facet.getRelativeGridPoint(9, 3));
         Assert.assertEquals(new Vector2i(4, 0), facet.getRelativeGridPoint(16, 0));
-        Assert.assertEquals(new Vector2i(-2, -1), facet.getRelativeGridPoint(-9, -3));
-        Assert.assertEquals(new Vector2i(-4, 0), facet.getRelativeGridPoint(-17, 0));
+        Assert.assertEquals(new Vector2i(8, 8), facet.getRelativeGridPoint(32, 32));
+        Assert.assertEquals(new Vector2i(4, 4), facet.getRelativeGridPoint(17, 17));
     }
 
     @Test
@@ -121,14 +121,14 @@ public class Grid2DObjectFacetTest {
 
     @Test
     public void testMixedGetSet1() {
-        facet.set(14, -12, 16);
-        Assert.assertEquals(Integer.valueOf(16), facet.getWorld(42, 34));
+        facet.set(14, 12, 16);
+        Assert.assertEquals(Integer.valueOf(16), facet.getWorld(24, 42));
     }
 
     @Test
     public void testMixedGetSet2() {
         facet.setWorld(24, 46, 32);
-        Assert.assertEquals(Integer.valueOf(32), facet.get(-1, 0));
+        Assert.assertEquals(Integer.valueOf(32), facet.get(14, 16), 0.0);
     }
 
 
