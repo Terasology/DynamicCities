@@ -15,7 +15,6 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
-import org.terasology.ShatteredPlanes.ShatteredPlanesBiome;
 import org.terasology.core.world.CoreBiome;
 import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.region.RegionEntityProvider;

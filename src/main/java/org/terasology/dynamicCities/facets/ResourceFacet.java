@@ -16,73 +16,90 @@
 package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
+import org.terasology.dynamicCities.ressource.Resource;
+import org.terasology.dynamicCities.ressource.ResourceType;
+import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.world.generation.Border3D;
 
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * This facet will allow to have only a small number of gridpoints embedded in a larger region.
- * It can be used as storage for world data after worldgeneration
- */
-public abstract class Grid2DFloatFacet extends Grid2DFacet {
+public class ResourceFacet extends Grid2DFacet implements Component {
 
-    private float[] data;
 
-    public Grid2DFloatFacet(Region3i targetRegion, Border3D border, int gridSize) {
+    private Region3i region;
+    private Map<ResourceType, Resource>[] data;
+
+    @SuppressWarnings(value = "unchecked")
+    public ResourceFacet(Region3i targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
-        this.data = new float[gridWorldRegion.area()];
+        data = new HashMap[gridWorldRegion.area()];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = new HashMap<>();
+        }
     }
 
-
-    public float get(int x, int y) {
-        BaseVector2i gridPos = getRelativeGridPoint(x, y);
-        return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
+    //Modify that to get resources per grid cell!
+    public void addRessource(ResourceType type, Vector2i pos, int amount) {
+        if (getWorld(pos).containsKey(type)) {
+            getWorld(pos).get(type).amount += amount;
+        } else {
+            getWorld(pos).put(type, new Resource(type));
+            getWorld(pos).get(type).amount += amount;
+        }
     }
 
-    public float get(BaseVector2i pos) {
+    public Map<ResourceType, Resource> get(int x, int y) {
+        return data[getRelativeGridIndex(x, y)];
+    }
+
+    public Map<ResourceType, Resource> get(BaseVector2i pos) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         return get(gridPos.x(), gridPos.y());
     }
 
-    public float getWorld(int x, int y) {
+    public Map<ResourceType, Resource> getWorld(int x, int y) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
         return data[getWorldGridIndex(gridPos.x(), gridPos.y())];
     }
 
-    public float getWorld(BaseVector2i pos) {
+    public Map<ResourceType, Resource> getWorld(BaseVector2i pos) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         return getWorld(gridPos.x(), gridPos.y());
     }
 
-    public float[] getInternal() {
+    public Map<ResourceType, Resource>[] getInternal() {
         return data;
     }
 
-    public void set(int x, int y, float value) {
+    public void set(int x, int y, Map<ResourceType, Resource> value) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
         data[getRelativeGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
-    public void set(BaseVector2i pos, float value) {
+    public void set(BaseVector2i pos, Map<ResourceType, Resource> value) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         set(pos.x(), pos.y(), value);
     }
 
-    public void setWorld(int x, int y, float value) {
+    public void setWorld(int x, int y, Map<ResourceType, Resource> value) {
         BaseVector2i gridPos = getWorldGridPoint(x,y);
         data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
-    public void setWorld(BaseVector2i pos, float value) {
+    public void setWorld(BaseVector2i pos, Map<ResourceType, Resource> value) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         setWorld(gridPos.x(), gridPos.y(), value);
     }
 
-    public void set(float[] newData) {
+    public void set(Map[] newData) {
         Preconditions.checkArgument(newData.length == data.length, "New data must have same length as existing");
         System.arraycopy(newData, 0, data, 0, newData.length);
     }
 
 }
+
+

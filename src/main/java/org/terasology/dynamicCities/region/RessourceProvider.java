@@ -15,7 +15,7 @@
  */
 package org.terasology.dynamicCities.region;
 
-import org.terasology.dynamicCities.facets.RessourceFacet;
+import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
@@ -26,7 +26,7 @@ import org.terasology.world.generation.facets.SurfaceHeightFacet;
 import org.terasology.world.generator.plugin.RegisterPlugin;
 
 @RegisterPlugin
-@Produces(RessourceFacet.class)
+@Produces(ResourceFacet.class)
 /**
  * This facet will be used to store information about the ressources in its region
  * It will be saved as a Component in the RegionEntity

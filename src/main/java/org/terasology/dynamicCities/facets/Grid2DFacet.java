@@ -16,8 +16,6 @@
 package org.terasology.dynamicCities.facets;
 
 import org.terasology.math.Region3i;
-import org.terasology.math.TeraMath;
-import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.world.generation.Border3D;
@@ -27,6 +25,9 @@ import org.terasology.world.generation.facets.base.BaseFacet2D;
 /**
  * This facet will allow to have only a small number of gridpoints embedded in a larger region.
  * It can be used as storage for world data after worldgeneration
+ *
+ * At the moment the gridRelativeRegion will be created with center at zero, unlike the normale Relative Region
+ * with min at zero -> maybe use the established standard
  */
 public abstract class Grid2DFacet extends BaseFacet2D {
 
@@ -38,14 +39,35 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     public Grid2DFacet(Region3i targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border);
         this.gridSize = gridSize;
-        Rect2i rect2i = getWorldRegion();
-        gridWorldRegion = Rect2i.createFromMinAndMax(getWorldGridPoint(getWorldRegion().min()), getWorldGridPoint(getWorldRegion().max()));
-        gridRelativeRegion = Rect2i.createFromMinAndMax(getRelativeGridPoint(getRelativeRegion().min()), getRelativeGridPoint(getRelativeRegion().max()));
-        center = new Vector2i(rect2i.minX() + Math.round(rect2i.sizeX() / 2), rect2i.minY() + Math.round(rect2i.sizeY() / 2));
+        center = new Vector2i(targetRegion.center().x(), targetRegion.center().z());
+        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.sizeX() / (2 * gridSize),
+                center.y() - targetRegion.sizeY() / (2 * gridSize),
+                center.x() + targetRegion.sizeX() / (2 * gridSize),
+                center.y() + targetRegion.sizeY() / (2 * gridSize));
+
+        gridRelativeRegion = Rect2i.createFromMinAndMax(-targetRegion.sizeX() / 2 / gridSize,
+                -targetRegion.sizeY() / 2 / gridSize,
+                targetRegion.sizeX() / 2 / gridSize,
+                targetRegion.sizeY() / 2 / gridSize);
     }
 
     public Vector2i getWorldPoint(Vector2i gridPoint) {
-        return center.add(gridPoint.sub(center).mul(gridSize));
+        return getWorldPoint(gridPoint.x(), gridPoint.y());
+    }
+
+    public Vector2i getWorldPoint(int x, int y) {
+        if (!gridWorldRegion.contains(x,y)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, gridWorldRegion.toString()));
+        }
+        int xRelative = x - center.x();
+        int yRelative = y - center.y();
+        int xNew = center.x() + Math.round((float) xRelative * gridSize);
+        int yNew = center.y() + Math.round((float) yRelative * gridSize);
+        Vector2i gridPoint = new Vector2i(xNew, yNew);
+        if (!getWorldRegion().contains(gridPoint)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, getWorldRegion().toString()));
+        }
+        return gridPoint;
     }
 
     public Vector2i getRelativeGridPoint(Vector2i worldPoint) {
@@ -53,13 +75,11 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     }
 
     public Vector2i getRelativeGridPoint(int x, int y) {
-        int xRelative = x-center.x();
-        int yRelative = y-center.y();
-        int xNew = Math.round(xRelative / gridSize);
-        int yNew = Math.round(yRelative / gridSize);
+        int xNew = Math.round((float) x / gridSize);
+        int yNew = Math.round((float) y / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!gridWorldRegion.contains(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, gridWorldRegion.toString()));
+        if (!gridRelativeRegion.contains(gridPoint)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridRelativeRegion.toString()));
         }
         return gridPoint;
     }
@@ -69,7 +89,15 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     }
 
     public Vector2i getWorldGridPoint(int x, int y) {
-        return getRelativeGridPoint(x, y).add(center);
+        int xRelative = x - center.x();
+        int yRelative = y - center.y();
+        int xNew = center.x() + Math.round((float) xRelative / gridSize);
+        int yNew = center.y() + Math.round((float) yRelative / gridSize);
+        Vector2i gridPoint = new Vector2i(xNew, yNew);
+        if (!gridWorldRegion.contains(gridPoint)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridWorldRegion.toString()));
+        }
+        return gridPoint;
     }
 
     public int getGridSize() {

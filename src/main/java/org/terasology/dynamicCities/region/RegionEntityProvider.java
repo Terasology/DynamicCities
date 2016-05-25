@@ -50,6 +50,8 @@ public class RegionEntityProvider implements EntityProvider {
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
             entityStore.addComponent(locationComponent);
             entityStore.addComponent(roughnessFacet);
+            //Region component is used as identifier for a region entity
+            entityStore.addComponent(new RegionComponent());
             entityStore.addComponent(new NetworkComponent());
             buffer.enqueue(entityStore);
 

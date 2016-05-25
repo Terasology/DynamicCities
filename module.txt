@@ -1,0 +1,12 @@
+{
+    "id" : "DynamicCities",
+    "version" : "0.1.0-SNAPSHOT",
+    "author" : "Cpt Crunchy",
+    "displayName" : "Dynamic Cities",
+    "description" : "Simulates complex city development over progressing game time based on the worlds resources",
+    "dependencies" : [{
+            "id" : "Core",
+            "minVersion" : "1.0.0"
+        }],
+    "serverSideOnly" : false
+}
