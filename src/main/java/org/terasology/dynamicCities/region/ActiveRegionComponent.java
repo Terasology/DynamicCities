@@ -13,27 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.ressource;
+package org.terasology.dynamicCities.region;
 
-public class Resource {
 
-    public int amount;
-    private ResourceType type;
+import org.terasology.entitySystem.Component;
 
-    public Resource(ResourceType type, int amount) {
-        this.type = type;
-        this.amount = amount;
+public class ActiveRegionComponent implements Component {
+
+    public ActiveRegionComponent() {
+
     }
-
-    public Resource(ResourceType type) {
-        this.type = type;
-        this.amount = 1;
-    }
-
-    public ResourceType getType() {
-        return type;
-    }
-
-
 }
-

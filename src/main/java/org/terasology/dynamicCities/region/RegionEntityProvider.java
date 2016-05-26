@@ -16,11 +16,13 @@
 
 package org.terasology.dynamicCities.region;
 
+import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
-import org.terasology.math.geom.*;
+import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.world.generation.EntityBuffer;
 import org.terasology.world.generation.EntityProvider;
@@ -43,6 +45,7 @@ public class RegionEntityProvider implements EntityProvider {
 
         SurfaceHeightFacet surfaceHeightFacet = region.getFacet(SurfaceHeightFacet.class);
         RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
+        ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
         Region3i worldRegion = region.getRegion();
 
         if(checkCorners(worldRegion, surfaceHeightFacet)) {
@@ -50,8 +53,9 @@ public class RegionEntityProvider implements EntityProvider {
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
             entityStore.addComponent(locationComponent);
             entityStore.addComponent(roughnessFacet);
+            entityStore.addComponent(resourceFacet);
             //Region component is used as identifier for a region entity
-            entityStore.addComponent(new RegionComponent());
+            entityStore.addComponent(new UnregisteredRegionComponent());
             entityStore.addComponent(new NetworkComponent());
             buffer.enqueue(entityStore);
 

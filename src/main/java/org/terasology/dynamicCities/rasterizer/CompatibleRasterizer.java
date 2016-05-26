@@ -15,26 +15,17 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
-import org.terasology.core.world.CoreBiome;
-import org.terasology.core.world.generator.facets.BiomeFacet;
-import org.terasology.dynamicCities.region.RegionEntityProvider;
-import org.terasology.math.TeraMath;
+import org.terasology.dynamicCities.facets.ResourceFacet;
+import org.terasology.dynamicCities.ressource.Resource;
+import org.terasology.dynamicCities.ressource.ResourceType;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.world.biomes.Biome;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
-import org.terasology.world.chunks.ChunkConstants;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.WorldRasterizer;
-import org.terasology.world.generation.facets.DensityFacet;
-import org.terasology.world.generation.facets.SeaLevelFacet;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
-import org.terasology.world.liquid.LiquidData;
-import org.terasology.world.liquid.LiquidType;
 
 /**
  */
@@ -43,16 +34,23 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
     private Block water;
     private Block ice;
     private Block stone;
+    private Block cobbleStone;
+    private Block hardStone;
     private Block sand;
     private Block grass;
     private Block snow;
     private Block dirt;
     private Block mantlestone;
+    private Block oakTrunk;
+    private Block pineTrunk;
+    private Block birchTrunk;
 
     @Override
     public void initialize() {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         stone = blockManager.getBlock("core:stone");
+        hardStone = blockManager.getBlock("core:hardstone");
+        cobbleStone = blockManager.getBlock("core:cobblestone");
         mantlestone = blockManager.getBlock("core:mantlestone");
         water = blockManager.getBlock("core:water");
         ice = blockManager.getBlock("core:Ice");
@@ -60,15 +58,39 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
         grass = blockManager.getBlock("core:Grass");
         snow = blockManager.getBlock("core:Snow");
         dirt = blockManager.getBlock("core:Dirt");
+        oakTrunk = blockManager.getBlock("core:OakTrunk");
+        pineTrunk = blockManager.getBlock("core:PineTrunk");
+        birchTrunk = blockManager.getBlock("core:BirchTrunk");
     }
 
     @Override
     public void generateChunk(CoreChunk chunk, Region chunkRegion) {
     }
 
-    public void setBlock(CoreChunk chunk, Block block, BaseVector3i pos) {
+    public void setBlock(CoreChunk chunk, Block block, BaseVector3i pos, ResourceFacet resourceFacet) {
         chunk.setBlock(pos, block);
+        Resource resource = getResourceType(block);
+        if (resource.getType() != ResourceType.NULL) {
+            resourceFacet.addResource(resource, new Vector2i(pos.x(), pos.y()));
+        }
 
+    }
+
+    public Resource getResourceType(Block block) {
+        if (block == stone || block == mantlestone || block == hardStone) {
+            return new Resource(ResourceType.STONE);
+        }
+        if (block == water) {
+            return new Resource(ResourceType.WATER);
+        }
+        if (block == grass) {
+            return new Resource(ResourceType.GRASS);
+        }
+        if (block == oakTrunk || block == pineTrunk || block == birchTrunk) {
+            return new Resource(ResourceType.WOOD);
+        }
+
+        return new Resource(ResourceType.NULL);
     }
 
 }

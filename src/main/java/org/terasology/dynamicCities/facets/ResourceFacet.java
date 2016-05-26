@@ -43,17 +43,17 @@ public class ResourceFacet extends Grid2DFacet implements Component {
     }
 
     //Modify that to get resources per grid cell!
-    public void addRessource(ResourceType type, Vector2i pos, int amount) {
-        if (getWorld(pos).containsKey(type)) {
-            getWorld(pos).get(type).amount += amount;
+    public void addResource(Resource resource, Vector2i pos) {
+        if (getWorld(pos).containsKey(resource.getType())) {
+            getWorld(pos).get(resource.getType()).amount += resource.amount;
         } else {
-            getWorld(pos).put(type, new Resource(type));
-            getWorld(pos).get(type).amount += amount;
+            getWorld(pos).put(resource.getType(), resource);
         }
     }
 
     public Map<ResourceType, Resource> get(int x, int y) {
-        return data[getRelativeGridIndex(x, y)];
+        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
     }
 
     public Map<ResourceType, Resource> get(BaseVector2i pos) {

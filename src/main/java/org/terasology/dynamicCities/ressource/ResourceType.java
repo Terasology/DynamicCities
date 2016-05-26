@@ -16,5 +16,5 @@
 package org.terasology.dynamicCities.ressource;
 
 public enum ResourceType {
-    WOOD, STONE, FOOD, WATER, GRASS
+    WOOD, STONE, FOOD, WATER, GRASS, NULL
 }
