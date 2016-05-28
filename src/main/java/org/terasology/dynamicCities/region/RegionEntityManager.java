@@ -24,7 +24,9 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.registry.In;
+import org.terasology.rendering.nui.Color;
 
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class RegionEntityManager extends BaseComponentSystem implements UpdateSubscriberSystem {
@@ -34,9 +36,9 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
 
     private EntityRef regionEntityManager;
 
-    @ReceiveEvent(components = {UnregisteredRegionComponent.class})
-    public void registerRegion(RegionRegisterEvent event, EntityRef region) {
-        regionEntityManager.getComponent(RegionEntities.class).add(region);
+    @Override
+    public void postBegin() {
+        regionEntityManager = entityManager.create(new RegionEntities());
     }
 
     @Override
@@ -46,13 +48,15 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
             region.send(new RegionRegisterEvent());
             region.removeComponent(UnregisteredRegionComponent.class);
             region.addComponent(new ActiveRegionComponent());
+            NameTagComponent nT = region.getComponent(NameTagComponent.class);
+            nT.textColor = Color.GREEN;
+            region.saveComponent(nT);
         }
     }
 
-    @Override
-    public void initialise() {
-        regionEntityManager = entityManager.create(new RegionEntities());
+    @ReceiveEvent(components = {UnregisteredRegionComponent.class})
+    public void registerRegion(RegionRegisterEvent event, EntityRef region) {
+        regionEntityManager.getComponent(RegionEntities.class).add(region);
     }
-
 
 }

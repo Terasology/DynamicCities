@@ -21,16 +21,16 @@ import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.reflection.MappedContainer;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
+@MappedContainer
 public class RoughnessFacet extends Grid2DFloatFacet implements Component {
 
-    private int gridSize;
 
     public RoughnessFacet(Region3i targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
-        this.gridSize = gridSize;
     }
 
     //Determines the std. deviation of the height in a given cell and saves it to the facet

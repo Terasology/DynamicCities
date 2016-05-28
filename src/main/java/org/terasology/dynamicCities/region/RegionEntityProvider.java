@@ -20,10 +20,13 @@ import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
+import org.terasology.reflection.MappedContainer;
+import org.terasology.rendering.nui.Color;
 import org.terasology.world.generation.EntityBuffer;
 import org.terasology.world.generation.EntityProvider;
 import org.terasology.world.generation.Region;
@@ -36,7 +39,7 @@ import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
  * Afterwards, if no settlement is adjacent clear them of unrelevant data
  * Only create an entity if it's a surface region
  */
-
+@MappedContainer
 public class RegionEntityProvider implements EntityProvider {
 
 
@@ -48,12 +51,26 @@ public class RegionEntityProvider implements EntityProvider {
         ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
         Region3i worldRegion = region.getRegion();
 
+        /**
+         * Copyproblem due to nesting (probably) -> Try to extract data out of the facet and add it without the whole facet
+         */
         if(checkCorners(worldRegion, surfaceHeightFacet)) {
             EntityStore entityStore = new EntityStore();
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
             entityStore.addComponent(locationComponent);
-            entityStore.addComponent(roughnessFacet);
-            entityStore.addComponent(resourceFacet);
+            entityStore.addComponent(new RoughnessFacetComponent(roughnessFacet));
+
+            //Crashes with Cannot obtain class for type java.util.Map<org.terasology.dynamicCities.resource.ResourceType,
+            // org.terasology.dynamicCities.resource.Resource>[], using default strategy :
+            //entityStore.addComponent(resourceFacet);
+
+            NameTagComponent nameTagComponent = new NameTagComponent();
+            nameTagComponent.text = locationComponent.getWorldPosition().toString();
+            nameTagComponent.textColor = Color.WHITE;
+            nameTagComponent.yOffset = 20;
+            nameTagComponent.scale = 20;
+            entityStore.addComponent(nameTagComponent);
+
             //Region component is used as identifier for a region entity
             entityStore.addComponent(new UnregisteredRegionComponent());
             entityStore.addComponent(new NetworkComponent());
@@ -73,7 +90,7 @@ public class RegionEntityProvider implements EntityProvider {
         positions[0] = new Vector2i(max.x(), max.z());
         positions[1] = new Vector2i(min.x(), min.z());
         positions[2] = new Vector2i(min.x() + worldRegion.sizeX(), min.z());
-        positions[3] = new Vector2i(min.x(), min.y() + worldRegion.sizeZ());
+        positions[3] = new Vector2i(min.x(), min.z() + worldRegion.sizeZ());
         positions[4] = new Vector2i(worldRegion.center().x,worldRegion.center().z);
 
         for (int i = 0; i < corners.length; i++) {

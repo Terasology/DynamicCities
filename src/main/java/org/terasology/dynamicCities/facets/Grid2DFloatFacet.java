@@ -18,7 +18,6 @@ package org.terasology.dynamicCities.facets;
 import com.google.common.base.Preconditions;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.world.generation.Border3D;
 
 
@@ -26,9 +25,10 @@ import org.terasology.world.generation.Border3D;
  * This facet will allow to have only a small number of gridpoints embedded in a larger region.
  * It can be used as storage for world data after worldgeneration
  */
+
 public abstract class Grid2DFloatFacet extends Grid2DFacet {
 
-    private float[] data;
+    protected float[] data;
 
     public Grid2DFloatFacet(Region3i targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);

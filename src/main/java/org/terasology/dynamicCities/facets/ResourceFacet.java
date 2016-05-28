@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
-import org.terasology.dynamicCities.ressource.Resource;
-import org.terasology.dynamicCities.ressource.ResourceType;
+import org.terasology.dynamicCities.resource.Resource;
+import org.terasology.dynamicCities.resource.ResourceType;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
@@ -36,7 +36,7 @@ public class ResourceFacet extends Grid2DFacet implements Component {
     @SuppressWarnings(value = "unchecked")
     public ResourceFacet(Region3i targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
-        data = new HashMap[gridWorldRegion.area()];
+        data = (HashMap<ResourceType, Resource>[]) new HashMap[gridWorldRegion.area()];
         for (int i = 0; i < data.length; i++) {
             data[i] = new HashMap<>();
         }
@@ -44,10 +44,10 @@ public class ResourceFacet extends Grid2DFacet implements Component {
 
     //Modify that to get resources per grid cell!
     public void addResource(Resource resource, Vector2i pos) {
-        if (getWorld(pos).containsKey(resource.getType())) {
-            getWorld(pos).get(resource.getType()).amount += resource.amount;
+        if (get(pos).containsKey(resource.getType())) {
+            get(pos).get(resource.getType()).amount += resource.amount;
         } else {
-            getWorld(pos).put(resource.getType(), resource);
+            get(pos).put(resource.getType(), resource);
         }
     }
 

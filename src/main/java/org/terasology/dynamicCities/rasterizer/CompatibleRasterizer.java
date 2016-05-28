@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.rasterizer;
 
 import org.terasology.dynamicCities.facets.ResourceFacet;
-import org.terasology.dynamicCities.ressource.Resource;
-import org.terasology.dynamicCities.ressource.ResourceType;
+import org.terasology.dynamicCities.resource.Resource;
+import org.terasology.dynamicCities.resource.ResourceType;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.registry.CoreRegistry;
@@ -26,24 +26,26 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.WorldRasterizer;
+import org.terasology.world.liquid.LiquidData;
+import org.terasology.world.liquid.LiquidType;
 
 /**
  */
 public abstract class CompatibleRasterizer implements WorldRasterizer {
 
-    private Block water;
-    private Block ice;
-    private Block stone;
-    private Block cobbleStone;
-    private Block hardStone;
-    private Block sand;
-    private Block grass;
-    private Block snow;
-    private Block dirt;
-    private Block mantlestone;
-    private Block oakTrunk;
-    private Block pineTrunk;
-    private Block birchTrunk;
+    protected Block water;
+    protected Block ice;
+    protected Block stone;
+    protected Block cobbleStone;
+    protected Block hardStone;
+    protected Block sand;
+    protected Block grass;
+    protected Block snow;
+    protected Block dirt;
+    protected Block mantlestone;
+    protected Block oakTrunk;
+    protected Block pineTrunk;
+    protected Block birchTrunk;
 
     @Override
     public void initialize() {
@@ -72,6 +74,16 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
         Resource resource = getResourceType(block);
         if (resource.getType() != ResourceType.NULL) {
             resourceFacet.addResource(resource, new Vector2i(pos.x(), pos.y()));
+        }
+    }
+
+    public void setLiquid(CoreChunk chunk, LiquidData liquid, BaseVector3i pos, ResourceFacet resourceFacet) {
+        chunk.setLiquid(pos, liquid);
+        if(liquid.getType() == LiquidType.WATER) {
+            Resource resource = new Resource(ResourceType.WATER);
+            if (resource.getType() != ResourceType.NULL) {
+                resourceFacet.addResource(resource, new Vector2i(pos.x(), pos.y()));
+            }
         }
 
     }

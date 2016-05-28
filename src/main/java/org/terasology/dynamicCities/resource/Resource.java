@@ -13,8 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.ressource;
+package org.terasology.dynamicCities.resource;
 
-public enum ResourceType {
-    WOOD, STONE, FOOD, WATER, GRASS, NULL
+public class Resource {
+
+    public int amount;
+    private ResourceType type;
+
+    public Resource(ResourceType type, int amount) {
+        this.type = type;
+        this.amount = amount;
+    }
+
+    public Resource(ResourceType type) {
+        this.type = type;
+        this.amount = 1;
+    }
+
+    public ResourceType getType() {
+        return type;
+    }
+
+
 }
+

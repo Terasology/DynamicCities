@@ -13,41 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.facets;
+package org.terasology.dynamicCities.region;
 
-import org.terasology.math.Region3i;
+import com.google.common.base.Preconditions;
+import org.terasology.dynamicCities.facets.RoughnessFacet;
+import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.BaseFacet2D;
+import org.terasology.reflection.MappedContainer;
 
 
-/**
- * This facet will allow to have only a small number of gridpoints embedded in a larger region.
- * It can be used as storage for world data after worldgeneration
- *
- */
+@MappedContainer
+public class RoughnessFacetComponent implements Component {
 
-public abstract class Grid2DFacet extends BaseFacet2D {
 
-    protected int gridSize;
-    protected Vector2i center;
-    protected Rect2i gridWorldRegion;
-    protected Rect2i gridRelativeRegion;
+    Rect2i relativeRegion;
+    Rect2i worldRegion;
+    Rect2i gridWorldRegion;
+    Rect2i gridRelativeRegion;
+    int gridSize;
+    Vector2i center;
+    float[] data;
 
-    public Grid2DFacet(Region3i targetRegion, Border3D border, int gridSize) {
-        super(targetRegion, border);
-        this.gridSize = gridSize;
-        center = new Vector2i(targetRegion.center().x(), targetRegion.center().z());
-        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.sizeX() / (2 * gridSize),
-                center.y() - targetRegion.sizeY() / (2 * gridSize),
-                center.x() + targetRegion.sizeX() / (2 * gridSize),
-                center.y() + targetRegion.sizeY() / (2 * gridSize));
+    public RoughnessFacetComponent(RoughnessFacet roughnessFacet) {
 
-        gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0,
-                targetRegion.sizeX() / gridSize,
-                targetRegion.sizeY() / gridSize);
+        relativeRegion = copyRect2i(roughnessFacet.getRelativeRegion());
+        worldRegion = copyRect2i(roughnessFacet.getWorldRegion());
+        gridWorldRegion = copyRect2i(roughnessFacet.getGridWorldRegion());
+        gridRelativeRegion = copyRect2i(roughnessFacet.getGridRelativeRegion());
+        gridSize = roughnessFacet.getGridSize();
+        center = new Vector2i(roughnessFacet.getCenter());
+        data = roughnessFacet.getInternal().clone();
+
     }
+
+    private Rect2i copyRect2i(Rect2i value) {
+        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
+    }
+
+    //Copy of the methods used to access the data. Maybe there is a better way than storing them all here :/
 
     public Vector2i getWorldPoint(Vector2i gridPoint) {
         return getWorldPoint(gridPoint.x(), gridPoint.y());
@@ -62,8 +67,8 @@ public abstract class Grid2DFacet extends BaseFacet2D {
         int xNew = center.x() + Math.round((float) xRelative * gridSize);
         int yNew = center.y() + Math.round((float) yRelative * gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!getWorldRegion().contains(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, getWorldRegion().toString()));
+        if (!worldRegion.contains(gridPoint)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, worldRegion.toString()));
         }
         return gridPoint;
     }
@@ -91,8 +96,8 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     }
 
     public Vector2i getWorldGridPoint(int x, int y) {
-        if (!getWorldRegion().contains(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, getWorldRegion().toString()));
+        if (!worldRegion.contains(x, y)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, worldRegion.toString()));
         }
         int xRelative = x - center.x();
         int yRelative = y - center.y();
@@ -133,5 +138,54 @@ public abstract class Grid2DFacet extends BaseFacet2D {
 
     public Rect2i getGridRelativeRegion() {
         return gridRelativeRegion;
+    }
+
+    public float get(int x, int y) {
+        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
+    }
+
+    public float get(BaseVector2i pos) {
+        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
+        return get(gridPos.x(), gridPos.y());
+    }
+
+    public float getWorld(int x, int y) {
+        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        return data[getWorldGridIndex(gridPos.x(), gridPos.y())];
+    }
+
+    public float getWorld(BaseVector2i pos) {
+        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
+        return getWorld(gridPos.x(), gridPos.y());
+    }
+
+    public float[] getInternal() {
+        return data;
+    }
+
+    public void set(int x, int y, float value) {
+        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        data[getRelativeGridIndex(gridPos.x(), gridPos.y())] = value;
+    }
+
+    public void set(BaseVector2i pos, float value) {
+        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
+        set(pos.x(), pos.y(), value);
+    }
+
+    public void setWorld(int x, int y, float value) {
+        BaseVector2i gridPos = getWorldGridPoint(x,y);
+        data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
+    }
+
+    public void setWorld(BaseVector2i pos, float value) {
+        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
+        setWorld(gridPos.x(), gridPos.y(), value);
+    }
+
+    public void set(float[] newData) {
+        Preconditions.checkArgument(newData.length == data.length, "New data must have same length as existing");
+        System.arraycopy(newData, 0, data, 0, newData.length);
     }
 }
