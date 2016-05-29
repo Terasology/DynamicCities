@@ -64,7 +64,7 @@ public class RegionEntityProvider implements EntityProvider {
 
             NameTagComponent nameTagComponent = new NameTagComponent();
             nameTagComponent.text = "Roughness: "
-                    + roughnessFacetComponent.meanDeviation + " Stone: " + resourceFacetComponent.getResourceSum("Stone");
+                    + roughnessFacetComponent.meanDeviation + " Grass: " + resourceFacetComponent.getResourceSum("Grass");
             nameTagComponent.textColor = Color.WHITE;
             nameTagComponent.yOffset = 20;
             nameTagComponent.scale = 10;
