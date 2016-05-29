@@ -41,14 +41,14 @@ public class RoughnessProvider implements FacetProvider {
     public void process(GeneratingRegion region) {
 
         Border3D border = region.getBorderForFacet(RoughnessFacet.class);
-        Region3i roughnessRegion = region.getRegion().expand(-region.getRegion().sizeX() + Math.round(region.getRegion().sizeX() / gridSize));
-        RoughnessFacet facet = new RoughnessFacet(roughnessRegion, border, gridSize);
+        RoughnessFacet facet = new RoughnessFacet(region.getRegion(), border, gridSize);
 
         SurfaceHeightFacet surfaceHeightFacet = region.getRegionFacet(SurfaceHeightFacet.class);
-        Rect2i processRegion = facet.getWorldRegion();
+        Rect2i processRegion = facet.getGridWorldRegion();
 
         for (BaseVector2i pos : processRegion.contents()) {
             facet.calcRoughness(new Vector2i(pos.x(), pos.y()), surfaceHeightFacet);
+            //facet.setWorld(new Vector2i(pos.x(), pos.y()), 2);
         }
 
         region.setRegionFacet(RoughnessFacet.class, facet);

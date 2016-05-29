@@ -25,8 +25,8 @@ import org.terasology.reflection.MappedContainer;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
-@MappedContainer
-public class RoughnessFacet extends Grid2DFloatFacet implements Component {
+
+public class RoughnessFacet extends Grid2DFloatFacet {
 
 
     public RoughnessFacet(Region3i targetRegion, Border3D border, int gridSize) {
@@ -41,10 +41,10 @@ public class RoughnessFacet extends Grid2DFloatFacet implements Component {
         float deviation = 0;
         float meanValue = meanHeight(gridCell, facet);
         for(BaseVector2i pos : gridCell.contents()) {
-            deviation += Math.sqrt(facet.getWorld(pos) - meanValue);
+            deviation += Math.pow(facet.getWorld(pos) - meanValue,2);
         }
 
-        deviation = TeraMath.sqrt(deviation / (gridCell.area()-1));
+        deviation = TeraMath.sqrt(deviation / (gridCell.area()));
         setWorld(gridPoint, deviation);
     }
 
@@ -68,6 +68,16 @@ public class RoughnessFacet extends Grid2DFloatFacet implements Component {
         }
 
         return mean / positions.length;
+    }
+
+    public float getMeanDeviation() {
+        float mean = 0;
+        for(BaseVector2i pos : getWorldRegion().contents()) {
+            mean += getWorld(pos);
+        }
+        mean /= getGridRelativeRegion().area();
+
+        return mean;
     }
 }
 

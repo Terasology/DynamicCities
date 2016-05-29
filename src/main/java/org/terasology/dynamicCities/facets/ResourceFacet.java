@@ -27,16 +27,16 @@ import org.terasology.world.generation.Border3D;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResourceFacet extends Grid2DFacet implements Component {
+public class ResourceFacet extends Grid2DFacet {
 
 
     private Region3i region;
-    private Map<ResourceType, Resource>[] data;
+    private Map<String, Resource>[] data;
 
     @SuppressWarnings(value = "unchecked")
     public ResourceFacet(Region3i targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
-        data = (HashMap<ResourceType, Resource>[]) new HashMap[gridWorldRegion.area()];
+        data = new HashMap[gridWorldRegion.area()];
         for (int i = 0; i < data.length; i++) {
             data[i] = new HashMap<>();
         }
@@ -44,53 +44,53 @@ public class ResourceFacet extends Grid2DFacet implements Component {
 
     //Modify that to get resources per grid cell!
     public void addResource(Resource resource, Vector2i pos) {
-        if (get(pos).containsKey(resource.getType())) {
-            get(pos).get(resource.getType()).amount += resource.amount;
+        if (get(pos).containsKey(resource.getType().toString())) {
+            get(pos).get(resource.getType().toString()).amount += resource.amount;
         } else {
-            get(pos).put(resource.getType(), resource);
+            get(pos).put(resource.getType().toString(), resource);
         }
     }
 
-    public Map<ResourceType, Resource> get(int x, int y) {
+    public Map<String, Resource> get(int x, int y) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
         return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
     }
 
-    public Map<ResourceType, Resource> get(BaseVector2i pos) {
+    public Map<String, Resource> get(BaseVector2i pos) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         return get(gridPos.x(), gridPos.y());
     }
 
-    public Map<ResourceType, Resource> getWorld(int x, int y) {
+    public Map<String, Resource> getWorld(int x, int y) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
         return data[getWorldGridIndex(gridPos.x(), gridPos.y())];
     }
 
-    public Map<ResourceType, Resource> getWorld(BaseVector2i pos) {
+    public Map<String, Resource> getWorld(BaseVector2i pos) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         return getWorld(gridPos.x(), gridPos.y());
     }
 
-    public Map<ResourceType, Resource>[] getInternal() {
+    public Map<String, Resource>[] getInternal() {
         return data;
     }
 
-    public void set(int x, int y, Map<ResourceType, Resource> value) {
+    public void set(int x, int y, Map<String, Resource> value) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
         data[getRelativeGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
-    public void set(BaseVector2i pos, Map<ResourceType, Resource> value) {
+    public void set(BaseVector2i pos, Map<String, Resource> value) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         set(pos.x(), pos.y(), value);
     }
 
-    public void setWorld(int x, int y, Map<ResourceType, Resource> value) {
+    public void setWorld(int x, int y, Map<String, Resource> value) {
         BaseVector2i gridPos = getWorldGridPoint(x,y);
         data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
-    public void setWorld(BaseVector2i pos, Map<ResourceType, Resource> value) {
+    public void setWorld(BaseVector2i pos, Map<String, Resource> value) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         setWorld(gridPos.x(), gridPos.y(), value);
     }

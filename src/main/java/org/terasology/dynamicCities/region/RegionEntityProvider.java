@@ -51,24 +51,23 @@ public class RegionEntityProvider implements EntityProvider {
         ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
         Region3i worldRegion = region.getRegion();
 
-        /**
-         * Copyproblem due to nesting (probably) -> Try to extract data out of the facet and add it without the whole facet
-         */
         if(checkCorners(worldRegion, surfaceHeightFacet)) {
             EntityStore entityStore = new EntityStore();
+
+            RoughnessFacetComponent roughnessFacetComponent = new RoughnessFacetComponent(roughnessFacet);
+            ResourceFacetComponent resourceFacetComponent = new ResourceFacetComponent(resourceFacet);
+            entityStore.addComponent(roughnessFacetComponent);
+            entityStore.addComponent(resourceFacetComponent);
+
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
             entityStore.addComponent(locationComponent);
-            entityStore.addComponent(new RoughnessFacetComponent(roughnessFacet));
-
-            //Crashes with Cannot obtain class for type java.util.Map<org.terasology.dynamicCities.resource.ResourceType,
-            // org.terasology.dynamicCities.resource.Resource>[], using default strategy :
-            //entityStore.addComponent(resourceFacet);
 
             NameTagComponent nameTagComponent = new NameTagComponent();
-            nameTagComponent.text = locationComponent.getWorldPosition().toString();
+            nameTagComponent.text = "Roughness: "
+                    + roughnessFacetComponent.meanDeviation + " Stone: " + resourceFacetComponent.getResourceSum("Stone");
             nameTagComponent.textColor = Color.WHITE;
             nameTagComponent.yOffset = 20;
-            nameTagComponent.scale = 20;
+            nameTagComponent.scale = 10;
             entityStore.addComponent(nameTagComponent);
 
             //Region component is used as identifier for a region entity

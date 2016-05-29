@@ -32,7 +32,6 @@ public abstract class AbstractTreeGenerator extends CompatibleRasterizer impleme
     protected void safelySetBlock(CoreChunk chunk, int x, int y, int z, Block block, ResourceFacet resourceFacet) {
         if (ChunkConstants.CHUNK_REGION.encompasses(x, y, z)) {
             setBlock(chunk, block, new Vector3i(x, y, z), resourceFacet);
-            chunk.setBlock(x, y, z, block);
         }
     }
 }
