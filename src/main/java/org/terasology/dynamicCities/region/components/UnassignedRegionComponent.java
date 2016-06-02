@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
+package org.terasology.dynamicCities.region.components;
+
 
 import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.Component;
 
-class Population {
+public class UnassignedRegionComponent implements Component {
 
-    private CultureComponent culture;
-    private int populationSize;
-    private float health;
-
-    //Store resources here
-    private float wood;
-    private float stone;
-    private float food;
-    private float water;
-
-    public Population (int size, CultureComponent culture){
-
-        populationSize = size;
-        this.culture = culture;
+    public UnassignedRegionComponent() {
 
     }
-
-
-
-
 }

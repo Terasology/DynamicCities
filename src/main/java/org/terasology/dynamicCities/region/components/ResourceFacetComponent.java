@@ -13,31 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.region;
+package org.terasology.dynamicCities.region.components;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.terasology.dynamicCities.facets.RoughnessFacet;
+import org.terasology.dynamicCities.facets.ResourceFacet;
+import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.Owns;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.network.Replicate;
-import org.terasology.network.ReplicationCheck;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.reflection.metadata.FieldMetadata;
-import org.terasology.world.block.ForceBlockActive;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @MappedContainer
-public final class RoughnessFacetComponent implements Component {
+public final class ResourceFacetComponent implements Component {
 
 
     public boolean privateToOwner = true;
-    
+
     @Replicate
     public Rect2i relativeRegion = Rect2i.EMPTY;
 
@@ -51,35 +49,45 @@ public final class RoughnessFacetComponent implements Component {
     public Rect2i gridRelativeRegion = Rect2i.EMPTY;
 
     @Replicate
-    public int gridSize = 0;
+    public int gridSize;
 
     @Replicate
     public Vector2i center = new Vector2i();
 
     @Replicate
-    public List<Float> data = Lists.newArrayList();
+    public List<Map<String, Resource>> data = Lists.newArrayList();
 
-    public float meanDeviation = 0;
 
-    public RoughnessFacetComponent() { }
+    public ResourceFacetComponent() { }
 
-    public RoughnessFacetComponent(RoughnessFacet roughnessFacet) {
+    public ResourceFacetComponent(ResourceFacet resourceFacet) {
 
-        relativeRegion = copyRect2i(roughnessFacet.getRelativeRegion());
-        worldRegion = copyRect2i(roughnessFacet.getWorldRegion());
-        gridWorldRegion = copyRect2i(roughnessFacet.getGridWorldRegion());
-        gridRelativeRegion = copyRect2i(roughnessFacet.getGridRelativeRegion());
-        gridSize = roughnessFacet.getGridSize();
-        center = new Vector2i(roughnessFacet.getCenter());
-        for(int i = 0; i < roughnessFacet.getInternal().length; i++) {
-            data.add(i, roughnessFacet.getInternal()[i]);
+        relativeRegion = copyRect2i(resourceFacet.getRelativeRegion());
+        worldRegion = copyRect2i(resourceFacet.getWorldRegion());
+        gridWorldRegion = copyRect2i(resourceFacet.getGridWorldRegion());
+        gridRelativeRegion = copyRect2i(resourceFacet.getGridRelativeRegion());
+        gridSize = resourceFacet.getGridSize();
+        center = new Vector2i(resourceFacet.getCenter());
+        for (int i = 0; i < resourceFacet.getInternal().length; i++) {
+            HashMap<String, Resource> map = new HashMap<>();
+            map.putAll(resourceFacet.getInternal()[i]);
+            data.add(i, map);
         }
-        meanDeviation = roughnessFacet.getMeanDeviation();
     }
 
 
     private Rect2i copyRect2i(Rect2i value) {
         return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
+    }
+
+    public int getResourceSum(String resourceType) {
+        int sum = 0;
+        for (Map<String, Resource> map : data) {
+            if (map.containsKey(resourceType)) {
+                sum += map.get(resourceType).amount;
+            }
+        }
+        return sum;
     }
 
     //Copy of the methods used to access the data. Maybe there is a better way than storing them all here
@@ -89,7 +97,7 @@ public final class RoughnessFacetComponent implements Component {
     }
 
     public Vector2i getWorldPoint(int x, int y) {
-        if (!gridWorldRegion.contains(x,y)) {
+        if (!gridWorldRegion.contains(x, y)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, gridWorldRegion.toString()));
         }
         int xRelative = x - center.x();
@@ -147,14 +155,14 @@ public final class RoughnessFacetComponent implements Component {
         return center;
     }
 
-    protected final int getRelativeGridIndex(int x, int z) {
+    protected int getRelativeGridIndex(int x, int z) {
         if (!gridRelativeRegion.contains(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
         return x - gridRelativeRegion.minX() + gridRelativeRegion.sizeX() * (z - gridRelativeRegion.minY());
     }
 
-    protected final int getWorldGridIndex(int x, int z) {
+    protected int getWorldGridIndex(int x, int z) {
         if (!gridWorldRegion.contains(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
@@ -169,51 +177,51 @@ public final class RoughnessFacetComponent implements Component {
         return gridRelativeRegion;
     }
 
-    public float get(int x, int y) {
+    public Map<String, Resource> get(int x, int y) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
         return data.get(getRelativeGridIndex(gridPos.x(), gridPos.y()));
     }
 
-    public float get(BaseVector2i pos) {
+    public Map<String, Resource> get(BaseVector2i pos) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         return get(gridPos.x(), gridPos.y());
     }
 
-    public float getWorld(int x, int y) {
+    public Map<String, Resource> getWorld(int x, int y) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
         return data.get(getWorldGridIndex(gridPos.x(), gridPos.y()));
     }
 
-    public float getWorld(BaseVector2i pos) {
+    public Map<String, Resource> getWorld(BaseVector2i pos) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         return getWorld(gridPos.x(), gridPos.y());
     }
 
-    public List<Float> getInternal() {
+    public List<Map<String, Resource>> getInternal() {
         return data;
     }
 
-    public void set(int x, int y, float value) {
+    public void set(int x, int y, Map<String, Resource> value) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
-        data.set(getRelativeGridIndex(gridPos.x(), gridPos.y()),value);
+        data.set(getRelativeGridIndex(gridPos.x(), gridPos.y()), value);
     }
 
-    public void set(BaseVector2i pos, float value) {
+    public void set(BaseVector2i pos, Map<String, Resource> value) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         set(pos.x(), pos.y(), value);
     }
 
-    public void setWorld(int x, int y, float value) {
-        BaseVector2i gridPos = getWorldGridPoint(x,y);
-        data.set(getWorldGridIndex(gridPos.x(), gridPos.y()),value);
+    public void setWorld(int x, int y, Map<String, Resource> value) {
+        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        data.set(getWorldGridIndex(gridPos.x(), gridPos.y()), value);
     }
 
-    public void setWorld(BaseVector2i pos, float value) {
+    public void setWorld(BaseVector2i pos, Map<String, Resource> value) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         setWorld(gridPos.x(), gridPos.y(), value);
     }
 
-    public void set(List<Float> newData) {
+    public void set(List<Map<String, Resource>> newData) {
         Preconditions.checkArgument(newData.size() == data.size(), "New data must have same length as existing");
         data.clear();
         data.addAll(newData);

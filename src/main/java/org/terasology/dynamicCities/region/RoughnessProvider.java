@@ -16,15 +16,18 @@
 package org.terasology.dynamicCities.region;
 
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.*;
+import org.terasology.math.geom.BaseVector2i;
+import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2i;
 import org.terasology.world.generation.*;
+import org.terasology.world.generation.facets.SeaLevelFacet;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 import org.terasology.world.generator.plugin.RegisterPlugin;
 
 @RegisterPlugin
 @Produces(RoughnessFacet.class)
-@Requires(@Facet(SurfaceHeightFacet.class))
+@Requires({@Facet(value = SurfaceHeightFacet.class),
+        @Facet(value = SeaLevelFacet.class)})
 /**
  * This facet will be used to store information about the height variations in grid cells with the size a
  * It will be saved as a Component in the RegionEntity
@@ -43,11 +46,17 @@ public class RoughnessProvider implements FacetProvider {
         Border3D border = region.getBorderForFacet(RoughnessFacet.class);
         RoughnessFacet facet = new RoughnessFacet(region.getRegion(), border, gridSize);
 
+        SeaLevelFacet seaLevelFacet = region.getRegionFacet(SeaLevelFacet.class);
         SurfaceHeightFacet surfaceHeightFacet = region.getRegionFacet(SurfaceHeightFacet.class);
         Rect2i processRegion = facet.getGridWorldRegion();
 
         for (BaseVector2i pos : processRegion.contents()) {
-            facet.calcRoughness(new Vector2i(pos.x(), pos.y()), surfaceHeightFacet);
+
+            if(surfaceHeightFacet.getWorld(pos) > seaLevelFacet.getSeaLevel()) {
+                facet.calcRoughness(new Vector2i(pos.x(), pos.y()), surfaceHeightFacet);
+            } else {
+                facet.setWorld(pos, -1000);
+            }
             //facet.setWorld(new Vector2i(pos.x(), pos.y()), 2);
         }
 

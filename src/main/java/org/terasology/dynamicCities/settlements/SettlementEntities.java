@@ -13,32 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.region;
+package org.terasology.dynamicCities.settlements;
 
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3f;
+import org.terasology.reflection.MappedContainer;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RegionEntities implements Component {
+@MappedContainer
+public final class SettlementEntities implements Component {
 
-    private Map<Vector2i, EntityRef> regionEntities;
+    public Map<String, EntityRef> settlementEntities = new HashMap<>();
 
-    public RegionEntities() {
-        regionEntities = new HashMap<>();
-    }
+    public SettlementEntities() { }
 
-    public void add(EntityRef region) {
-        LocationComponent location = region.getComponent(LocationComponent.class);
-        Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
-        regionEntities.put(position, region);
+    public void add(EntityRef settlement) {
+        Vector3f pos3f = settlement.getComponent(LocationComponent.class).getWorldPosition();
+        Vector2i pos = new Vector2i(pos3f.x(), pos3f.z());
+        settlementEntities.put(pos.toString(), settlement);
+
     }
 
     public EntityRef get(Vector2i position) {
-        return regionEntities.get(position);
+        return settlementEntities.get(position.toString());
     }
+
+    public Map<String, EntityRef> getMap() {
+        return settlementEntities;
+    }
+
 }

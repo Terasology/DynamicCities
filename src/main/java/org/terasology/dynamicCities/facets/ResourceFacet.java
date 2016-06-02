@@ -17,8 +17,6 @@ package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
 import org.terasology.dynamicCities.resource.Resource;
-import org.terasology.dynamicCities.resource.ResourceType;
-import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
@@ -49,6 +47,16 @@ public class ResourceFacet extends Grid2DFacet {
         } else {
             get(pos).put(resource.getType().toString(), resource);
         }
+    }
+
+    public int getResourceSum(String resourceType) {
+        int sum = 0;
+        for (Map<String, Resource> map : data) {
+            if (map.containsKey(resourceType)) {
+                sum += map.get(resourceType).amount;
+            }
+        }
+        return sum;
     }
 
     public Map<String, Resource> get(int x, int y) {
@@ -86,7 +94,7 @@ public class ResourceFacet extends Grid2DFacet {
     }
 
     public void setWorld(int x, int y, Map<String, Resource> value) {
-        BaseVector2i gridPos = getWorldGridPoint(x,y);
+        BaseVector2i gridPos = getWorldGridPoint(x, y);
         data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 

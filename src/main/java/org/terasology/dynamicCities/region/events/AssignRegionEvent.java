@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.region;
+package org.terasology.dynamicCities.region.events;
 
+import org.terasology.entitySystem.event.Event;
+import org.terasology.network.ServerEvent;
 
-import org.terasology.entitySystem.Component;
-
-public class UnregisteredRegionComponent implements Component {
-
-    public UnregisteredRegionComponent() {
-
-    }
+@ServerEvent
+public class AssignRegionEvent implements Event {
 }
