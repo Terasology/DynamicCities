@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.region.components;
+        package org.terasology.dynamicCities.region.components;
 
 
 import org.terasology.dynamicCities.utilities.Toolbox;
@@ -141,26 +141,36 @@ public class RegionEntities implements Component {
         return  getRegionsInCell(Toolbox.stringToVector2i(posString));
     }
 
-    public boolean checkSidesLoaded(EntityRef region) {
-        LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
-        return checkSidesLoaded(pos);
+
+
+    public boolean checkSidesLoadedLong(Vector2i pos) {
+        return (cellIsLoaded(pos.addX(2 * gridSize)) && cellIsLoaded(pos.addX(-2 * gridSize))
+                && cellIsLoaded(pos.addY(2 * gridSize)) && cellIsLoaded(pos.addY(-2 * gridSize)));
     }
 
-    public boolean checkSidesLoaded(Vector2i pos) {
+    public boolean checkSidesLoadedLong(EntityRef region) {
+        LocationComponent regionLocation = region.getComponent(LocationComponent.class);
+        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        return checkSidesLoadedLong(pos);
+    }
+
+    public boolean checkSidesLoadedLong(String posString) {
+        return checkSidesLoadedLong(Toolbox.stringToVector2i(posString));
+    }
+
+
+    public boolean checkSidesLoadedNear(Vector2i pos) {
         return (cellIsLoaded(pos.addX(gridSize)) && cellIsLoaded(pos.addX(-gridSize))
                 && cellIsLoaded(pos.addY(gridSize)) && cellIsLoaded(pos.addY(-gridSize)));
     }
 
-
-
-    public boolean checkCubeLoaded(EntityRef region) {
+    public boolean checkSidesLoadedNear(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
         Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
-        return checkCubeLoaded(pos);
+        return checkSidesLoadedNear(pos);
     }
 
-    public boolean checkCubeLoaded(Vector2i pos) {
+    public boolean checkFullLoaded(Vector2i pos) {
         Rect2i cube = Rect2i.createFromMinAndMax(-1, -1, 1, 1);
         Vector2i cellPos = new Vector2i();
         for(BaseVector2i cubePos : cube.contents()) {
@@ -172,9 +182,12 @@ public class RegionEntities implements Component {
         return true;
     }
 
-    public boolean checkSidesLoaded(String posString) {
-        return checkSidesLoaded(Toolbox.stringToVector2i(posString));
+    public boolean checkFullLoaded(EntityRef region) {
+        LocationComponent regionLocation = region.getComponent(LocationComponent.class);
+        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        return checkFullLoaded(pos);
     }
+
 
     //maybe add variable component filters here
     public void clearCell(Vector2i pos) {
@@ -192,3 +205,5 @@ public class RegionEntities implements Component {
     }
 
 }
+
+

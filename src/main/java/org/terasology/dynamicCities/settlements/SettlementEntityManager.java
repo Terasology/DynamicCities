@@ -19,6 +19,7 @@ package org.terasology.dynamicCities.settlements;
 import org.terasology.dynamicCities.population.Population;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntities;
+import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
@@ -70,7 +71,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(Site.class);
         for (EntityRef siteRegion : uncheckedSiteRegions) {
-            if (checkMinDistance(siteRegion) && regionEntitiesStore.checkCubeLoaded(siteRegion)) {
+            if (checkMinDistance(siteRegion) && regionEntitiesStore.checkSidesLoadedNear(siteRegion)
+                    && checkBuildArea(siteRegion)) {
                 createSettlement(siteRegion);
                 siteRegion.send(new SettlementRegisterEvent());
                 siteRegion.removeComponent(Site.class);
@@ -137,10 +139,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
      * @return
      */
     private void getSurroundingRegions(Vector2i pos, RegionEntities assignedRegions) {
-        /**
-         * This solution is probably faster, but it doesn't work yet:
-         */
-
         Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-3, -3, 3, 3);
         Circle settlementCircle = new Circle(pos.toVector2f(), settlementMaxRadius);
         Vector2i regionWorldPos = new Vector2i();
@@ -162,11 +160,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     }
 
-    private boolean checkSides(EntityRef siteRegion) {
+    private boolean checkBuildArea(EntityRef siteRegion) {
         LocationComponent siteLocation = siteRegion.getComponent(LocationComponent.class);
         Vector2i pos = new Vector2i(siteLocation.getLocalPosition().x(), siteLocation.getLocalPosition().z());
         int unusableRegionsCount = 0;
-        int checkedRegions = 0;
         Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-3, -3,
                 3, 3);
         Circle settlementCircle = new Circle(pos.toVector2f(), settlementMaxRadius);
@@ -176,7 +173,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
             if (settlementCircle.contains(regionWorldPos)) {
                 EntityRef region = regionEntitiesStore.getNearest(regionWorldPos);
-                if (region != null && !region.hasComponent(Site.class)) {
+                if (region != null && region.getComponent(RoughnessFacetComponent.class).meanDeviation > 0.3) {
                     unusableRegionsCount++;
                 }
             }

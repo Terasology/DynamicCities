@@ -67,8 +67,7 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
         }
 
         for (String posString : regionEntities.cellGrid.keySet()) {
-            if (!regionEntities.processed.contains(posString) && regionEntities.cellIsLoaded(posString)
-                    && regionEntities.checkSidesLoaded(posString)) {
+            if (!regionEntities.processed.contains(posString) && regionEntities.checkSidesLoadedLong(posString)) {
                 regionEntities.clearCell(posString);
             }
         }
