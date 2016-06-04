@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-        package org.terasology.dynamicCities.region.components;
+package org.terasology.dynamicCities.region.components;
 
 
 import org.terasology.dynamicCities.utilities.Toolbox;
@@ -39,6 +39,7 @@ public class RegionEntities implements Component {
     //This stores information about the loaded state of several regions packed into a cell
     public Map<String, Integer> cellGrid;
     public List<String> processed;
+    public int cellSize;
 
     public RegionEntities() {
         regionEntities = new HashMap<>();
@@ -51,6 +52,7 @@ public class RegionEntities implements Component {
         cellGrid = new HashMap<>();
         processed = new ArrayList<>();
         this.gridSize = gridSize;
+        cellSize = gridSize * gridSize / (32 * 32);
     }
 
     public void add(EntityRef region) {
@@ -60,7 +62,14 @@ public class RegionEntities implements Component {
             addCell(position);
             regionEntities.put(position.toString(), region);
         }
+    }
 
+    public void addDeleted(EntityRef region) {
+        if (region != null) {
+            LocationComponent location = region.getComponent(LocationComponent.class);
+            Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
+            addCell(position);
+        }
     }
 
     public EntityRef get(Vector2i position) {
@@ -73,6 +82,10 @@ public class RegionEntities implements Component {
         Vector2i regionPos = new Vector2i(Math.round((x - Math.signum(x) * 16) / 32) * 32 + Math.signum(x) * 16,
                 Math.round((y - Math.signum(y) * 16) / 32) * 32 + Math.signum(y) * 16);
         return regionEntities.get(regionPos.toString());
+    }
+
+    public EntityRef getNearest(String posString) {
+        return getNearest(Toolbox.stringToVector2i(posString));
     }
 
     public void addCell(Vector2i position) {
@@ -102,19 +115,18 @@ public class RegionEntities implements Component {
     }
 
     public boolean cellIsLoaded(Vector2i position) {
-        return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == gridSize * gridSize / (32 * 32));
+        return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
     }
 
     public boolean cellIsLoaded(String posString) {
         Vector2i position = Toolbox.stringToVector2i(posString);
-        return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == gridSize * gridSize / (32 * 32));
+        return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
     }
 
     public List<EntityRef> getRegionsInCell(Vector2i position) {
         List<EntityRef> regions = new ArrayList<>();
 
         Vector2i cellCenter = getCellVector(position);
-        int cellSize = gridSize * gridSize / (32 * 32);
         int edgeLength = Math.round((float)Math.sqrt(cellSize));
         Rect2i cellRegion = Rect2i.createFromMinAndMax(-edgeLength, -edgeLength, edgeLength, edgeLength);
         Vector2i regionWorldPos = new Vector2i();

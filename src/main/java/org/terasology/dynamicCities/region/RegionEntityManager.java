@@ -21,6 +21,7 @@ import org.terasology.dynamicCities.region.components.RegionEntities;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.components.UnregisteredRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
+import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -40,6 +41,9 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
     @In
     private EntityManager entityManager;
 
+    @In
+    private SettlementEntityManager settlementEntities;
+
     private RegionEntities regionEntities;
 
     @Override
@@ -48,6 +52,11 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
     }
 
     private int counter = 100;
+
+    /**
+     * Current Task: play around with intervals of deletion
+     * @param delta The time (in seconds) since the last engine update.
+     */
     @Override
     public void update(float delta) {
         Iterable<EntityRef> unregisteredRegions = entityManager.getEntitiesWith(UnregisteredRegionComponent.class);
@@ -67,7 +76,8 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
         }
 
         for (String posString : regionEntities.cellGrid.keySet()) {
-            if (!regionEntities.processed.contains(posString) && regionEntities.checkSidesLoadedLong(posString)) {
+            if (!regionEntities.processed.contains(posString) && (!settlementEntities.checkMinDistanceCell(posString)
+                    || regionEntities.checkSidesLoadedLong(posString))) {
                 regionEntities.clearCell(posString);
             }
         }
@@ -82,7 +92,6 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
         nT.textColor = Color.YELLOW;
         region.saveComponent(nT);
     }
-
 
     
     public RegionEntities getRegionEntities() {

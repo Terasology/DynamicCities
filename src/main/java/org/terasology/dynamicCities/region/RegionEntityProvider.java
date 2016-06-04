@@ -50,12 +50,13 @@ public class RegionEntityProvider implements EntityProvider {
     public void process(Region region, EntityBuffer buffer) {
 
         SurfaceHeightFacet surfaceHeightFacet = region.getFacet(SurfaceHeightFacet.class);
-        RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
-        ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
-        SiteFacet siteFacet = region.getFacet(SiteFacet.class);
         Region3i worldRegion = region.getRegion();
 
         if (checkCorners(worldRegion, surfaceHeightFacet)) {
+            RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
+            ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
+            SiteFacet siteFacet = region.getFacet(SiteFacet.class);
+
             EntityStore entityStore = new EntityStore();
 
             RoughnessFacetComponent roughnessFacetComponent = new RoughnessFacetComponent(roughnessFacet);

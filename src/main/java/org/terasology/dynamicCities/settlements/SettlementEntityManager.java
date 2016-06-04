@@ -36,11 +36,13 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.math.geom.*;
 import org.terasology.registry.In;
+import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
 /**
  * Current tasks: Rewrite site to settlement conversion: Check sides and remove sitecomponent if all 
  */
 
+@Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SettlementEntityManager extends BaseComponentSystem implements UpdateSubscriberSystem {
 
@@ -55,7 +57,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int minDistance = 500;
     private RegionEntities regionEntitiesStore;
     private int settlementMaxRadius = 96;
-    private int counter = 50;
+    private int counter = 80;
 
     @Override
     public void postBegin() {
@@ -71,17 +73,19 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(Site.class);
         for (EntityRef siteRegion : uncheckedSiteRegions) {
-            if (checkMinDistance(siteRegion) && regionEntitiesStore.checkSidesLoadedNear(siteRegion)
-                    && checkBuildArea(siteRegion)) {
+            boolean checkDistance = checkMinDistance(siteRegion);
+            boolean checkBuildArea = checkBuildArea(siteRegion);
+            if (checkDistance && regionEntitiesStore.checkSidesLoadedNear(siteRegion)
+                    && checkBuildArea) {
                 createSettlement(siteRegion);
                 siteRegion.send(new SettlementRegisterEvent());
                 siteRegion.removeComponent(Site.class);
-            } else if (!checkMinDistance(siteRegion)) {
+            } else if (!checkDistance || !checkBuildArea) {
                 siteRegion.removeComponent(Site.class);
             }
 
         }
-        counter = 50;
+        counter = 100;
     }
 
     @ReceiveEvent(components = {Site.class})
@@ -91,7 +95,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
 
-    private boolean checkMinDistance(EntityRef siteRegion) {
+    public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
 
@@ -102,6 +106,20 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
         }
         return true;
+    }
+
+    public boolean checkMinDistanceCell(Vector2i pos) {
+        for (String vector2iString : settlementEntities.getComponent(SettlementEntities.class).getMap().keySet()) {
+            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
+            if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkMinDistanceCell(String posString) {
+        return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
     }
 
     private void createSettlement(EntityRef siteRegion) {
@@ -173,8 +191,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
             if (settlementCircle.contains(regionWorldPos)) {
                 EntityRef region = regionEntitiesStore.getNearest(regionWorldPos);
-                if (region != null && region.getComponent(RoughnessFacetComponent.class).meanDeviation > 0.3) {
-                    unusableRegionsCount++;
+                if (region != null && region.hasComponent(RoughnessFacetComponent.class)) {
+                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > 0.3) {
+                        unusableRegionsCount++;
+                    }
                 }
             }
         }
