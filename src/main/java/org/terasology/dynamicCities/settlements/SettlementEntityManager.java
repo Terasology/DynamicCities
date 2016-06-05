@@ -109,6 +109,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     public boolean checkMinDistanceCell(Vector2i pos) {
+        if (!regionEntitiesStore.cellIsLoaded(pos)) {
+            return true;
+        }
         for (String vector2iString : settlementEntities.getComponent(SettlementEntities.class).getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
