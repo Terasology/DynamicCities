@@ -35,7 +35,7 @@ import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
 /**
  */
-@RegisterWorldGenerator(id = "facetedperlin", displayName = "DynamicCitiesPerlin", description = "Faceted world generator")
+@RegisterWorldGenerator(id = "facetedperlin", displayName = "TESTESTESTEST", description = "Faceted world generator")
 public class PerlinFacetedWorldGenerator extends BaseFacetedWorldGenerator {
 
     private final FixedSpawner spawner = new FixedSpawner(0, 0);
@@ -63,9 +63,9 @@ public class PerlinFacetedWorldGenerator extends BaseFacetedWorldGenerator {
                 .addProvider(new PerlinHumidityProvider())
                 .addProvider(new PerlinSurfaceTemperatureProvider())
                 .addProvider(new PerlinBaseSurfaceProvider())
-                .addProvider(new PerlinRiverProvider())
-                .addProvider(new PerlinOceanProvider())
-                .addProvider(new PerlinHillsAndMountainsProvider())
+                //.addProvider(new PerlinRiverProvider())
+                //.addProvider(new PerlinOceanProvider())
+                //.addProvider(new PerlinHillsAndMountainsProvider())
                 .addProvider(new BiomeProvider())
                 .addProvider(new SurfaceToDensityProvider())
                 .addProvider(new RoughnessProvider())

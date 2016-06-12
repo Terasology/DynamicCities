@@ -16,6 +16,15 @@
 package org.terasology.dynamicCities.settlements;
 
 
+import org.terasology.cities.bldg.Building;
+import org.terasology.commonworld.Orientation;
+import org.terasology.commonworld.heightmap.HeightMaps;
+import org.terasology.dynamicCities.buildings.BuildingQueue;
+import org.terasology.dynamicCities.buildings.GenericBuilding;
+import org.terasology.dynamicCities.construction.Construction;
+import org.terasology.dynamicCities.gen.SimpleChurchGenerator;
+import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Population;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntities;
@@ -54,6 +63,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private RegionEntityManager regionEntityManager;
 
+    @In
+    private Construction constructer;
+
     private int minDistance = 500;
     private RegionEntities regionEntitiesStore;
     private int settlementMaxRadius = 96;
@@ -84,6 +96,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 siteRegion.removeComponent(Site.class);
             }
 
+        }
+        Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
+        for (EntityRef settlement : activeSettlements) {
+            settlement.getComponent(BuildingQueue.class).build();
         }
         counter = 100;
     }
@@ -139,6 +155,37 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
         Population population = new Population(site.getPopulation());
 
+        /**
+         * some sample parcels for testing
+         */
+        Orientation or1 = Orientation.NORTH;
+        Orientation or2 = Orientation.SOUTH;
+
+        Rect2i shape1 = Rect2i.createFromMinAndSize(regionCenter.add(5, 5), new Vector2i(30, 30));
+        Rect2i shape2 = Rect2i.createFromMinAndSize(regionCenter.sub(30, 30), new Vector2i(20, 20));
+
+        DynParcel par1 = new DynParcel(shape1, or1, Math.round(locationComponent.getLocalPosition().y()));
+        DynParcel par2 = new DynParcel(shape2, or2, Math.round(locationComponent.getLocalPosition().y()));
+
+        SimpleChurchGenerator commercialBuildingGenerator = new SimpleChurchGenerator(1423243);
+        Building testBldg = commercialBuildingGenerator.apply(par1, HeightMaps.constant(constructer.flatten(par1.shape, par1.height)));
+        Building testBldg2 = commercialBuildingGenerator.apply(par1, HeightMaps.constant(constructer.flatten(par2.shape, par2.height)));
+        GenericBuilding testGenBldg = new GenericBuilding(testBldg);
+        GenericBuilding testGenBldg2 = new GenericBuilding(testBldg2);
+        par1.addGenericBuilding(testGenBldg);
+        par2.addGenericBuilding(testGenBldg2);
+
+        ParcelList parcels = new ParcelList();
+        parcels.parcels.add(par1);
+        parcels.parcels.add(par2);
+
+        BuildingQueue buildingQueue = new BuildingQueue(constructer);
+        buildingQueue.buildingQueue.add(par1);
+        buildingQueue.buildingQueue.add(par2);
+
+
+
+
 
         NameTagComponent settlementName = new NameTagComponent();
         settlementName.text = "testcity regions: " + regionEntities.regionEntities.size();
@@ -151,7 +198,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         EntityRef settlement = entityManager.create(locationComponent,
-                population, settlementName, regionEntities);
+                population, settlementName, regionEntities, parcels, buildingQueue);
     }
 
     /**
@@ -178,15 +225,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 }
             }
         }
-
     }
 
     private boolean checkBuildArea(EntityRef siteRegion) {
         LocationComponent siteLocation = siteRegion.getComponent(LocationComponent.class);
         Vector2i pos = new Vector2i(siteLocation.getLocalPosition().x(), siteLocation.getLocalPosition().z());
         int unusableRegionsCount = 0;
-        Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-3, -3,
-                3, 3);
+        Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-3, -3, 3, 3);
         Circle settlementCircle = new Circle(pos.toVector2f(), settlementMaxRadius);
 
         for (BaseVector2i regionPos : settlementRectArea.contents()) {
@@ -202,8 +247,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
         }
 
-        return unusableRegionsCount < 10;
+        return unusableRegionsCount < 15;
     }
-
-
 }

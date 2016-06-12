@@ -16,12 +16,11 @@
 package org.terasology.dynamicCities.population;
 
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Vector2i;
 
 
 public interface CultureComponent extends Component {
 /*
-    //Define building space needs per person
+    //Define genericBuilding space needs per person
     float residential_per_person;
     float commercial_per_person;
     float governmental_per_person;
@@ -51,3 +50,4 @@ public interface CultureComponent extends Component {
     float food_mod;
 */
 }
+

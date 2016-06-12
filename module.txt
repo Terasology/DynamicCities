@@ -7,6 +7,16 @@
     "dependencies" : [{
             "id" : "Core",
             "minVersion" : "1.0.0"
-        }],
+        },
+        {
+                    "id" : "CommonWorld",
+                    "minVersion" : "0.2.1"
+        },
+        {
+                    "id" : "Cities",
+                    "minVersion" : "0.6.0"
+        }
+     ],
+    "isGameplay" : "true",
     "serverSideOnly" : false
 }
