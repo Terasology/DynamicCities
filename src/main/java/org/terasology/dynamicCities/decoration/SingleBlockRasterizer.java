@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package org.terasology.dynamicCities.rasterizer.parts;
+package org.terasology.dynamicCities.decoration;
 
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.deco.SingleBlockDecoration;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
-import org.terasology.world.WorldProvider;
 
 import java.util.Collections;
 
 /**
  * Converts {@link SingleBlockDecoration} into blocks
  */
-public class SingleBlockRasterizer extends AbsDynBuildingRasterizer<SingleBlockDecoration> {
+public class SingleBlockRasterizer extends DecorationRasterizer<SingleBlockDecoration> {
 
     /**
      * @param theme the block theme to use
      */
-    public SingleBlockRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, SingleBlockDecoration.class, worldProvider);
+    public SingleBlockRasterizer(BlockTheme theme) {
+        super(theme, SingleBlockDecoration.class);
     }
 
     @Override

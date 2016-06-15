@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package org.terasology.dynamicCities.rasterizer.parts;
+package org.terasology.dynamicCities.decoration;
 
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.BlockType;
 import org.terasology.cities.deco.ColumnDecoration;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.math.Side;
 import org.terasology.math.geom.ImmutableVector3i;
-import org.terasology.world.WorldProvider;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -32,13 +30,13 @@ import java.util.Set;
 /**
  * Converts {@link ColumnDecoration} into blocks
  */
-public class ColumnRasterizer extends AbsDynBuildingRasterizer<ColumnDecoration> {
+public class ColumnRasterizer extends DecorationRasterizer<ColumnDecoration> {
 
     /**
      * @param theme the block theme to use
      */
-    public ColumnRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, ColumnDecoration.class, worldProvider);
+    public ColumnRasterizer(BlockTheme theme) {
+        super(theme, ColumnDecoration.class);
     }
 
     @Override

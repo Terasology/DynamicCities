@@ -25,20 +25,18 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.world.WorldProvider;
 
 /**
  * Converts a {@link FlatRoof} into blocks
  */
-public class FlatRoofRasterizer extends AbsDynBuildingRasterizer<FlatRoof> {
+public class FlatRoofRasterizer extends RoofRasterizer<FlatRoof> {
 
     /**
      * @param theme the block theme to use
      */
-    public FlatRoofRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, FlatRoof.class, worldProvider);
+    public FlatRoofRasterizer(BlockTheme theme) {
+        super(theme, FlatRoof.class);
     }
 
     @Override

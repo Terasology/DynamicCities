@@ -24,20 +24,18 @@ import org.terasology.cities.raster.Pens;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.world.WorldProvider;
 
 /**
  * Converts a {@link DomeRoof} into blocks
  */
-public class DomeRoofRasterizer extends AbsDynBuildingRasterizer<DomeRoof> {
+public class DomeRoofRasterizer extends RoofRasterizer<DomeRoof> {
 
     /**
      * @param theme the block theme to use
      */
-    public DomeRoofRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, DomeRoof.class, worldProvider);
+    public DomeRoofRasterizer(BlockTheme theme) {
+        super(theme, DomeRoof.class);
     }
 
     @Override

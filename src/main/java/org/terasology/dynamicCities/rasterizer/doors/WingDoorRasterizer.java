@@ -24,19 +24,17 @@ import org.terasology.cities.raster.Pens;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
-import org.terasology.world.WorldProvider;
 
 /**
  * Converts {@link WingDoor} into blocks
  */
-public class WingDoorRasterizer extends AbsDynBuildingRasterizer<WingDoor> {
+public class WingDoorRasterizer extends DoorRasterizer<WingDoor> {
 
     /**
      * @param theme the block theme to use
      */
-    public WingDoorRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, WingDoor.class, worldProvider);
+    public WingDoorRasterizer(BlockTheme theme) {
+        super(theme, WingDoor.class);
     }
 
     @Override

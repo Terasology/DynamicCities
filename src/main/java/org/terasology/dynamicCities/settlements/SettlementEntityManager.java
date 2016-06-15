@@ -22,7 +22,8 @@ import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.buildings.GenericBuilding;
 import org.terasology.dynamicCities.construction.Construction;
-import org.terasology.dynamicCities.gen.SimpleChurchGenerator;
+import org.terasology.dynamicCities.gen.CommercialBuildingGenerator;
+import org.terasology.dynamicCities.gen.RectHouseGenerator;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Population;
@@ -167,22 +168,22 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         DynParcel par1 = new DynParcel(shape1, or1, Math.round(locationComponent.getLocalPosition().y()));
         DynParcel par2 = new DynParcel(shape2, or2, Math.round(locationComponent.getLocalPosition().y()));
 
-        SimpleChurchGenerator commercialBuildingGenerator = new SimpleChurchGenerator(1423243);
-        Building testBldg = commercialBuildingGenerator.apply(par1, HeightMaps.constant(constructer.flatten(par1.shape, par1.height)));
-        Building testBldg2 = commercialBuildingGenerator.apply(par1, HeightMaps.constant(constructer.flatten(par2.shape, par2.height)));
+        CommercialBuildingGenerator clericalBuildingGenerator = new CommercialBuildingGenerator(1423243);
+        RectHouseGenerator commercialBuildingGenerator = new RectHouseGenerator();
+        Building testBldg = clericalBuildingGenerator.generate(par1, HeightMaps.constant(constructer.flatten(par1.shape, par1.height)));
+        Building testBldg2 = commercialBuildingGenerator.apply(par2, HeightMaps.constant(constructer.flatten(par2.shape, par2.height)));
         GenericBuilding testGenBldg = new GenericBuilding(testBldg);
         GenericBuilding testGenBldg2 = new GenericBuilding(testBldg2);
         par1.addGenericBuilding(testGenBldg);
         par2.addGenericBuilding(testGenBldg2);
 
         ParcelList parcels = new ParcelList();
-        parcels.parcels.add(par1);
         parcels.parcels.add(par2);
+        parcels.parcels.add(par1);
 
         BuildingQueue buildingQueue = new BuildingQueue(constructer);
-        buildingQueue.buildingQueue.add(par1);
         buildingQueue.buildingQueue.add(par2);
-
+        buildingQueue.buildingQueue.add(par1);
 
 
 

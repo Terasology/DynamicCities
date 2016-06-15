@@ -26,24 +26,22 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.world.WorldProvider;
 
 import java.math.RoundingMode;
 
 /**
  * Converts a {@link PentRoof} into blocks
  */
-public class PentRoofRasterizer extends AbsDynBuildingRasterizer<PentRoof> {
+public class PentRoofRasterizer extends RoofRasterizer<PentRoof> {
 
     /**
      * @param theme the block theme to use
      */
-    public PentRoofRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, PentRoof.class, worldProvider);
+    public PentRoofRasterizer(BlockTheme theme) {
+        super(theme, PentRoof.class);
     }
 
     @Override

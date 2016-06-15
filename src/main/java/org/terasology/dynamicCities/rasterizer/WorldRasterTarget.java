@@ -43,7 +43,7 @@ public class WorldRasterTarget implements RasterTarget {
         this.blockTheme = blockTheme;
         this.worldProvider = worldProvider;
         this.affectedArea = area;
-        affectedRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), 0, area.minY()), new Vector3i(area.maxX(), 0, area.maxY()));
+        affectedRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), -255, area.minY()), new Vector3i(area.maxX(), 255, area.maxY()));
     }
     /**
      * @param x x in world coords

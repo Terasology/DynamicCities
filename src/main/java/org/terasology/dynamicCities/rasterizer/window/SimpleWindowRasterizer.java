@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-package org.terasology.dynamicCities.rasterizer.doors;
+package org.terasology.dynamicCities.rasterizer.window;
 
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
-import org.terasology.cities.door.SimpleDoor;
-import org.terasology.cities.raster.Pen;
-import org.terasology.cities.raster.Pens;
 import org.terasology.cities.raster.RasterTarget;
+import org.terasology.cities.window.SimpleWindow;
 import org.terasology.commonworld.heightmap.HeightMap;
 
 /**
- * Converts {@link SimpleDoor} into blocks (or air actually)
+ * Converts {@link SimpleWindow} into blocks (or air actually)
  */
-public class SimpleDoorRasterizer extends DoorRasterizer<SimpleDoor> {
+public class SimpleWindowRasterizer extends WindowRasterizer<SimpleWindow> {
 
     /**
      * @param theme the block theme to use
      */
-    public SimpleDoorRasterizer(BlockTheme theme) {
-        super(theme, SimpleDoor.class);
+    public SimpleWindowRasterizer(BlockTheme theme) {
+        super(theme, SimpleWindow.class);
     }
 
     @Override
-    public void raster(RasterTarget target, SimpleDoor door, HeightMap hm) {
-        if (target.getAffectedArea().contains(door.getPos())) {
-            Pen pen = Pens.fill(target, door.getBaseHeight(), door.getTopHeight(), DefaultBlockType.SIMPLE_DOOR);
-            pen.draw(door.getPos());
+    public void raster(RasterTarget target, SimpleWindow wnd, HeightMap hm) {
+        int x = wnd.getPos().x();
+        int y = wnd.getHeight();
+        int z = wnd.getPos().y();
+
+        if (target.getAffectedRegion().encompasses(x, y, z)) {
+            target.setBlock(x, y, z, DefaultBlockType.WINDOW_GLASS);
         }
     }
+
 }

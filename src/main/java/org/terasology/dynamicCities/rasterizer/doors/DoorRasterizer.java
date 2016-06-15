@@ -17,30 +17,33 @@
 package org.terasology.dynamicCities.rasterizer.doors;
 
 import org.terasology.cities.BlockTheme;
-import org.terasology.cities.DefaultBlockType;
-import org.terasology.cities.door.SimpleDoor;
-import org.terasology.cities.raster.Pen;
-import org.terasology.cities.raster.Pens;
+import org.terasology.cities.door.Door;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
 
 /**
- * Converts {@link SimpleDoor} into blocks (or air actually)
+ * @param <T> the target class
  */
-public class SimpleDoorRasterizer extends DoorRasterizer<SimpleDoor> {
+public abstract class DoorRasterizer<T extends Door> {
+
+    private final BlockTheme theme;
+    private final Class<T> targetClass;
 
     /**
-     * @param theme the block theme to use
+     * @param theme the block theme that is used to map type to blocks
+     * @param targetClass the target class that is rasterized
      */
-    public SimpleDoorRasterizer(BlockTheme theme) {
-        super(theme, SimpleDoor.class);
+    protected DoorRasterizer(BlockTheme theme, Class<T> targetClass) {
+        this.theme = theme;
+        this.targetClass = targetClass;
     }
 
-    @Override
-    public void raster(RasterTarget target, SimpleDoor door, HeightMap hm) {
-        if (target.getAffectedArea().contains(door.getPos())) {
-            Pen pen = Pens.fill(target, door.getBaseHeight(), door.getTopHeight(), DefaultBlockType.SIMPLE_DOOR);
-            pen.draw(door.getPos());
+    public void tryRaster(RasterTarget brush, Door door, HeightMap heightMap) {
+        if (targetClass.isInstance(door)) {
+            raster(brush, targetClass.cast(door), heightMap);
         }
     }
+
+    protected abstract void raster(RasterTarget brush, T part, HeightMap heightMap);
 }
+

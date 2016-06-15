@@ -22,24 +22,22 @@ import org.terasology.cities.model.roof.ConicRoof;
 import org.terasology.cities.raster.*;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Circle;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.world.WorldProvider;
 
 import java.math.RoundingMode;
 
 /**
  * Converts a {@link ConicRoof} into blocks
  */
-public class ConicRoofRasterizer extends AbsDynBuildingRasterizer<ConicRoof> {
+public class ConicRoofRasterizer extends RoofRasterizer<ConicRoof> {
 
     /**
      * @param theme the block theme to use
      */
-    public ConicRoofRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, ConicRoof.class, worldProvider);
+    public ConicRoofRasterizer(BlockTheme theme) {
+        super(theme, ConicRoof.class);
     }
 
     @Override

@@ -25,9 +25,7 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.world.WorldProvider;
 
 import static org.terasology.commonworld.Orientation.EAST;
 import static org.terasology.commonworld.Orientation.WEST;
@@ -35,13 +33,13 @@ import static org.terasology.commonworld.Orientation.WEST;
 /**
  * Converts a {@link SaddleRoof} into blocks
  */
-public class SaddleRoofRasterizer extends AbsDynBuildingRasterizer<SaddleRoof> {
+public class SaddleRoofRasterizer extends RoofRasterizer<SaddleRoof> {
 
     /**
      * @param theme the block theme to use
      */
-    public SaddleRoofRasterizer(BlockTheme theme, WorldProvider worldProvider) {
-        super(theme, SaddleRoof.class, worldProvider);
+    public SaddleRoofRasterizer(BlockTheme theme) {
+        super(theme, SaddleRoof.class);
     }
 
     @Override

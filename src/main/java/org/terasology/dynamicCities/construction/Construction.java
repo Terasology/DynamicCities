@@ -17,17 +17,33 @@ package org.terasology.dynamicCities.construction;
 
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
+import org.terasology.cities.bldg.Building;
+import org.terasology.cities.bldg.BuildingPart;
+import org.terasology.cities.deco.Decoration;
+import org.terasology.cities.door.Door;
+import org.terasology.cities.model.roof.Roof;
 import org.terasology.cities.raster.RasterTarget;
+import org.terasology.cities.window.Window;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.GenericBuilding;
+import org.terasology.dynamicCities.decoration.ColumnRasterizer;
+import org.terasology.dynamicCities.decoration.DecorationRasterizer;
+import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
+import org.terasology.dynamicCities.rasterizer.doors.DoorRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.SimpleDoorRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.WingDoorRasterizer;
-import org.terasology.dynamicCities.rasterizer.parts.*;
+import org.terasology.dynamicCities.rasterizer.parts.HollowBuildingPartRasterizer;
+import org.terasology.dynamicCities.rasterizer.parts.RectPartRasterizer;
+import org.terasology.dynamicCities.rasterizer.parts.RoundPartRasterizer;
+import org.terasology.dynamicCities.rasterizer.parts.StaircaseRasterizer;
 import org.terasology.dynamicCities.rasterizer.roofs.*;
+import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
+import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
+import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.math.Region3i;
@@ -57,7 +73,7 @@ public class Construction extends BaseComponentSystem {
     @In
     static BlockManager blockManager;
 
-    static BlockTheme theme;
+    private BlockTheme theme;
 
     private Block air;
     private Block plant;
@@ -65,7 +81,12 @@ public class Construction extends BaseComponentSystem {
     private Block defaultBlock;
     private int maxMinDeviation = 40;
 
-    private final List<AbsDynBuildingRasterizer> rasterizers = new ArrayList<>();
+    private final List<AbsDynBuildingRasterizer> stdRasterizers = new ArrayList<>();
+    private final List<WindowRasterizer> windowRasterizers = new ArrayList<>();
+    private final List<DoorRasterizer> doorRasterizers = new ArrayList<>();
+    private final List<RoofRasterizer> roofRasterizers = new ArrayList<>();
+    private final List<DecorationRasterizer> decorationRasterizers = new ArrayList<>();
+
 
     public void initialise() {
         theme = BlockTheme.builder(blockManager)
@@ -104,20 +125,28 @@ public class Construction extends BaseComponentSystem {
         water = blockManager.getBlock("core:water");
         plant = blockManager.getBlock("core:plant");
         defaultBlock = blockManager.getBlock("core:dirt");
-        rasterizers.add(new HollowBuildingPartRasterizer(theme, worldProvider));
-        rasterizers.add(new ColumnRasterizer(theme, worldProvider));
-        rasterizers.add(new RectPartRasterizer(theme, worldProvider));
-        rasterizers.add(new RoundPartRasterizer(theme, worldProvider));
-        rasterizers.add(new SingleBlockRasterizer(theme, worldProvider));
-        rasterizers.add(new StaircaseRasterizer(theme, worldProvider));
-        rasterizers.add(new SimpleDoorRasterizer(theme, worldProvider));
-        rasterizers.add(new WingDoorRasterizer(theme, worldProvider));
-        rasterizers.add(new ConicRoofRasterizer(theme, worldProvider));
-        rasterizers.add(new DomeRoofRasterizer(theme, worldProvider));
-        rasterizers.add(new FlatRoofRasterizer(theme, worldProvider));
-        rasterizers.add(new HipRoofRasterizer(theme, worldProvider));
-        rasterizers.add(new PentRoofRasterizer(theme, worldProvider));
-        rasterizers.add(new SaddleRoofRasterizer(theme, worldProvider));
+
+        stdRasterizers.add(new HollowBuildingPartRasterizer(theme, worldProvider));
+        stdRasterizers.add(new RectPartRasterizer(theme, worldProvider));
+        stdRasterizers.add(new RoundPartRasterizer(theme, worldProvider));
+        stdRasterizers.add(new StaircaseRasterizer(theme, worldProvider));
+
+
+        decorationRasterizers.add(new SingleBlockRasterizer(theme));
+        decorationRasterizers.add(new ColumnRasterizer(theme));
+
+        doorRasterizers.add(new SimpleDoorRasterizer(theme));
+        doorRasterizers.add(new WingDoorRasterizer(theme));
+
+        windowRasterizers.add(new RectWindowRasterizer(theme));
+        windowRasterizers.add(new SimpleWindowRasterizer(theme));
+
+        roofRasterizers.add(new ConicRoofRasterizer(theme));
+        roofRasterizers.add(new DomeRoofRasterizer(theme));
+        roofRasterizers.add(new FlatRoofRasterizer(theme));
+        roofRasterizers.add(new HipRoofRasterizer(theme));
+        roofRasterizers.add(new PentRoofRasterizer(theme));
+        roofRasterizers.add(new SaddleRoofRasterizer(theme));
 
     }
 
@@ -194,9 +223,35 @@ public class Construction extends BaseComponentSystem {
         HeightMap hm = HeightMaps.constant(dynParcel.height);
         for (GenericBuilding genBldg : dynParcel.getGenericBuildings()) {
             if (genBldg.isComposite()) {
-                for (AbsDynBuildingRasterizer rasterizer : rasterizers) {
-                    rasterizer.raster(rasterTarget, genBldg.asComposite(), hm);
+                Building bldg = genBldg.asComposite();
+
+                for (AbsDynBuildingRasterizer rasterizer : stdRasterizers) {
+                    rasterizer.raster(rasterTarget, bldg, hm);
                 }
+
+                for (BuildingPart part : bldg.getParts()) {
+                    for (Door door : part.getDoors()) {
+                        for (DoorRasterizer doorRasterizer : doorRasterizers) {
+                            doorRasterizer.tryRaster(rasterTarget, door, hm);
+                        }
+                    }
+                    for (Window window : part.getWindows()) {
+                        for (WindowRasterizer windowRasterizer : windowRasterizers) {
+                            windowRasterizer.tryRaster(rasterTarget, window, hm);
+                        }
+                    }
+                    for (Decoration decoration : part.getDecorations()) {
+                        for (DecorationRasterizer decorationRasterizer : decorationRasterizers) {
+                            decorationRasterizer.tryRaster(rasterTarget, decoration, hm);
+                        }
+                    }
+                    Roof roof = part.getRoof();
+                    for (RoofRasterizer roofRasterizer : roofRasterizers) {
+                           roofRasterizer.tryRaster(rasterTarget, roof, hm);
+                    }
+
+                }
+
             }
 
         }
