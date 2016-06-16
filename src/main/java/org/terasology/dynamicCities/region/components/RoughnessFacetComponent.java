@@ -22,7 +22,6 @@ import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.List;
@@ -30,30 +29,13 @@ import java.util.List;
 @MappedContainer
 public final class RoughnessFacetComponent implements Component {
 
-
-    public boolean privateToOwner = true;
-    
-    @Replicate
     public Rect2i relativeRegion = Rect2i.EMPTY;
-
-    @Replicate
     public Rect2i worldRegion = Rect2i.EMPTY;
-
-    @Replicate
     public Rect2i gridWorldRegion = Rect2i.EMPTY;
-
-    @Replicate
     public Rect2i gridRelativeRegion = Rect2i.EMPTY;
-
-    @Replicate
     public int gridSize;
-
-    @Replicate
     public Vector2i center = new Vector2i();
-
-    @Replicate
     public List<Float> data = Lists.newArrayList();
-
     public float meanDeviation;
 
     public RoughnessFacetComponent() { }

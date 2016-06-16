@@ -187,7 +187,7 @@ public class RegionEntities implements Component {
         Vector2i cellPos = new Vector2i();
         for(BaseVector2i cubePos : cube.contents()) {
             cellPos.set(pos.x() + cubePos.x() * gridSize, pos.y() + cubePos.y() * gridSize);
-            if (cellIsLoaded(cellPos)) {
+            if (!cellIsLoaded(cellPos)) {
                 return false;
             }
         }

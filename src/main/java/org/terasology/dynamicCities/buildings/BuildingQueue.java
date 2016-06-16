@@ -20,25 +20,25 @@ import org.terasology.dynamicCities.construction.Construction;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.entitySystem.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BuildingQueue implements Component {
-    public List<DynParcel> buildingQueue;
+    public Set<DynParcel> buildingQueue;
     private Construction constructer;
 
     public BuildingQueue() {    }
 
     public BuildingQueue(Construction constructer) {
-        buildingQueue = new ArrayList<>();
+        buildingQueue = new HashSet<>();
         this.constructer = constructer;
     }
 
-    public void build() {
-        for (DynParcel dynParcel : buildingQueue) {
-            constructer.flatten(dynParcel.shape, dynParcel.height);
-            constructer.buildParcel(dynParcel);
-        }
-        buildingQueue.clear();
+    public Collection<DynParcel> getParcels() {
+        return Collections.unmodifiableSet(buildingQueue);
     }
+
+
 }

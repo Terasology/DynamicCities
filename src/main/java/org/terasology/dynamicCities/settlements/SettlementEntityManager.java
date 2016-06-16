@@ -16,14 +16,9 @@
 package org.terasology.dynamicCities.settlements;
 
 
-import org.terasology.cities.bldg.Building;
 import org.terasology.commonworld.Orientation;
-import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
-import org.terasology.dynamicCities.buildings.GenericBuilding;
 import org.terasology.dynamicCities.construction.Construction;
-import org.terasology.dynamicCities.gen.CommercialBuildingGenerator;
-import org.terasology.dynamicCities.gen.RectHouseGenerator;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Population;
@@ -32,6 +27,8 @@ import org.terasology.dynamicCities.region.components.RegionEntities;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
+import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
+import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.dynamicCities.sites.Site;
 import org.terasology.dynamicCities.utilities.Toolbox;
@@ -44,10 +41,16 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
+import org.terasology.math.Region3i;
 import org.terasology.math.geom.*;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
+import org.terasology.world.generation.Border3D;
+
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Current tasks: Rewrite site to settlement conversion: Check sides and remove sitecomponent if all 
  */
@@ -96,11 +99,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             } else if (!checkDistance || !checkBuildArea) {
                 siteRegion.removeComponent(Site.class);
             }
-
         }
         Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
         for (EntityRef settlement : activeSettlements) {
-            settlement.getComponent(BuildingQueue.class).build();
+            build(settlement);
         }
         counter = 100;
     }
@@ -147,14 +149,20 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Vector2i regionCenter = new Vector2i(siteRegion.getComponent(LocationComponent.class).getLocalPosition().x(),
                                              siteRegion.getComponent(LocationComponent.class).getLocalPosition().z());
         Site site = siteRegion.getComponent(Site.class);
+        LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
+        Population population = new Population(site.getPopulation());
 
         //add surrounding regions to settlement
         RegionEntities regionEntities = new RegionEntities();
         getSurroundingRegions(regionCenter, regionEntities);
 
+        //Create the district facet
+        Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
+        Border3D border = new Border3D(0, 0, 0);
+        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
 
-        LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
-        Population population = new Population(site.getPopulation());
+
+
 
         /**
          * some sample parcels for testing
@@ -167,15 +175,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         DynParcel par1 = new DynParcel(shape1, or1, Math.round(locationComponent.getLocalPosition().y()));
         DynParcel par2 = new DynParcel(shape2, or2, Math.round(locationComponent.getLocalPosition().y()));
-
-        CommercialBuildingGenerator clericalBuildingGenerator = new CommercialBuildingGenerator(1423243);
-        RectHouseGenerator commercialBuildingGenerator = new RectHouseGenerator();
-        Building testBldg = clericalBuildingGenerator.generate(par1, HeightMaps.constant(constructer.flatten(par1.shape, par1.height)));
-        Building testBldg2 = commercialBuildingGenerator.apply(par2, HeightMaps.constant(constructer.flatten(par2.shape, par2.height)));
-        GenericBuilding testGenBldg = new GenericBuilding(testBldg);
-        GenericBuilding testGenBldg2 = new GenericBuilding(testBldg2);
-        par1.addGenericBuilding(testGenBldg);
-        par2.addGenericBuilding(testGenBldg2);
 
         ParcelList parcels = new ParcelList();
         parcels.parcels.add(par2);
@@ -250,4 +249,21 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         return unusableRegionsCount < 15;
     }
+
+
+    public void build(EntityRef settlement) {
+        BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
+
+        Set<DynParcel> removedParcels = new HashSet<>();
+        Set<DynParcel> parcels = buildingQueue.buildingQueue;
+
+        for (DynParcel dynParcel : parcels) {
+            if (constructer.buildParcel(dynParcel)) {
+                removedParcels.add(dynParcel);
+            }
+        }
+        parcels.removeAll(removedParcels);
+        settlement.saveComponent(buildingQueue);
+    }
+
 }

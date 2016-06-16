@@ -13,77 +13,63 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.region.components;
+package org.terasology.dynamicCities.settlements.components;
+
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import org.terasology.dynamicCities.facets.ResourceFacet;
-import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.entitySystem.Component;
+import org.terasology.math.Region3i;
+import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.utilities.procedural.WhiteNoise;
+import org.terasology.world.generation.Border3D;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-@MappedContainer
-public final class ResourceFacetComponent implements Component {
+public class DistrictFacetComponent implements Component {
 
 
-    public boolean privateToOwner = true;
-
-    
     public Rect2i relativeRegion = Rect2i.EMPTY;
     public Rect2i worldRegion = Rect2i.EMPTY;
     public Rect2i gridWorldRegion = Rect2i.EMPTY;
     public Rect2i gridRelativeRegion = Rect2i.EMPTY;
     public int gridSize;
     public Vector2i center = new Vector2i();
+    public List<Float>[] data;
 
-    
-    public List<Map<String, Resource>> data = Lists.newArrayList();
-
-
-    public ResourceFacetComponent() { }
-
-    public ResourceFacetComponent(ResourceFacet resourceFacet) {
-
-        relativeRegion = copyRect2i(resourceFacet.getRelativeRegion());
-        worldRegion = copyRect2i(resourceFacet.getWorldRegion());
-        gridWorldRegion = copyRect2i(resourceFacet.getGridWorldRegion());
-        gridRelativeRegion = copyRect2i(resourceFacet.getGridRelativeRegion());
-        gridSize = resourceFacet.getGridSize();
-        center = new Vector2i(resourceFacet.getCenter());
-        for (int i = 0; i < resourceFacet.getInternal().length; i++) {
-            HashMap<String, Resource> map = new HashMap<>();
-            map.putAll(resourceFacet.getInternal()[i]);
-            data.add(i, map);
+    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed) {
+        worldRegion = border.expandTo2D(targetRegion);
+        relativeRegion = border.expandTo2D(targetRegion.size());
+        this.gridSize = gridSize;
+        center = new Vector2i(targetRegion.center().x(), targetRegion.center().z());
+        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.sizeX() / (2 * gridSize),
+                center.y() - targetRegion.sizeY() / (2 * gridSize),
+                center.x() + targetRegion.sizeX() / (2 * gridSize),
+                center.y() + targetRegion.sizeY() / (2 * gridSize));
+        gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
+        WhiteNoise randNumberGen = new WhiteNoise(seed);
+        data = new List[gridRelativeRegion.area()];
+        /**
+         * Currently there are 4 Zones: Governmental, Residential, Clerical and Commercial.
+         * Add additional random numbers here for new zones.
+         */
+        for (List list : data) {
+            list = new ArrayList<Float>();
+            list.add(TeraMath.fastAbs(randNumberGen.noise(452324, 323942)));
+            list.add(TeraMath.fastAbs(randNumberGen.noise(253242, 213102)));
+            list.add(TeraMath.fastAbs(randNumberGen.noise(786332, 262333)));
+            list.add(TeraMath.fastAbs(randNumberGen.noise(126743, 748323)));
         }
     }
 
 
-    private Rect2i copyRect2i(Rect2i value) {
-        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
-    }
 
-    public int getResourceSum(String resourceType) {
-        int sum = 0;
-        for (Map<String, Resource> map : data) {
-            if (map.containsKey(resourceType)) {
-                sum += map.get(resourceType).amount;
-            }
-        }
-        return sum;
-    }
 
-    /**
-     * Copy of the methods used to access the data. Maybe there is a better way than storing them all here but @MappedContainer
-     * wants flat hierarchies.
-     */
 
+    //Copy of the methods used to access the data. Maybe there is a better way than storing them all here
 
     public Vector2i getWorldPoint(Vector2i gridPoint) {
         return getWorldPoint(gridPoint.x(), gridPoint.y());
@@ -170,54 +156,53 @@ public final class ResourceFacetComponent implements Component {
         return gridRelativeRegion;
     }
 
-    public Map<String, Resource> get(int x, int y) {
+    public List<Float> get(int x, int y) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
-        return data.get(getRelativeGridIndex(gridPos.x(), gridPos.y()));
+        return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
     }
 
-    public Map<String, Resource> get(BaseVector2i pos) {
+    public List<Float> get(BaseVector2i pos) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         return get(gridPos.x(), gridPos.y());
     }
 
-    public Map<String, Resource> getWorld(int x, int y) {
+    public List<Float> getWorld(int x, int y) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
-        return data.get(getWorldGridIndex(gridPos.x(), gridPos.y()));
+        return data[getWorldGridIndex(gridPos.x(), gridPos.y())];
     }
 
-    public Map<String, Resource> getWorld(BaseVector2i pos) {
+    public List<Float> getWorld(BaseVector2i pos) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         return getWorld(gridPos.x(), gridPos.y());
     }
 
-    public List<Map<String, Resource>> getInternal() {
+    public List<Float>[] getInternal() {
         return data;
     }
 
-    public void set(int x, int y, Map<String, Resource> value) {
+    public void set(int x, int y, List<Float> value) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
-        data.set(getRelativeGridIndex(gridPos.x(), gridPos.y()), value);
+        data[getRelativeGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
-    public void set(BaseVector2i pos, Map<String, Resource> value) {
+    public void set(BaseVector2i pos, List<Float> value) {
         BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
         set(pos.x(), pos.y(), value);
     }
 
-    public void setWorld(int x, int y, Map<String, Resource> value) {
+    public void setWorld(int x, int y, List<Float> value) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
-        data.set(getWorldGridIndex(gridPos.x(), gridPos.y()), value);
+        data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
-    public void setWorld(BaseVector2i pos, Map<String, Resource> value) {
+    public void setWorld(BaseVector2i pos, List<Float> value) {
         BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
         setWorld(gridPos.x(), gridPos.y(), value);
     }
 
-    public void set(List<Map<String, Resource>> newData) {
-        Preconditions.checkArgument(newData.size() == data.size(), "New data must have same length as existing");
-        data.clear();
-        data.addAll(newData);
+    public void set(List<Float>[] newData) {
+        Preconditions.checkArgument(newData.length == data.length, "New data must have same length as existing");
+        System.arraycopy(newData, 0, data, 0, data.length);
     }
 
 }

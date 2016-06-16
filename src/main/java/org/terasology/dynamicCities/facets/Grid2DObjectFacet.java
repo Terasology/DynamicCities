@@ -31,7 +31,7 @@ import java.lang.reflect.Array;
  */
 public abstract class Grid2DObjectFacet<T> extends Grid2DFacet {
 
-    private T[] data;
+    protected T[] data;
 
     @SuppressWarnings(value = "unchecked")
     public Grid2DObjectFacet(Region3i targetRegion, Border3D border, int gridSize, Class<T> objectType) {

@@ -24,9 +24,9 @@ import org.terasology.cities.door.SimpleDoor;
 import org.terasology.cities.model.roof.HipRoof;
 import org.terasology.cities.model.roof.Roof;
 import org.terasology.cities.parcels.Parcel;
-import org.terasology.cities.surface.InfiniteSurfaceHeightFacet;
 import org.terasology.cities.window.SimpleWindow;
 import org.terasology.commonworld.Orientation;
+import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
@@ -37,7 +37,7 @@ import org.terasology.math.geom.Vector2i;
  */
 public class TownHallGenerator {
 
-    public Building generate(Parcel parcel, InfiniteSurfaceHeightFacet hm) {
+    public Building generate(Parcel parcel, HeightMap hm) {
 
         Orientation o = parcel.getOrientation();
         DefaultBuilding bldg = new DefaultBuilding(o);
@@ -57,7 +57,7 @@ public class TownHallGenerator {
         length -= length % 6;
 
         // we add +1, because the building starts at 1 block above the terrain
-        int floorHeight = TeraMath.floorToInt(hm.getWorld(probePos)) + 1;
+        int floorHeight = TeraMath.floorToInt(hm.apply(probePos)) + 1;
         int wallHeight = 6;
 
         // Create entry hall

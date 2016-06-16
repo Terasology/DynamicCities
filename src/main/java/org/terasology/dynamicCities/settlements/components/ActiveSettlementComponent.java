@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements;
+package org.terasology.dynamicCities.settlements.components;
 
 
 import org.terasology.entitySystem.Component;
 
-public class IncompleteSettlementComponent implements Component {
+public class ActiveSettlementComponent implements Component {
 
-    public IncompleteSettlementComponent() {
+    public ActiveSettlementComponent() {
 
     }
 }

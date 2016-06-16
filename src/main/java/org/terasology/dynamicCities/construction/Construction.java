@@ -26,10 +26,10 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.window.Window;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.dynamicCities.buildings.GenericBuilding;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
+import org.terasology.dynamicCities.gen.*;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
@@ -62,6 +62,7 @@ import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Share(value = Construction.class)
 @RegisterSystem
@@ -87,6 +88,11 @@ public class Construction extends BaseComponentSystem {
     private final List<RoofRasterizer> roofRasterizers = new ArrayList<>();
     private final List<DecorationRasterizer> decorationRasterizers = new ArrayList<>();
 
+    private CommercialBuildingGenerator commercialBuildingGenerator;
+    private RectHouseGenerator rectHouseGenerator;
+    private SimpleChurchGenerator simpleChurchGenerator;
+    private TownHallGenerator townHallGenerator;
+    private DefaultBuildingGenerator defaultBuildingGenerator;
 
     public void initialise() {
         theme = BlockTheme.builder(blockManager)
@@ -148,6 +154,12 @@ public class Construction extends BaseComponentSystem {
         roofRasterizers.add(new PentRoofRasterizer(theme));
         roofRasterizers.add(new SaddleRoofRasterizer(theme));
 
+
+        commercialBuildingGenerator = new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
+        rectHouseGenerator = new RectHouseGenerator();
+        simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
+        townHallGenerator = new TownHallGenerator();
+        defaultBuildingGenerator = new DefaultBuildingGenerator(worldProvider.getSeed().hashCode() / 3);
     }
 
     /**
@@ -218,42 +230,52 @@ public class Construction extends BaseComponentSystem {
     }
 
     //the standard strategy used in Cities and StaticCities module
-    public void buildParcel(DynParcel dynParcel) {
+    public boolean buildParcel(DynParcel dynParcel) {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
+        dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
         HeightMap hm = HeightMaps.constant(dynParcel.height);
-        for (GenericBuilding genBldg : dynParcel.getGenericBuildings()) {
-            if (genBldg.isComposite()) {
-                Building bldg = genBldg.asComposite();
+        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().maxX(), 255, dynParcel.getShape().maxY()),
+                new Vector3i(dynParcel.getShape().minX(), -255, dynParcel.getShape().minY()));
+        /**
+         *
+         * TODO: Insert advanced building generation here
+         *
+         */
 
-                for (AbsDynBuildingRasterizer rasterizer : stdRasterizers) {
-                    rasterizer.raster(rasterTarget, bldg, hm);
-                }
+        //dynParcel.assignZone();
+        Set<Building> buildings = (defaultBuildingGenerator.generate(dynParcel, hm));
 
-                for (BuildingPart part : bldg.getParts()) {
-                    for (Door door : part.getDoors()) {
-                        for (DoorRasterizer doorRasterizer : doorRasterizers) {
-                            doorRasterizer.tryRaster(rasterTarget, door, hm);
-                        }
-                    }
-                    for (Window window : part.getWindows()) {
-                        for (WindowRasterizer windowRasterizer : windowRasterizers) {
-                            windowRasterizer.tryRaster(rasterTarget, window, hm);
-                        }
-                    }
-                    for (Decoration decoration : part.getDecorations()) {
-                        for (DecorationRasterizer decorationRasterizer : decorationRasterizers) {
-                            decorationRasterizer.tryRaster(rasterTarget, decoration, hm);
-                        }
-                    }
-                    Roof roof = part.getRoof();
-                    for (RoofRasterizer roofRasterizer : roofRasterizers) {
-                           roofRasterizer.tryRaster(rasterTarget, roof, hm);
-                    }
+        if (!worldProvider.isRegionRelevant(region)) {
+            return false;
+        }
 
-                }
-
+        for (Building building : buildings) {
+            for (AbsDynBuildingRasterizer rasterizer : stdRasterizers) {
+                rasterizer.raster(rasterTarget, building, hm);
             }
 
+            for (BuildingPart part : building.getParts()) {
+                for (Door door : part.getDoors()) {
+                    for (DoorRasterizer doorRasterizer : doorRasterizers) {
+                        doorRasterizer.tryRaster(rasterTarget, door, hm);
+                    }
+                }
+                for (Window window : part.getWindows()) {
+                    for (WindowRasterizer windowRasterizer : windowRasterizers) {
+                        windowRasterizer.tryRaster(rasterTarget, window, hm);
+                    }
+                }
+                for (Decoration decoration : part.getDecorations()) {
+                    for (DecorationRasterizer decorationRasterizer : decorationRasterizers) {
+                        decorationRasterizer.tryRaster(rasterTarget, decoration, hm);
+                    }
+                }
+                Roof roof = part.getRoof();
+                for (RoofRasterizer roofRasterizer : roofRasterizers) {
+                    roofRasterizer.tryRaster(rasterTarget, roof, hm);
+                }
+            }
         }
+        return true;
     }
 }
