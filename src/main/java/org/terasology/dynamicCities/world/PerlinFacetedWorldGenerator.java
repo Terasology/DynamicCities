@@ -35,7 +35,7 @@ import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 
 /**
  */
-@RegisterWorldGenerator(id = "facetedperlin", displayName = "DynCitiesPerlin", description = "Faceted world generator")
+@RegisterWorldGenerator(id = "DynamicCitiesPerlin", displayName = "DynCitiesPerlin", description = "Faceted world generator")
 public class PerlinFacetedWorldGenerator extends BaseFacetedWorldGenerator {
 
     private final FixedSpawner spawner = new FixedSpawner(0, 0);

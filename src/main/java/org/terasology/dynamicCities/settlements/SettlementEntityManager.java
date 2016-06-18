@@ -259,6 +259,21 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
         LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
         NameTagComponent nameTagComponent = settlement.getComponent(NameTagComponent.class);
+        if (population == null) {
+            return;
+        }
+        if (parcels == null) {
+            return;
+        }
+        if (buildingQueue == null) {
+            return;
+        }
+        if (locationComponent == null) {
+            return;
+        }
+        if (nameTagComponent == null) {
+            return;
+        }
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
 
         Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
