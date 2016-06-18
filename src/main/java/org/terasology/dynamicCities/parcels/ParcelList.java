@@ -29,9 +29,12 @@ public class ParcelList implements Component {
     public int militaryArea;
     public int clericalArea;
     public int governmentalArea;
+
+    public int minBuildRadius;
     public List<DynParcel> parcels;
 
     public ParcelList() {
+        minBuildRadius = 0;
         parcels = new ArrayList<>();
     }
 

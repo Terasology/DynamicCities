@@ -39,7 +39,7 @@ public abstract class PopulationConstants {
     public static final Vector2i MAXMIN_CLERICAL = new Vector2i(600, 300);
 
 
-    public static final float GROWTH_RATE = 1f;
+    public static final float GROWTH_RATE = 10f;
     /*
     //Define resource needs per person
     public static final float wood_per_person;

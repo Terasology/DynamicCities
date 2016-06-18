@@ -263,6 +263,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
 
+        int minRadius = parcels.minBuildRadius;
+        int maxIterations = 40;
         int buildingSpawned = 0;
         int[] zoneArea = new int[5];
         int[] buildingNeeds = new int[5];
@@ -309,6 +311,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
          */
         for (int i = 0; i<zones.length; i++) {
             while (buildingNeeds[i] - zoneArea[i] > maxMinSizes[i].y() && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN && i != 3) {
+                int iter = 0;
                 int size = Math.round(TeraMath.fastAbs(rng.nextInt((int) Math.round(Math.sqrt((double) maxMinSizes[i].y())),
                         (int) Math.round(Math.sqrt(maxMinSizes[i].x())))));
                 Rect2i shape = Rect2i.EMPTY;
@@ -317,12 +320,17 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 //Place parcel randomly until it hits the right district
                 //For now: Just place is somewhere non intersecting
                 do {
+                    iter++;
                     float angle = rng.nextFloat(0, 360);
-                    float radius = rng.nextFloat(0, SettlementConstants.SETTLEMENT_RADIUS - size);
+                    float radius = rng.nextFloat(minRadius, minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), size, size);
-                } while (!parcels.isNotIntersecting(shape));
+                } while (!parcels.isNotIntersecting(shape) && iter != maxIterations);
+                if (iter == maxIterations) {
+                    minRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
+                    break;
+                }
                 DynParcel newParcel = new DynParcel(shape, orientation, zones[i], Math.round(locationComponent.getLocalPosition().y()));
                 parcels.addParcel(newParcel);
                 buildingQueue.buildingQueue.add(newParcel);
