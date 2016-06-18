@@ -13,20 +13,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.terasology.dynamicCities.population;
 
+
 import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.Vector2i;
 
 public class Population implements Component {
 
 
-    public int populationSize;
+    public float populationSize;
     public float health;
-
-    public Population (int size) {
+    public Population(int size) {
         populationSize = size;
     }
 
     public Population() { }
+
+    public void grow() {
+        populationSize += PopulationConstants.GROWTH_RATE /* * populationSize*/;
+    }
+
+    public int getResidentialNeed() {
+        return Math.round(populationSize * PopulationConstants.RESIDENTIAL_PER_PERSON);
+    }
+    public int getCommercialNeed() {
+        return Math.round(populationSize * PopulationConstants.COMMERCIAL_PER_PERSON);
+    }
+    public int getGovernmentalNeed() {
+        return Math.round(populationSize * PopulationConstants.GOVERNMENTAL_PER_PERSON);
+    }
+    public int getMilitaryNeed() {
+        return Math.round(populationSize * PopulationConstants.MILITARY_PER_PERSON);
+    }
+    public int getClericalNeed() {
+        return Math.round(populationSize * PopulationConstants.CLERICAL_PER_PERSON);
+    }
+
+
+    public Vector2i getMaxMinResidential() {
+        return PopulationConstants.MAXMIN_RESIDENTIAL;
+    }
+    public Vector2i getMaxMinCommercial() {
+        return PopulationConstants.MAXMIN_COMMERCIAL;
+    }
+    public Vector2i getMaxMinGovernmental() {
+        return PopulationConstants.MAXMIN_GOVERNMENTAL;
+    }
+    public Vector2i getMaxMinMilitary() {
+        return PopulationConstants.MAXMIN_MILITARY;
+    }
+    public Vector2i getMaxMinClerical() {
+        return PopulationConstants.MAXMIN_CLERICAL;
+    }
+
 }

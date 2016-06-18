@@ -17,15 +17,52 @@ package org.terasology.dynamicCities.parcels;
 
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.Rect2i;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ParcelList implements Component {
 
+    public int residentialArea;
+    public int commercialArea;
+    public int militaryArea;
+    public int clericalArea;
+    public int governmentalArea;
     public List<DynParcel> parcels;
 
     public ParcelList() {
         parcels = new ArrayList<>();
     }
+
+    public void addParcel(DynParcel parcel) {
+        parcels.add(parcel);
+        switch (parcel.getZoneDyn()) {
+            case CLERICAL:      clericalArea += parcel.getShape().area();
+                                break;
+            case RESIDENTIAL:   residentialArea += parcel.getShape().area();
+                                break;
+            case COMMERCIAL:    commercialArea += parcel.getShape().area();
+                                break;
+            case GOVERNMENTAL:  governmentalArea += parcel.getShape().area();
+                                break;
+            case MILITARY:      militaryArea += parcel.getShape().area();
+                                break;
+            default:            break;
+        }
+    }
+
+    public boolean isNotIntersecting(DynParcel parcel) {
+        return isNotIntersecting(parcel.shape);
+    }
+
+    public boolean isNotIntersecting(Rect2i rect) {
+        for (DynParcel spawnedParcels : parcels) {
+            if (spawnedParcels.getShape().overlaps(rect)) {
+               return false;
+            }
+        }
+        return true;
+    }
+
 }

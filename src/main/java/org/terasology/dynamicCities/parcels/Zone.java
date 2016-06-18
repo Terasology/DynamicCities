@@ -39,5 +39,10 @@ public enum Zone {
     /**
      * Markets, storage sites, etc.
      */
-    COMMERCIAL
+    COMMERCIAL,
+
+    /**
+     * Barracks, fortifications, etc.
+     */
+    MILITARY
 }

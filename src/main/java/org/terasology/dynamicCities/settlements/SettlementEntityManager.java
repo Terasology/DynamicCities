@@ -21,7 +21,9 @@ import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
+import org.terasology.dynamicCities.parcels.Zone;
 import org.terasology.dynamicCities.population.Population;
+import org.terasology.dynamicCities.population.PopulationConstants;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntities;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
@@ -42,10 +44,15 @@ import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.math.Region3i;
+import org.terasology.math.TeraMath;
 import org.terasology.math.geom.*;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
+import org.terasology.utilities.procedural.Noise;
+import org.terasology.utilities.procedural.WhiteNoise;
+import org.terasology.utilities.random.FastRandom;
+import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
 
 import java.util.HashSet;
@@ -73,17 +80,20 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int minDistance = 500;
     private RegionEntities regionEntitiesStore;
     private int settlementMaxRadius = 96;
-    private int counter = 80;
-
+    private int counter = 50;
+    private int timer = 0;
+    private Noise randNumGen;
     @Override
     public void postBegin() {
         settlementEntities = entityManager.create(new SettlementEntities());
         regionEntitiesStore = regionEntityManager.getRegionEntities();
+        randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
     }
 
     @Override
     public void update(float delta) {
         counter--;
+        timer++;
         if (counter != 0) {
             return;
         }
@@ -102,6 +112,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
         Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
         for (EntityRef settlement : activeSettlements) {
+            growSettlement(settlement, timer);
             build(settlement);
         }
         counter = 100;
@@ -161,37 +172,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
 
-
-
-
-        /**
-         * some sample parcels for testing
-         */
-        Orientation or1 = Orientation.NORTH;
-        Orientation or2 = Orientation.SOUTH;
-
-        Rect2i shape1 = Rect2i.createFromMinAndSize(regionCenter.add(5, 5), new Vector2i(30, 30));
-        Rect2i shape2 = Rect2i.createFromMinAndSize(regionCenter.sub(30, 30), new Vector2i(20, 20));
-
-        DynParcel par1 = new DynParcel(shape1, or1, Math.round(locationComponent.getLocalPosition().y()));
-        DynParcel par2 = new DynParcel(shape2, or2, Math.round(locationComponent.getLocalPosition().y()));
-
         ParcelList parcels = new ParcelList();
-        parcels.parcels.add(par2);
-        parcels.parcels.add(par1);
 
         BuildingQueue buildingQueue = new BuildingQueue(constructer);
-        buildingQueue.buildingQueue.add(par2);
-        buildingQueue.buildingQueue.add(par1);
-
-
-
 
         NameTagComponent settlementName = new NameTagComponent();
-        settlementName.text = "testcity regions: " + regionEntities.regionEntities.size();
-        if (regionEntities.regionEntities.size() >= 28) {
-            settlementName.text += " #";
-        }
+        settlementName.text = "testcity regions: " + regionEntities.regionEntities.size() + " " + population.populationSize;
+
         settlementName.textColor = Color.CYAN;
         settlementName.yOffset = 20;
         settlementName.scale = 20;
@@ -263,6 +250,91 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
         }
         parcels.removeAll(removedParcels);
+        settlement.saveComponent(buildingQueue);
+    }
+
+    public void growSettlement(EntityRef settlement, int time) {
+        Population population = settlement.getComponent(Population.class);
+        ParcelList parcels = settlement.getComponent(ParcelList.class);
+        BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
+        LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
+        NameTagComponent nameTagComponent = settlement.getComponent(NameTagComponent.class);
+        Vector3i center = new Vector3i(locationComponent.getLocalPosition());
+
+        Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
+
+        int buildingSpawned = 0;
+        int[] zoneArea = new int[5];
+        int[] buildingNeeds = new int[5];
+        Zone[] zones = new Zone[5];
+        Vector2i[] maxMinSizes = new Vector2i[5];
+
+        class  Updater {
+            public void update() {
+                zoneArea[0] = parcels.clericalArea;
+                zoneArea[1] = parcels.commercialArea;
+                zoneArea[2] = parcels.governmentalArea;
+                zoneArea[3] = parcels.militaryArea;
+                zoneArea[4] = parcels.residentialArea;
+            }
+        }
+        Updater updater = new Updater();
+        updater.update();
+
+        population.grow();
+
+        buildingNeeds[0] = population.getClericalNeed();
+        buildingNeeds[1] = population.getCommercialNeed();
+        buildingNeeds[2] = population.getGovernmentalNeed();
+        buildingNeeds[3] = population.getMilitaryNeed();
+        buildingNeeds[4] = population.getResidentialNeed();
+
+        zones[0] = Zone.CLERICAL;
+        zones[1] = Zone.COMMERCIAL;
+        zones[2] = Zone.GOVERNMENTAL;
+        //Set this one to military ones it is properly integrated:
+        zones[3] = Zone.RESIDENTIAL;
+        zones[4] = Zone.RESIDENTIAL;
+
+        maxMinSizes[0] = population.getMaxMinClerical();
+        maxMinSizes[1] = population.getMaxMinCommercial();
+        maxMinSizes[2] = population.getMaxMinGovernmental();
+        maxMinSizes[3] = population.getMaxMinMilitary();
+        maxMinSizes[4] = population.getMaxMinResidential();
+
+        /**
+         * TODO: Generate more random rectangles (currently only squares).
+         * TODO: Integrate military zone here. Currently it skips i == 3
+         * TODO: Integrate a flag when there aren't any building spots found after a certain amount of time
+         */
+        for (int i = 0; i<zones.length; i++) {
+            while (buildingNeeds[i] - zoneArea[i] > maxMinSizes[i].y() && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN && i != 3) {
+                int size = Math.round(TeraMath.fastAbs(rng.nextInt((int) Math.round(Math.sqrt((double) maxMinSizes[i].y())),
+                        (int) Math.round(Math.sqrt(maxMinSizes[i].x())))));
+                Rect2i shape = Rect2i.EMPTY;
+                Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(4));
+                Vector2i rectPosition = new Vector2i();
+                //Place parcel randomly until it hits the right district
+                //For now: Just place is somewhere non intersecting
+                do {
+                    float angle = rng.nextFloat(0, 360);
+                    float radius = rng.nextFloat(0, SettlementConstants.SETTLEMENT_RADIUS - size);
+                    rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
+                            (int) Math.round(radius * Math.cos((double) angle)) + center.z());
+                    shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), size, size);
+                } while (!parcels.isNotIntersecting(shape));
+                DynParcel newParcel = new DynParcel(shape, orientation, zones[i], Math.round(locationComponent.getLocalPosition().y()));
+                parcels.addParcel(newParcel);
+                buildingQueue.buildingQueue.add(newParcel);
+                updater.update();
+                buildingSpawned++;
+            }
+        }
+
+        nameTagComponent.text =  nameTagComponent.text.replaceAll(Float.toString((population.populationSize - PopulationConstants.GROWTH_RATE)), Float.toString(population.populationSize));
+        settlement.saveComponent(parcels);
+        settlement.saveComponent(nameTagComponent);
+        settlement.saveComponent(population);
         settlement.saveComponent(buildingQueue);
     }
 

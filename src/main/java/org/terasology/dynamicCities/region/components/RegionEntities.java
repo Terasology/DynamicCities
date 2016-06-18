@@ -156,8 +156,8 @@ public class RegionEntities implements Component {
 
 
     public boolean checkSidesLoadedLong(Vector2i pos) {
-        return (cellIsLoaded(pos.addX(2 * gridSize)) && cellIsLoaded(pos.addX(-2 * gridSize))
-                && cellIsLoaded(pos.addY(2 * gridSize)) && cellIsLoaded(pos.addY(-2 * gridSize)));
+        return (cellIsLoaded(pos.addX(3 * gridSize)) && cellIsLoaded(pos.addX(-3 * gridSize))
+                && cellIsLoaded(pos.addY(3 * gridSize)) && cellIsLoaded(pos.addY(-3 * gridSize)));
     }
 
     public boolean checkSidesLoadedLong(EntityRef region) {
