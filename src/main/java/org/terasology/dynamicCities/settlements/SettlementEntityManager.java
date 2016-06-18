@@ -172,7 +172,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
 
-        ParcelList parcels = new ParcelList();
+        ParcelList parcels = new ParcelList(1);
 
         BuildingQueue buildingQueue = new BuildingQueue();
 

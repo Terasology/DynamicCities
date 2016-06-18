@@ -33,7 +33,8 @@ public class ParcelList implements Component {
     public int minBuildRadius;
     public List<DynParcel> parcels;
 
-    public ParcelList() {
+    public ParcelList() { }
+    public ParcelList(int i) {
         minBuildRadius = 0;
         parcels = new ArrayList<>();
     }
