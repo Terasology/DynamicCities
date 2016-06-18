@@ -1,13 +1,13 @@
-# Boo eclipse! - every eclipse project needs its own .gitignore file
+# Modules get a copy of build.gradle as they are not allowed to have their own (for build security / sandboxing)
+build.gradle
 
-# Ignore Eclipse
-/.checkstyle
-/.project
-/.classpath
-/.settings/
-/bin/
+# IntelliJ
+*.iml
 
-# Ignore gradle
-/build/
-
-/.ignore DynamicCities.iml
+# Eclipse
+.checkstyle
+.classpath
+.project
+.settings
+bin/
+build/
