@@ -174,7 +174,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         ParcelList parcels = new ParcelList();
 
-        BuildingQueue buildingQueue = new BuildingQueue(constructer);
+        BuildingQueue buildingQueue = new BuildingQueue();
 
         NameTagComponent settlementName = new NameTagComponent();
         settlementName.text = "testcity regions: " + regionEntities.regionEntities.size() + " " + population.populationSize;

@@ -16,7 +16,6 @@
 package org.terasology.dynamicCities.buildings;
 
 
-import org.terasology.dynamicCities.construction.Construction;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.entitySystem.Component;
 
@@ -27,13 +26,10 @@ import java.util.Set;
 
 public class BuildingQueue implements Component {
     public Set<DynParcel> buildingQueue;
-    private Construction constructer;
 
-    public BuildingQueue() {    }
 
-    public BuildingQueue(Construction constructer) {
+    public BuildingQueue() {
         buildingQueue = new HashSet<>();
-        this.constructer = constructer;
     }
 
     public Collection<DynParcel> getParcels() {
