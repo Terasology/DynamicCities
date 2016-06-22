@@ -69,7 +69,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private EntityManager entityManager;
 
-    private EntityRef settlementEntities;
+    private SettlementEntities settlementEntities;
 
     @In
     private RegionEntityManager regionEntityManager;
@@ -85,7 +85,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private Noise randNumGen;
     @Override
     public void postBegin() {
-        settlementEntities = entityManager.create(new SettlementEntities());
+        settlementEntities = new SettlementEntities();
         regionEntitiesStore = regionEntityManager.getRegionEntities();
         randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
     }
@@ -103,8 +103,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             boolean checkBuildArea = checkBuildArea(siteRegion);
             if (checkDistance && regionEntitiesStore.checkSidesLoadedNear(siteRegion)
                     && checkBuildArea) {
-                createSettlement(siteRegion);
-                siteRegion.send(new SettlementRegisterEvent());
+                EntityRef newSettlement = createSettlement(siteRegion);
+                newSettlement.send(new SettlementRegisterEvent());
                 siteRegion.removeComponent(Site.class);
             } else if (!checkDistance || !checkBuildArea) {
                 siteRegion.removeComponent(Site.class);
@@ -118,10 +118,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         counter = 100;
     }
 
-    @ReceiveEvent(components = {Site.class})
+    @ReceiveEvent(components = {ActiveSettlementComponent.class})
     public void registerSettlement(SettlementRegisterEvent event, EntityRef settlement) {
-        settlementEntities.getComponent(SettlementEntities.class).add(settlement);
-        settlement.addComponent(new ActiveSettlementComponent());
+        settlementEntities.add(settlement);
     }
 
 
@@ -129,7 +128,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
 
-        for (String vector2iString : settlementEntities.getComponent(SettlementEntities.class).getMap().keySet()) {
+        for (String vector2iString : settlementEntities.getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance) {
                 return false;
@@ -142,7 +141,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         if (!regionEntitiesStore.cellIsLoaded(pos)) {
             return true;
         }
-        for (String vector2iString : settlementEntities.getComponent(SettlementEntities.class).getMap().keySet()) {
+        for (String vector2iString : settlementEntities.getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
                 return false;
@@ -155,7 +154,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
     }
 
-    private void createSettlement(EntityRef siteRegion) {
+    private EntityRef createSettlement(EntityRef siteRegion) {
 
         Vector2i regionCenter = new Vector2i(siteRegion.getComponent(LocationComponent.class).getLocalPosition().x(),
                                              siteRegion.getComponent(LocationComponent.class).getLocalPosition().z());
@@ -185,7 +184,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         EntityRef settlement = entityManager.create(locationComponent,
-                population, settlementName, regionEntities, parcels, buildingQueue);
+                population, settlementName, regionEntities, parcels, buildingQueue, new ActiveSettlementComponent());
+
+        return settlement;
     }
 
     /**
@@ -245,7 +246,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Set<DynParcel> parcels = buildingQueue.buildingQueue;
 
         for (DynParcel dynParcel : parcels) {
-            if (constructer.buildParcel(dynParcel)) {
+            if (constructer.buildParcel(dynParcel, settlement)) {
                 removedParcels.add(dynParcel);
             }
         }
@@ -278,7 +279,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
 
-        int minRadius = parcels.minBuildRadius;
+        float minRadius = parcels.minBuildRadius;
+        float maxRadius = parcels.maxBuildRadius;
         int maxIterations = 40;
         int buildingSpawned = 0;
         int[] zoneArea = new int[5];
@@ -332,12 +334,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 Rect2i shape = Rect2i.EMPTY;
                 Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(4));
                 Vector2i rectPosition = new Vector2i();
+                float radius = 0;
                 //Place parcel randomly until it hits the right district
                 //For now: Just place is somewhere non intersecting
                 do {
                     iter++;
                     float angle = rng.nextFloat(0, 360);
-                    float radius = rng.nextFloat(minRadius, minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL);
+                    radius = rng.nextFloat(minRadius, minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), size, size);
@@ -345,6 +348,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 if (iter == maxIterations) {
                     minRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
                     break;
+                }
+                if (radius > maxRadius) {
+                    parcels.maxBuildRadius = radius;
                 }
                 DynParcel newParcel = new DynParcel(shape, orientation, zones[i], Math.round(locationComponent.getLocalPosition().y()));
                 parcels.addParcel(newParcel);
@@ -359,6 +365,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(population);
         settlement.saveComponent(buildingQueue);
+    }
+
+    public SettlementEntities getSettlementEntities() {
+        return settlementEntities;
     }
 
 }

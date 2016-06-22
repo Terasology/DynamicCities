@@ -18,10 +18,12 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.reflection.MappedContainer;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@MappedContainer
 public class ParcelList implements Component {
 
     public int residentialArea;
@@ -30,11 +32,13 @@ public class ParcelList implements Component {
     public int clericalArea;
     public int governmentalArea;
 
-    public int minBuildRadius;
+    public float minBuildRadius;
+    public float maxBuildRadius;
     public List<DynParcel> parcels;
 
     public ParcelList() { }
     public ParcelList(int i) {
+        maxBuildRadius = 0;
         minBuildRadius = 0;
         parcels = new ArrayList<>();
     }
@@ -67,6 +71,12 @@ public class ParcelList implements Component {
             }
         }
         return true;
+    }
+
+    public ParcelList copy() {
+        ParcelList copy = new ParcelList(1);
+        copy.parcels.addAll(parcels);
+        return copy;
     }
 
 }

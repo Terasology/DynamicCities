@@ -32,7 +32,7 @@ public class ParcelListTest {
     public Rect2i[] shapes;
     @Before
     public void setup() {
-        parcels = new ParcelList();
+        parcels = new ParcelList(1);
         shapes = new Rect2i[5];
         shapes[0] = Rect2i.createFromMinAndSize(0, 0, 10, 10);
         shapes[1] = Rect2i.createFromMinAndSize(13, 13, 10, 10);

@@ -29,6 +29,7 @@ import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
+import org.terasology.dynamicCities.events.PlayerTracker;
 import org.terasology.dynamicCities.gen.*;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
@@ -44,13 +45,16 @@ import org.terasology.dynamicCities.rasterizer.roofs.*;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -62,6 +66,7 @@ import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Share(value = Construction.class)
@@ -69,10 +74,16 @@ import java.util.Set;
 public class Construction extends BaseComponentSystem {
 
     @In
-    static WorldProvider worldProvider;
+    private WorldProvider worldProvider;
 
     @In
-    static BlockManager blockManager;
+    private BlockManager blockManager;
+
+    @In
+    private PlayerTracker playerTracker;
+
+    @In
+    private NetworkSystem networkSystem;
 
     private BlockTheme theme;
 
@@ -230,7 +241,7 @@ public class Construction extends BaseComponentSystem {
     }
 
     //the standard strategy used in Cities and StaticCities module
-    public boolean buildParcel(DynParcel dynParcel) {
+    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
         HeightMap hm = HeightMaps.constant(dynParcel.height);
@@ -244,9 +255,18 @@ public class Construction extends BaseComponentSystem {
 
         //dynParcel.assignZone();
         Set<Building> buildings = (defaultBuildingGenerator.generate(dynParcel, hm));
-
+        Map<EntityRef, EntityRef> playerCityMap = playerTracker.getPlayerCityMap();
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
+        }
+        for (EntityRef player : playerCityMap.keySet()) {
+            if (playerCityMap.get(player) == settlement) {
+                LocationComponent playerLocation = player.getComponent(LocationComponent.class);
+                if (dynParcel.getShape().contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().y())) {
+                    return false;
+                }
+            }
+
         }
 
         for (Building building : buildings) {

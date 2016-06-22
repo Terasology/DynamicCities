@@ -27,6 +27,7 @@ import java.util.Set;
 /**
  * A parcel where buildings can be placed on.
  */
+
 public class DynParcel extends Parcel {
 
     public Set<GenericBuilding> genericBuilding;
@@ -51,6 +52,7 @@ public class DynParcel extends Parcel {
         genericBuilding = new HashSet<>();
     }
 
+
     /**
      * @return the layout shape
      */
@@ -72,6 +74,10 @@ public class DynParcel extends Parcel {
         return zone;
     }
 
+    public int getHeight() {
+        return height;
+    }
+
     /**
      * @param bldg the genericBuilding to add
      */
@@ -84,6 +90,13 @@ public class DynParcel extends Parcel {
      */
     public Set<GenericBuilding> getGenericBuildings() {
         return genericBuilding;
+    }
+
+    public DynParcel copy() {
+        DynParcel parcel = new DynParcel(shape, orientation, zone, height);
+        parcel.genericBuilding = genericBuilding;
+        return parcel;
+
     }
 
 
