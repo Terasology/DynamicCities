@@ -174,7 +174,7 @@ public class Construction extends BaseComponentSystem {
     }
 
     /**
-     *
+     * Maybe return a structured data with (int or false) as return value
      * @param area The area which should be flattened
      * @param defaultHeight A rough estimation of the mean height of the terrain
      * @param filler The blocktype which should be used to fill up terrain under the mean height
@@ -185,7 +185,12 @@ public class Construction extends BaseComponentSystem {
         SurfaceHeightFacet surfaceHeightFacet = sample(area, defaultHeight);
         int meanHeight = 0;
         Vector3i setPos = new Vector3i();
+        Region3i areaRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), defaultHeight - maxMinDeviation, area.minY()),
+                new Vector3i(area.maxX(), defaultHeight + maxMinDeviation, area.maxY()));
 
+        if (!worldProvider.isRegionRelevant(areaRegion)) {
+            return -9999;
+        }
         for (BaseVector2i pos : area.contents()) {
             meanHeight += surfaceHeightFacet.getWorld(pos);
         }
@@ -244,9 +249,12 @@ public class Construction extends BaseComponentSystem {
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
+        if (dynParcel.height == -9999) {
+            return false;
+        }
         HeightMap hm = HeightMaps.constant(dynParcel.height);
-        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().maxX(), 255, dynParcel.getShape().maxY()),
-                new Vector3i(dynParcel.getShape().minX(), -255, dynParcel.getShape().minY()));
+        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
+                new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
         /**
          *
          * TODO: Insert advanced building generation here
@@ -262,7 +270,7 @@ public class Construction extends BaseComponentSystem {
         for (EntityRef player : playerCityMap.keySet()) {
             if (playerCityMap.get(player) == settlement) {
                 LocationComponent playerLocation = player.getComponent(LocationComponent.class);
-                if (dynParcel.getShape().contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().y())) {
+                if (dynParcel.getShape().contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
                     return false;
                 }
             }
