@@ -16,7 +16,9 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import com.google.common.base.Preconditions;
+import org.terasology.dynamicCities.districts.DistrictTypes;
+import org.terasology.dynamicCities.districts.Kmeans;
+import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
@@ -27,7 +29,11 @@ import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class DistrictFacetComponent implements Component {
 
@@ -38,9 +44,15 @@ public class DistrictFacetComponent implements Component {
     public Rect2i gridRelativeRegion = Rect2i.EMPTY;
     public int gridSize;
     public Vector2i center = new Vector2i();
-    public List<Float>[] data;
+    public List<Integer> districtMap;
+    public Map<Integer, String> districtTypeMap;
+    public int districtCount;
+    public List<Vector2i> districtCenters;
+
+    public DistrictFacetComponent() { }
 
     public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed) {
+
         worldRegion = border.expandTo2D(targetRegion);
         relativeRegion = border.expandTo2D(targetRegion.size());
         this.gridSize = gridSize;
@@ -51,22 +63,102 @@ public class DistrictFacetComponent implements Component {
                 center.y() + targetRegion.sizeY() / (2 * gridSize));
         gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
         WhiteNoise randNumberGen = new WhiteNoise(seed);
-        data = new List[gridRelativeRegion.area()];
         /**
-         * Currently there are 4 Zones: Governmental, Residential, Clerical and Commercial.
-         * Add additional random numbers here for new zones.
+         * The first two values will be the x-pos and y-pos
+         * Add additional random numbers for scattering
          */
-        for (List list : data) {
-            list = new ArrayList<Float>();
-            list.add(TeraMath.fastAbs(randNumberGen.noise(452324, 323942)));
-            list.add(TeraMath.fastAbs(randNumberGen.noise(253242, 213102)));
+        List<List<Float>> data = new ArrayList<>();
+        Kmeans kmeans = new Kmeans();
+        for (int i = 0; i < gridRelativeRegion.area(); i++) {
+            List<Float> list = new ArrayList<>();
+            list.add((float) Math.round(i / gridWorldRegion.sizeX()));
+            list.add((float) Math.round(i % gridWorldRegion.sizeX()));
             list.add(TeraMath.fastAbs(randNumberGen.noise(786332, 262333)));
             list.add(TeraMath.fastAbs(randNumberGen.noise(126743, 748323)));
+            data.add(list);
         }
+        /*districtCount = Math.round(TeraMath.fastAbs(randNumberGen.noise(15233, 45129)
+                * SettlementConstants.MAX_DISTRICTS));*/
+        districtCount = SettlementConstants.MAX_DISTRICTS;
+        int[] intMap = kmeans.kmeans(data, districtCount);
+        districtMap = new ArrayList<>();
+        districtMap = IntStream.of(intMap).boxed().collect(Collectors.toList());
+        districtTypeMap = new HashMap<>(districtMap.size());
+        districtCenters = new ArrayList<>();
+        for(Vector2i districtCenter : kmeans.getCenters()) {
+            districtCenters.add(districtCenter.mul(gridSize).add(worldRegion.min()));
+        }
+        mapDistrictTypes();
+
+        int[] dim = new int[2];
+        dim[0] = relativeRegion.sizeX();
+        dim[1] = dim[0];
+        //MapVis visualizer = new MapVis(dim);
+        //visualizer.paint_CMap(Toolbox.arrayToMatrix(intMap, dim[0], dim[1]));
+
     }
 
 
+    private void mapDistrictTypes() {
 
+
+        class DistrictOrder {
+            private int index;
+
+            public String next() {
+                index++;
+                if (index == 4) {
+                    index = 1;
+                }
+                switch (index) {
+                    case 1:     return DistrictTypes.CITYCENTER.toString();
+                    case 2:     return DistrictTypes.RESIDENTIAL.toString();
+                    case 3:     return DistrictTypes.COMMERCIAL.toString();
+                    case 4:     return DistrictTypes.OUTSKIRTS.toString();
+                    default:    return DistrictTypes.OUTSKIRTS.toString();
+                }
+            }
+        }
+        DistrictOrder districtOrder = new DistrictOrder();
+/*
+        for (int i = 0; i < districtCount; i++) {
+            float min = 99999;
+            Vector2i minCenter = null;
+            for (Vector2i districtCenter : districtCenters) {
+                int key = getWorld(districtCenter.x(), districtCenter.y());
+                if (districtTypeMap.containsKey(key)) {
+                    continue;
+                }
+                float temp = (float) districtCenter.distance(center);
+                if (temp < min) {
+                    min = temp;
+                    minCenter = districtCenter;
+                }
+            }
+            if (minCenter != null) {
+                districtTypeMap.put(getWorld(minCenter.x(), minCenter.y()), districtOrder.next());
+            }
+        }
+
+        /**/
+        for (int i = 0; i < districtCount; i++) {
+
+            int rand = (int) Math.round(Math.abs(Math.random() * 4));
+            switch (rand) {
+                case 1:     districtTypeMap.put(i, DistrictTypes.RESIDENTIAL.toString());
+                            break;
+                case 2:     districtTypeMap.put(i, DistrictTypes.COMMERCIAL.toString());
+                            break;
+                case 3:     districtTypeMap.put(i, DistrictTypes.RESIDENTIAL.toString());
+                            break;
+                case 4:     districtTypeMap.put(i, DistrictTypes.CITYCENTER.toString());
+                            break;
+                default:    districtTypeMap.put(i, DistrictTypes.RESIDENTIAL.toString());
+                            break;
+            }
+
+        }
+    }
 
 
     //Copy of the methods used to access the data. Maybe there is a better way than storing them all here
@@ -156,33 +248,31 @@ public class DistrictFacetComponent implements Component {
         return gridRelativeRegion;
     }
 
-    public List<Float> get(int x, int y) {
+    public int get(int x, int y) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
-        return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
+        return districtMap.get(getRelativeGridIndex(gridPos.x(), gridPos.y()));
     }
 
-    public List<Float> get(BaseVector2i pos) {
-        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
-        return get(gridPos.x(), gridPos.y());
+    public int get(BaseVector2i pos) {
+        return get(pos.x(), pos.y());
     }
 
-    public List<Float> getWorld(int x, int y) {
+    public int getWorld(int x, int y) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
-        return data[getWorldGridIndex(gridPos.x(), gridPos.y())];
+        return districtMap.get(getWorldGridIndex(gridPos.x(), gridPos.y()));
     }
 
-    public List<Float> getWorld(BaseVector2i pos) {
-        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
-        return getWorld(gridPos.x(), gridPos.y());
+    public int getWorld(BaseVector2i pos) {
+        return getWorld(pos.x(), pos.y());
     }
 
-    public List<Float>[] getInternal() {
-        return data;
+    public List<Integer> getInternal() {
+        return districtMap;
     }
-
+/*
     public void set(int x, int y, List<Float> value) {
         BaseVector2i gridPos = getRelativeGridPoint(x, y);
-        data[getRelativeGridIndex(gridPos.x(), gridPos.y())] = value;
+        data.set(getRelativeGridIndex(gridPos.x(), gridPos.y()), value);
     }
 
     public void set(BaseVector2i pos, List<Float> value) {
@@ -192,7 +282,7 @@ public class DistrictFacetComponent implements Component {
 
     public void setWorld(int x, int y, List<Float> value) {
         BaseVector2i gridPos = getWorldGridPoint(x, y);
-        data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
+        data.set(getWorldGridIndex(gridPos.x(), gridPos.y()), value);
     }
 
     public void setWorld(BaseVector2i pos, List<Float> value) {
@@ -201,8 +291,8 @@ public class DistrictFacetComponent implements Component {
     }
 
     public void set(List<Float>[] newData) {
-        Preconditions.checkArgument(newData.length == data.length, "New data must have same length as existing");
-        System.arraycopy(newData, 0, data, 0, data.length);
+        Preconditions.checkArgument(newData.length == data.size(), "New data must have same length as existing");
+        System.arraycopy(newData, 0, data, 0, data.size());
     }
-
+*/
 }

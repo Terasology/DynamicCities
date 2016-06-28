@@ -17,10 +17,11 @@ package org.terasology.dynamicCities.settlements;
 
 
 public abstract class SettlementConstants {
-    public static final int SETTLEMENT_RADIUS = 96;
+    public static final int SETTLEMENT_RADIUS = 320;
     public static final int DISTRICT_GRIDSIZE = 12;
-    public static final int MIN_POPULATIONSIZE = 100;
-    public static final int MAX_POPULATIONSIZE = 300;
-    public static final int MAX_BUILDINGSPAWN = 4;
+    public static final int MIN_POPULATIONSIZE = 200;
+    public static final int MAX_POPULATIONSIZE = 900;
+    public static final int MAX_BUILDINGSPAWN = 8;
+    public static final int MAX_DISTRICTS = 25;
     public static final int BUILD_RADIUS_INTERVALL = 50;
 }

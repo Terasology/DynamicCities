@@ -16,9 +16,12 @@
 package org.terasology.dynamicCities.settlements;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
+import org.terasology.dynamicCities.districts.DistrictTypes;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.parcels.Zone;
@@ -83,6 +86,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int counter = 50;
     private int timer = 0;
     private Noise randNumGen;
+
+    private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @Override
     public void postBegin() {
         settlementEntities = new SettlementEntities();
@@ -166,11 +171,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         RegionEntities regionEntities = new RegionEntities();
         getSurroundingRegions(regionCenter, regionEntities);
 
-        //Create the district facet
+        //Create the district facet and DistrictTypeMap
         Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
 
+        //districtGrid.districtTypeMap.put(districtGrid.getWorld(regionCenter), DistrictTypes.CITYCENTER.toString());
+        if (districtGrid.districtMap.size() < 1) {
+            logger.error("DistrictFacetComponent.districtMap not initialised!");
+        }
         ParcelList parcels = new ParcelList(1);
 
         BuildingQueue buildingQueue = new BuildingQueue();
@@ -183,8 +192,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementName.scale = 20;
 
 
-        EntityRef settlement = entityManager.create(locationComponent,
+        EntityRef settlement = entityManager.create(locationComponent, districtGrid,
                 population, settlementName, regionEntities, parcels, buildingQueue, new ActiveSettlementComponent());
+
 
         return settlement;
     }
@@ -239,6 +249,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
 
+
     public void build(EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
 
@@ -255,6 +266,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     public void growSettlement(EntityRef settlement, int time) {
+        DistrictFacetComponent districtFacetComponent = settlement.getComponent(DistrictFacetComponent.class);
         Population population = settlement.getComponent(Population.class);
         ParcelList parcels = settlement.getComponent(ParcelList.class);
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
@@ -273,6 +285,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             return;
         }
         if (nameTagComponent == null) {
+            return;
+        }
+        if (districtFacetComponent == null || districtFacetComponent.districtMap == null || districtFacetComponent.districtTypeMap == null) {
+            logger.error("No DistrictFacetComponent found or was uninitialised!");
             return;
         }
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
@@ -326,32 +342,40 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
          * TODO: Integrate military zone here. Currently it skips i == 3
          * TODO: Integrate a flag when there aren't any building spots found after a certain amount of time
          */
-        for (int i = 0; i<zones.length; i++) {
+        for (int i = 0; i < zones.length; i++) {
             while (buildingNeeds[i] - zoneArea[i] > maxMinSizes[i].y() && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN && i != 3) {
                 int iter = 0;
                 int size = Math.round(TeraMath.fastAbs(rng.nextInt((int) Math.round(Math.sqrt((double) maxMinSizes[i].y())),
                         (int) Math.round(Math.sqrt(maxMinSizes[i].x())))));
                 Rect2i shape = Rect2i.EMPTY;
-                Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(4));
+                Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(5));
                 Vector2i rectPosition = new Vector2i();
                 float radius = 0;
+                int district = 0;
                 //Place parcel randomly until it hits the right district
                 //For now: Just place is somewhere non intersecting
                 do {
                     iter++;
                     float angle = rng.nextFloat(0, 360);
-                    radius = rng.nextFloat(minRadius, minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL);
+                    radius = rng.nextFloat(0, minRadius);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), size, size);
-                } while (!parcels.isNotIntersecting(shape) && iter != maxIterations);
-                if (iter == maxIterations) {
+                    district = districtFacetComponent.getWorld(rectPosition.x(), rectPosition.y());
+                } while ((!parcels.isNotIntersecting(shape)
+                        || !DistrictTypes.valueOf(districtFacetComponent.districtTypeMap.get(district)).isValidType(zones[i]))
+                        && iter != maxIterations);
+                //Grow settlement radius if no valid area was found
+                if (iter == maxIterations && minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL < SettlementConstants.SETTLEMENT_RADIUS) {
                     minRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
+                    break;
+                } else if (iter == maxIterations) {
                     break;
                 }
                 if (radius > maxRadius) {
                     parcels.maxBuildRadius = radius;
                 }
+
                 DynParcel newParcel = new DynParcel(shape, orientation, zones[i], Math.round(locationComponent.getLocalPosition().y()));
                 parcels.addParcel(newParcel);
                 buildingQueue.buildingQueue.add(newParcel);

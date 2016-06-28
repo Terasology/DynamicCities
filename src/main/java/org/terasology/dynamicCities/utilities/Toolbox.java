@@ -43,4 +43,40 @@ public class Toolbox {
             throw new NullPointerException();
         }
     }
+
+    public static float distance(float[] a, float[] b) {
+        if (a.length != b.length) {
+            System.out.print("Error in Function distance: Arrays have different Dimension");
+            return 0;
+        }
+        float sum = 0;
+        for (int i = 0; i < a.length; i++) {
+            sum += Math.pow(a[i] - b[i], 2);
+        }
+        sum = (float) Math.sqrt(sum);
+        return sum;
+    }
+
+    public static float distance(int[] a, int[] b) {
+        return (float) Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+    }
+
+    public static float abs(float[] a) {
+        float abs = 0;
+        for (int i = 0; i < a.length; i++) {
+            abs += Math.pow(a[i], 2);
+        }
+        abs = (float) Math.sqrt(abs);
+        return abs;
+    }
+
+    public static int[][] arrayToMatrix(int[] array, int rows, int columns) {
+        int[][] matrix = new int[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                matrix[i][j] = array[j + i * columns];
+            }
+        }
+        return matrix;
+    }
 }

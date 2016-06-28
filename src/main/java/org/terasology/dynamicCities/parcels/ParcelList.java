@@ -39,7 +39,7 @@ public class ParcelList implements Component {
     public ParcelList() { }
     public ParcelList(int i) {
         maxBuildRadius = 0;
-        minBuildRadius = 0;
+        minBuildRadius = 60;
         parcels = new ArrayList<>();
     }
 
