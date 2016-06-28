@@ -121,7 +121,7 @@ public class Kmeans {
         for (int i = 0; i < clusters; i++) {
             for (int j = 0; j < variables; j++) {
                 if (clusterSum[i] == 0) {
-                    //System.out.println("No element found for cluster " + i);
+                    logger.debug("No element found for cluster " + i);
                     break;
                 }
 
@@ -133,7 +133,6 @@ public class Kmeans {
             } else {
                 clusterCenters.add(i, clusterPosition);
             }
-            //ShowArray(To1D(Means,weight_dim,i));
         }
         initialised = true;
         return clusterMap;
