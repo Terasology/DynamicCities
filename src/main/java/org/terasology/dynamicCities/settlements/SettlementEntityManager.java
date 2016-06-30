@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
-import org.terasology.dynamicCities.districts.DistrictTypes;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.parcels.Zone;
@@ -176,7 +175,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
 
-        //districtGrid.districtTypeMap.put(districtGrid.getWorld(regionCenter), DistrictTypes.CITYCENTER.toString());
+        //districtGrid.districtTypeMapTemp.put(districtGrid.getWorld(regionCenter), DistrictTypes.CITYCENTER.toString());
         if (districtGrid.districtMap.size() < 1) {
             logger.error("DistrictFacetComponent.districtMap not initialised!");
         }
@@ -361,9 +360,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), size, size);
-                    district = districtFacetComponent.getWorld(rectPosition.x(), rectPosition.y());
                 } while ((!parcels.isNotIntersecting(shape)
-                        || !DistrictTypes.valueOf(districtFacetComponent.districtTypeMap.get(district)).isValidType(zones[i]))
+                        || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zones[i])))
                         && iter != maxIterations);
                 //Grow settlement radius if no valid area was found
                 if (iter == maxIterations && minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL < SettlementConstants.SETTLEMENT_RADIUS) {

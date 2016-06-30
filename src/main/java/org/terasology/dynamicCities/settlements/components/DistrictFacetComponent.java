@@ -16,6 +16,8 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.districts.DistrictTypes;
 import org.terasology.dynamicCities.districts.Kmeans;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
@@ -45,10 +47,10 @@ public class DistrictFacetComponent implements Component {
     public int gridSize;
     public Vector2i center = new Vector2i();
     public List<Integer> districtMap;
-    public Map<Integer, String> districtTypeMap;
+    public Map<String, String> districtTypeMap;
     public int districtCount;
     public List<Vector2i> districtCenters;
-
+    public Logger logger = LoggerFactory.getLogger(DistrictFacetComponent.class);
     public DistrictFacetComponent() { }
 
     public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed) {
@@ -100,14 +102,12 @@ public class DistrictFacetComponent implements Component {
 
 
     private void mapDistrictTypes() {
-
-
         class DistrictOrder {
             private int index;
 
             public String next() {
                 index++;
-                if (index == 4) {
+                if (index == 5) {
                     index = 1;
                 }
                 switch (index) {
@@ -120,12 +120,12 @@ public class DistrictFacetComponent implements Component {
             }
         }
         DistrictOrder districtOrder = new DistrictOrder();
-/*
+
         for (int i = 0; i < districtCount; i++) {
             float min = 99999;
             Vector2i minCenter = null;
             for (Vector2i districtCenter : districtCenters) {
-                int key = getWorld(districtCenter.x(), districtCenter.y());
+                String key = Integer.toString(districtCenters.indexOf(districtCenter));
                 if (districtTypeMap.containsKey(key)) {
                     continue;
                 }
@@ -136,30 +136,36 @@ public class DistrictFacetComponent implements Component {
                 }
             }
             if (minCenter != null) {
-                districtTypeMap.put(getWorld(minCenter.x(), minCenter.y()), districtOrder.next());
+                districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), districtOrder.next());
             }
         }
 
-        /**/
+        /* Completely random method:
         for (int i = 0; i < districtCount; i++) {
 
             int rand = (int) Math.round(Math.abs(Math.random() * 4));
             switch (rand) {
-                case 1:     districtTypeMap.put(i, DistrictTypes.RESIDENTIAL.toString());
+                case 1:     districtTypeMap.put(Integer.toString(i), DistrictTypes.RESIDENTIAL.toString());
                             break;
-                case 2:     districtTypeMap.put(i, DistrictTypes.COMMERCIAL.toString());
+                case 2:     districtTypeMap.put(Integer.toString(i), DistrictTypes.COMMERCIAL.toString());
                             break;
-                case 3:     districtTypeMap.put(i, DistrictTypes.RESIDENTIAL.toString());
+                case 3:     districtTypeMap.put(Integer.toString(i), DistrictTypes.RESIDENTIAL.toString());
                             break;
-                case 4:     districtTypeMap.put(i, DistrictTypes.CITYCENTER.toString());
+                case 4:     districtTypeMap.put(Integer.toString(i), DistrictTypes.CITYCENTER.toString());
                             break;
-                default:    districtTypeMap.put(i, DistrictTypes.RESIDENTIAL.toString());
+                default:    districtTypeMap.put(Integer.toString(i), DistrictTypes.RESIDENTIAL.toString());
                             break;
             }
-
-        }
+        }*/
     }
 
+    public DistrictTypes getDistrict(Vector2i worldPoint) {
+        return getDistrict(worldPoint.x(), worldPoint.y());
+    }
+
+    public DistrictTypes getDistrict(int x, int y) {
+        return DistrictTypes.valueOf(districtTypeMap.get(Integer.toString(getWorld(x, y))));
+    }
 
     //Copy of the methods used to access the data. Maybe there is a better way than storing them all here
 
