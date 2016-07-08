@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
+import org.terasology.dynamicCities.minimap.DistrictOverlay;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.parcels.Zone;
@@ -45,6 +46,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
+import org.terasology.logic.players.MinimapSystem;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.*;
@@ -79,6 +81,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private Construction constructer;
 
+    @In
+    private MinimapSystem minimapSystem;
+
     private int minDistance = 500;
     private RegionEntities regionEntitiesStore;
     private int settlementMaxRadius = 96;
@@ -92,6 +97,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntities = new SettlementEntities();
         regionEntitiesStore = regionEntityManager.getRegionEntities();
         randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
+        minimapSystem.addOverlay(new DistrictOverlay(this));
     }
 
     @Override
@@ -175,7 +181,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
 
-        //districtGrid.districtTypeMapTemp.put(districtGrid.getWorld(regionCenter), DistrictTypes.CITYCENTER.toString());
+        //districtGrid.districtTypeMapTemp.put(districtGrid.getWorld(regionCenter), DistrictType.CITYCENTER.toString());
         if (districtGrid.districtMap.size() < 1) {
             logger.error("DistrictFacetComponent.districtMap not initialised!");
         }
@@ -364,7 +370,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                         || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zones[i])))
                         && iter != maxIterations);
                 //Grow settlement radius if no valid area was found
-                if (iter == maxIterations && minRadius + SettlementConstants.BUILD_RADIUS_INTERVALL < SettlementConstants.SETTLEMENT_RADIUS) {
+                if (iter == maxIterations && minRadius < SettlementConstants.SETTLEMENT_RADIUS) {
                     minRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
                     break;
                 } else if (iter == maxIterations) {

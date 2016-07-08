@@ -13,15 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements;
+package org.terasology.dynamicCities.gen;
 
 
-public abstract class SettlementConstants {
-    public static final int SETTLEMENT_RADIUS = 320;
-    public static final int DISTRICT_GRIDSIZE = 8;
-    public static final int MIN_POPULATIONSIZE = 200;
-    public static final int MAX_POPULATIONSIZE = 900;
-    public static final int MAX_BUILDINGSPAWN = 8;
-    public static final int MAX_DISTRICTS = 25;
-    public static final int BUILD_RADIUS_INTERVALL = 50;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+
+public abstract class GeneratorRegistry {
+
+    public static final Map<String, Class> GENERATORS = new ImmutableMap.Builder<String, Class>()
+            .put("CommercialBuildingGenerator", CommercialBuildingGenerator.class)
+            .put("RectHouseGenerator", RectHouseGenerator.class)
+            .put("SimpleChurchGenerator", SimpleChurchGenerator.class)
+            .put("TownHallGenerator", TownHallGenerator.class)
+            .build();
+
+
+
 }

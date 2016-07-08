@@ -34,7 +34,7 @@ public class DynParcelTypeHandler extends SimpleTypeHandler<DynParcel> {
                 .put("posY", context.create(parcel.getShape().minY()))
                 .put("sizeX", context.create(parcel.getShape().sizeX()))
                 .put("sizeY", context.create(parcel.getShape().sizeY()))
-                .put("zone", context.create(parcel.getZoneDyn().name()))
+                .put("zone", context.create(parcel.getZone().name()))
                 .put("orientation", context.create(parcel.getOrientation().name()))
                 .build();
         return context.create(data);

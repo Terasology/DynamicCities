@@ -15,8 +15,11 @@
  */
 package org.terasology.dynamicCities.buildings;
 
+import org.terasology.assets.management.AssetManager;
+import org.terasology.context.Context;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.registry.In;
 import org.terasology.registry.Share;
 
 import java.util.List;
@@ -29,16 +32,22 @@ import java.util.List;
 public class BuildingManager extends BaseComponentSystem {
 
     //List of available residential buildings
-    private List<GenericBuilding> resiBldgs;
+    private List<GenericBuildingData> resiBldgs;
     //List of available clerical buildings
-    private List<GenericBuilding> cleriBldgs;
+    private List<GenericBuildingData> cleriBldgs;
     //List of available governmental buildings
-    private List<GenericBuilding> governBldgs;
+    private List<GenericBuildingData> governBldgs;
     //List of available commercial buildings
-    private List<GenericBuilding> comBlgds;
+    private List<GenericBuildingData> comBlgds;
+
+    @In
+    private Context context;
+
+    @In
+    private AssetManager assetManager;
 
     @Override
     public void initialise() {
-        //get all genericBuilding plans and add it to the corresponding list
+        //get all genericBuildingData plans and add it to the corresponding list*/
     }
 }

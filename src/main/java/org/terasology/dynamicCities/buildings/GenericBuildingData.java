@@ -16,24 +16,23 @@
 package org.terasology.dynamicCities.buildings;
 
 
-import org.terasology.assets.Asset;
-import org.terasology.assets.AssetType;
-import org.terasology.assets.ResourceUrn;
-import org.terasology.assets.module.annotations.RegisterAssetType;
+import org.terasology.assets.AssetData;
 
-@RegisterAssetType(folderName = "buildings", factoryClass = GenericBuildingFactory.class)
-public class GenericBuilding extends Asset<GenericBuildingData> {
+/**
+ *  Can either store a composite genericBuildingData from the module cities
+ *  or a structured template
+ */
+public class GenericBuildingData implements AssetData {
 
-    /**
-     *  Can either store a composite genericBuildingData from the module cities
-     *  or a structured template
-     */
+
+    private String name;
+    private int id;
     private boolean isComposite;
     private String compositeGenerator;
 
-    public GenericBuilding(ResourceUrn urn, AssetType<?, GenericBuildingData> type, GenericBuildingData data) {
-        super(urn, type);
-        reload(data);
+    public GenericBuildingData(String generator) {
+        isComposite = true;
+        compositeGenerator = generator;
     }
 
     public String asComposite() {
@@ -48,13 +47,5 @@ public class GenericBuilding extends Asset<GenericBuildingData> {
         return isComposite;
     }
 
-
-    @Override
-    protected void doReload(GenericBuildingData data) {
-        isComposite = data.isComposite();
-        if (isComposite) {
-            compositeGenerator = data.asComposite();
-        }
-    }
 
 }

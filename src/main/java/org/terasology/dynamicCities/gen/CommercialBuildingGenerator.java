@@ -23,9 +23,9 @@ import org.terasology.cities.bldg.HollowBuildingPart;
 import org.terasology.cities.common.Edges;
 import org.terasology.cities.deco.SingleBlockDecoration;
 import org.terasology.cities.model.roof.HipRoof;
-import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
 import org.terasology.commonworld.heightmap.HeightMap;
+import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.math.Side;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.*;
@@ -34,7 +34,7 @@ import org.terasology.utilities.procedural.WhiteNoise;
 /**
  *
  */
-public class CommercialBuildingGenerator {
+public class CommercialBuildingGenerator implements BuildingGenerator {
 
     private long seed;
 
@@ -45,7 +45,7 @@ public class CommercialBuildingGenerator {
         this.seed = seed;
     }
 
-    public Building generate(Parcel parcel, HeightMap hm) {
+    public Building generate(DynParcel parcel, HeightMap hm) {
         Orientation o = parcel.getOrientation();
         DefaultBuilding bldg = new DefaultBuilding(o);
 

@@ -17,16 +17,14 @@
 package org.terasology.dynamicCities.gen;
 
 import org.terasology.cities.bldg.Building;
-import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.heightmap.HeightMap;
-
-import java.util.Set;
+import org.terasology.dynamicCities.parcels.DynParcel;
 
 /**
  *
  */
 public interface BuildingGenerator {
 
-    Set<Building> generate(Parcel parcel, HeightMap hm);
+    Building generate(DynParcel parcel, HeightMap hm);
 
 }

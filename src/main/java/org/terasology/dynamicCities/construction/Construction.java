@@ -15,6 +15,8 @@
  */
 package org.terasology.dynamicCities.construction;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.bldg.Building;
@@ -26,6 +28,7 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.window.Window;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
+import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
@@ -61,13 +64,11 @@ import org.terasology.registry.Share;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Share(value = Construction.class)
 @RegisterSystem
@@ -84,6 +85,9 @@ public class Construction extends BaseComponentSystem {
 
     @In
     private NetworkSystem networkSystem;
+
+    @In
+    private BuildingManager buildingManager;
 
     private BlockTheme theme;
 
@@ -104,6 +108,10 @@ public class Construction extends BaseComponentSystem {
     private SimpleChurchGenerator simpleChurchGenerator;
     private TownHallGenerator townHallGenerator;
     private DefaultBuildingGenerator defaultBuildingGenerator;
+
+    private List<BuildingGenerator> generators = new ArrayList<>();
+
+    private Logger logger = LoggerFactory.getLogger(Construction.class);
 
     public void initialise() {
         theme = BlockTheme.builder(blockManager)
@@ -171,6 +179,13 @@ public class Construction extends BaseComponentSystem {
         simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
         townHallGenerator = new TownHallGenerator();
         defaultBuildingGenerator = new DefaultBuildingGenerator(worldProvider.getSeed().hashCode() / 3);
+
+        generators.add(commercialBuildingGenerator);
+        generators.add(rectHouseGenerator);
+        generators.add(simpleChurchGenerator);
+        generators.add(townHallGenerator);
+
+
     }
 
     /**
@@ -304,6 +319,22 @@ public class Construction extends BaseComponentSystem {
                 }
             }
         }
+        Map<Vector3i, Block> blockPos = new HashMap<>();
+        for (BaseVector2i rectPos : dynParcel.getShape().contents()) {
+            blockPos.put(new Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
+        }
+        settlement.send(new PlaceBlocks(blockPos));
         return true;
+    }
+
+    public BuildingGenerator getGenerator(String generatorName) {
+        Class generatorClass = GeneratorRegistry.GENERATORS.get(generatorName);
+        for(BuildingGenerator generator : generators) {
+            if (generator.getClass() == generatorClass) {
+                return generator;
+            }
+        }
+        logger.error("No generator found with identifier " + generatorName);
+        return null;
     }
 }

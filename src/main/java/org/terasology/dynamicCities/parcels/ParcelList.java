@@ -45,7 +45,7 @@ public class ParcelList implements Component {
 
     public void addParcel(DynParcel parcel) {
         parcels.add(parcel);
-        switch (parcel.getZoneDyn()) {
+        switch (parcel.getZone()) {
             case CLERICAL:      clericalArea += parcel.getShape().area();
                                 break;
             case RESIDENTIAL:   residentialArea += parcel.getShape().area();

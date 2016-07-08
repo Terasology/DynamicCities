@@ -18,7 +18,7 @@ package org.terasology.dynamicCities.settlements.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.dynamicCities.districts.DistrictTypes;
+import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.entitySystem.Component;
@@ -102,20 +102,22 @@ public class DistrictFacetComponent implements Component {
 
 
     private void mapDistrictTypes() {
-        class DistrictOrder {
-            private int index;
 
+        class DistrictOrder {
+            private int index = 0;
+            private int cityCenters = 0;
             public String next() {
                 index++;
                 if (index == 5) {
                     index = 1;
                 }
                 switch (index) {
-                    case 1:     return DistrictTypes.CITYCENTER.toString();
-                    case 2:     return DistrictTypes.RESIDENTIAL.toString();
-                    case 3:     return DistrictTypes.COMMERCIAL.toString();
-                    case 4:     return DistrictTypes.OUTSKIRTS.toString();
-                    default:    return DistrictTypes.OUTSKIRTS.toString();
+                    case 1:     cityCenters++;
+                                return (cityCenters < 2) ? DistrictType.CITYCENTER.toString() : DistrictType.OUTSKIRTS.toString();
+                    case 2:     return DistrictType.RESIDENTIAL.toString();
+                    case 3:     return DistrictType.COMMERCIAL.toString();
+                    case 4:     return DistrictType.OUTSKIRTS.toString();
+                    default:    return DistrictType.OUTSKIRTS.toString();
                 }
             }
         }
@@ -145,26 +147,26 @@ public class DistrictFacetComponent implements Component {
 
             int rand = (int) Math.round(Math.abs(Math.random() * 4));
             switch (rand) {
-                case 1:     districtTypeMap.put(Integer.toString(i), DistrictTypes.RESIDENTIAL.toString());
+                case 1:     districtTypeMap.put(Integer.toString(i), DistrictType.RESIDENTIAL.toString());
                             break;
-                case 2:     districtTypeMap.put(Integer.toString(i), DistrictTypes.COMMERCIAL.toString());
+                case 2:     districtTypeMap.put(Integer.toString(i), DistrictType.COMMERCIAL.toString());
                             break;
-                case 3:     districtTypeMap.put(Integer.toString(i), DistrictTypes.RESIDENTIAL.toString());
+                case 3:     districtTypeMap.put(Integer.toString(i), DistrictType.RESIDENTIAL.toString());
                             break;
-                case 4:     districtTypeMap.put(Integer.toString(i), DistrictTypes.CITYCENTER.toString());
+                case 4:     districtTypeMap.put(Integer.toString(i), DistrictType.CITYCENTER.toString());
                             break;
-                default:    districtTypeMap.put(Integer.toString(i), DistrictTypes.RESIDENTIAL.toString());
+                default:    districtTypeMap.put(Integer.toString(i), DistrictType.RESIDENTIAL.toString());
                             break;
             }
         }*/
     }
 
-    public DistrictTypes getDistrict(Vector2i worldPoint) {
+    public DistrictType getDistrict(Vector2i worldPoint) {
         return getDistrict(worldPoint.x(), worldPoint.y());
     }
 
-    public DistrictTypes getDistrict(int x, int y) {
-        return DistrictTypes.valueOf(districtTypeMap.get(Integer.toString(getWorld(x, y))));
+    public DistrictType getDistrict(int x, int y) {
+        return DistrictType.valueOf(districtTypeMap.get(Integer.toString(getWorld(x, y))));
     }
 
     //Copy of the methods used to access the data. Maybe there is a better way than storing them all here

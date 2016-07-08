@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements;
+package org.terasology.dynamicCities.buildings;
 
 
-public abstract class SettlementConstants {
-    public static final int SETTLEMENT_RADIUS = 320;
-    public static final int DISTRICT_GRIDSIZE = 8;
-    public static final int MIN_POPULATIONSIZE = 200;
-    public static final int MAX_POPULATIONSIZE = 900;
-    public static final int MAX_BUILDINGSPAWN = 8;
-    public static final int MAX_DISTRICTS = 25;
-    public static final int BUILD_RADIUS_INTERVALL = 50;
+import org.terasology.assets.AssetFactory;
+import org.terasology.assets.AssetType;
+import org.terasology.assets.ResourceUrn;
+
+public class GenericBuildingFactory implements AssetFactory<GenericBuilding, GenericBuildingData> {
+
+    @Override
+    public GenericBuilding build(ResourceUrn urn, AssetType<GenericBuilding, GenericBuildingData> type, GenericBuildingData data) {
+        return new GenericBuilding(urn, type, data);
+    }
+
 }

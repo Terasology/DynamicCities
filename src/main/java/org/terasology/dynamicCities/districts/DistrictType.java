@@ -18,39 +18,38 @@ package org.terasology.dynamicCities.districts;
 
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.Zone;
+import org.terasology.rendering.nui.Color;
 
-public enum DistrictTypes {
-    RESIDENTIAL, COMMERCIAL, CITYCENTER, OUTSKIRTS;
+public enum DistrictType {
+    RESIDENTIAL (Color.YELLOW),
+    COMMERCIAL (Color.GREEN),
+    CITYCENTER (Color.BLUE),
+    OUTSKIRTS (Color.GREY),
+    BLOCKED (Color.TRANSPARENT);
 
+    private final Color color;
 
+    DistrictType(Color color) {
+        this.color = color;
+    }
     public boolean isValidType(DynParcel parcel) {
-        Zone zone = parcel.getZoneDyn();
+        Zone zone = parcel.getZone();
         return isValidType(zone);
     }
 
     public boolean isValidType(Zone zone) {
         switch (this) {
-            case RESIDENTIAL:   if (zone != Zone.RESIDENTIAL) {
-                return false;
-            } else {
-                return true;
-            }
-            case COMMERCIAL:    if (zone != Zone.COMMERCIAL) {
-                return false;
-            } else {
-                return true;
-            }
-            case CITYCENTER:    if (zone == Zone.RESIDENTIAL || zone == Zone.COMMERCIAL) {
-                return false;
-            } else {
-                return true;
-            }
-            case OUTSKIRTS:     if (zone == Zone.CLERICAL || zone == Zone.GOVERNMENTAL) {
-                return false;
-            } else {
-                return true;
-            }
+            case RESIDENTIAL:   return (zone == Zone.RESIDENTIAL);
+            case COMMERCIAL:    return (zone == Zone.COMMERCIAL);
+            case CITYCENTER:    return (zone == Zone.CLERICAL || zone == Zone.GOVERNMENTAL);
+            case OUTSKIRTS:     return (zone == Zone.RESIDENTIAL || zone == Zone.COMMERCIAL);
+            case BLOCKED:       return false;
             default:        return true;
         }
     }
+
+    public Color getColor() {
+        return color;
+    }
+
 }

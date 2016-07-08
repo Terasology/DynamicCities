@@ -29,11 +29,11 @@ import org.terasology.cities.door.WingDoor;
 import org.terasology.cities.model.roof.HipRoof;
 import org.terasology.cities.model.roof.PentRoof;
 import org.terasology.cities.model.roof.SaddleRoof;
-import org.terasology.cities.parcels.Parcel;
 import org.terasology.cities.window.RectWindow;
 import org.terasology.cities.window.SimpleWindow;
 import org.terasology.commonworld.Orientation;
 import org.terasology.commonworld.heightmap.HeightMap;
+import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.math.Side;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.LineSegment;
@@ -48,7 +48,7 @@ import java.math.RoundingMode;
 /**
  * Creates building models of a simple church.
  */
-public class SimpleChurchGenerator {
+public class SimpleChurchGenerator implements BuildingGenerator {
 
     private final long seed;
 
@@ -64,7 +64,7 @@ public class SimpleChurchGenerator {
      * @param hm the height map to define the floor level
      * @return a generated building model of a simple church
      */
-    public Building apply(Parcel lot, HeightMap hm) {
+    public Building generate(DynParcel lot, HeightMap hm) {
 
         Random rand = new MersenneRandom(seed ^ lot.getShape().hashCode());
 

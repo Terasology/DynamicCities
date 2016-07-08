@@ -16,9 +16,8 @@
 
 package org.terasology.dynamicCities.parcels;
 
-import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
-import org.terasology.dynamicCities.buildings.GenericBuilding;
+import org.terasology.dynamicCities.buildings.GenericBuildingData;
 import org.terasology.math.geom.Rect2i;
 
 import java.util.HashSet;
@@ -28,9 +27,9 @@ import java.util.Set;
  * A parcel where buildings can be placed on.
  */
 
-public class DynParcel extends Parcel {
+public class DynParcel {
 
-    public Set<GenericBuilding> genericBuilding;
+    public Set<GenericBuildingData> genericBuildingData;
     public int height;
     public Zone zone;
 
@@ -43,13 +42,12 @@ public class DynParcel extends Parcel {
      * @param orientation the orientation of the parcel (e.g. towards the closest street)
      */
     public DynParcel(Rect2i shape, Orientation orientation, Zone zone, int height) {
-        super(shape, org.terasology.cities.parcels.Zone.valueOf(zone.name()), orientation);
         this.zone = zone;
         this.shape = shape;
         this.orientation = orientation;
         this.height = height;
 
-        genericBuilding = new HashSet<>();
+        genericBuildingData = new HashSet<>();
     }
 
 
@@ -70,7 +68,7 @@ public class DynParcel extends Parcel {
     /**
      * @return the zone type that was assigned to this parcel
      */
-    public Zone getZoneDyn() {
+    public Zone getZone() {
         return zone;
     }
 
@@ -79,22 +77,22 @@ public class DynParcel extends Parcel {
     }
 
     /**
-     * @param bldg the genericBuilding to add
+     * @param bldg the genericBuildingData to add
      */
-    public void addGenericBuilding(GenericBuilding bldg) {
-        genericBuilding.add(bldg);
+    public void addGenericBuilding(GenericBuildingData bldg) {
+        genericBuildingData.add(bldg);
     }
 
     /**
      * @return an unmodifiable view on all buildings in this lot
      */
-    public Set<GenericBuilding> getGenericBuildings() {
-        return genericBuilding;
+    public Set<GenericBuildingData> getGenericBuildings() {
+        return genericBuildingData;
     }
 
     public DynParcel copy() {
         DynParcel parcel = new DynParcel(shape, orientation, zone, height);
-        parcel.genericBuilding = genericBuilding;
+        parcel.genericBuildingData = genericBuildingData;
         return parcel;
 
     }

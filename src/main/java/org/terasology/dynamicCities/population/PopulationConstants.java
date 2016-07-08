@@ -24,7 +24,7 @@ import org.terasology.math.geom.Vector2i;
 public abstract class PopulationConstants {
 
     
-    //Define genericBuilding space needs per person
+    //Define genericBuildingData space needs per person
     public static final int RESIDENTIAL_PER_PERSON = 8;
     public static final int COMMERCIAL_PER_PERSON = 4;
     public static final int GOVERNMENTAL_PER_PERSON = 2;
@@ -34,9 +34,9 @@ public abstract class PopulationConstants {
     //Define x=max, y=min size of buildings
     public static final Vector2i MAXMIN_RESIDENTIAL = new Vector2i(300, 100);
     public static final Vector2i MAXMIN_COMMERCIAL = new Vector2i(600, 300);
-    public static final Vector2i MAXMIN_GOVERNMENTAL = new Vector2i(600, 500);
+    public static final Vector2i MAXMIN_GOVERNMENTAL = new Vector2i(900, 600);
     public static final Vector2i MAXMIN_MILITARY = new Vector2i(200, 50);
-    public static final Vector2i MAXMIN_CLERICAL = new Vector2i(600, 400);
+    public static final Vector2i MAXMIN_CLERICAL = new Vector2i(1200, 600);
 
 
     public static final float GROWTH_RATE = 30f;

@@ -19,10 +19,10 @@ package org.terasology.dynamicCities.gen;
 import com.google.common.math.IntMath;
 import org.terasology.cities.bldg.Building;
 import org.terasology.cities.door.SimpleDoor;
-import org.terasology.cities.parcels.Parcel;
 import org.terasology.cities.window.SimpleWindow;
 import org.terasology.commonworld.Orientation;
 import org.terasology.commonworld.heightmap.HeightMap;
+import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
@@ -37,7 +37,7 @@ import java.util.Set;
 /**
  *
  */
-public class DefaultBuildingGenerator implements BuildingGenerator {
+public class DefaultBuildingGenerator {
 
     private long seed;
     private final RectHouseGenerator gen = new RectHouseGenerator();
@@ -46,8 +46,8 @@ public class DefaultBuildingGenerator implements BuildingGenerator {
         this.seed = seed;
     }
 
-    @Override
-    public Set<Building> generate(Parcel parcel, HeightMap hm) {
+
+    public Set<Building> generate(DynParcel parcel, HeightMap hm) {
         Random rng = new FastRandom(parcel.getShape().hashCode() ^ seed);
         Building b;
         switch (parcel.getZone()) {
@@ -55,7 +55,7 @@ public class DefaultBuildingGenerator implements BuildingGenerator {
             if (rng.nextFloat() < 0.2f) {
                 b = generateRoundHouse(parcel, hm);
             } else {
-                b = gen.apply(parcel, hm);
+                b = gen.generate(parcel, hm);
             }
             break;
 
@@ -68,7 +68,7 @@ public class DefaultBuildingGenerator implements BuildingGenerator {
             break;
 
         case CLERICAL:
-            b = new SimpleChurchGenerator(seed).apply(parcel, hm);
+            b = new SimpleChurchGenerator(seed).generate(parcel, hm);
             break;
 
         default:
@@ -78,7 +78,7 @@ public class DefaultBuildingGenerator implements BuildingGenerator {
         return Collections.singleton(b);
     }
 
-    private Building generateRoundHouse(Parcel parcel, HeightMap hm) {
+    private Building generateRoundHouse(DynParcel parcel, HeightMap hm) {
 
         // make build-able area 1 block smaller, so make the roof stay inside
         Rect2i lotRc = parcel.getShape().expand(new Vector2i(-1, -1));

@@ -28,10 +28,10 @@ import org.terasology.cities.model.roof.DomeRoof;
 import org.terasology.cities.model.roof.HipRoof;
 import org.terasology.cities.model.roof.Roof;
 import org.terasology.cities.model.roof.SaddleRoof;
-import org.terasology.cities.parcels.Parcel;
 import org.terasology.cities.window.SimpleWindow;
 import org.terasology.commonworld.Orientation;
 import org.terasology.commonworld.heightmap.HeightMap;
+import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.math.Side;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.*;
@@ -43,9 +43,9 @@ import java.util.Set;
 /**
  *
  */
-public class RectHouseGenerator {
+public class RectHouseGenerator implements BuildingGenerator {
 
-    public Building apply(Parcel parcel, HeightMap hm) {
+    public Building generate(DynParcel parcel, HeightMap hm) {
 
         // use the rectangle, not the lot itself, because its hashcode is the identity hashcode
         Random rng = new MersenneRandom(parcel.getShape().hashCode());
