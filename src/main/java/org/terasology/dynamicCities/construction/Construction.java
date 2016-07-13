@@ -68,6 +68,7 @@ import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
@@ -342,7 +343,11 @@ public class Construction extends BaseComponentSystem {
         Optional<List<EntityRef>> templatesOptional = buildingManager.getTemplatesForBuilding(building);
         if (templatesOptional.isPresent()) {
             List<EntityRef> templates = templatesOptional.get();
-            BlockRegionTransform spawnTransformation = new BlockRegionMovement(new Vector3i(shape.maxX(), dynParcel.height, shape.minY()));
+            BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
+            transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
+                    dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
+            //transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.fastAbs(dynParcel.orientation.ordinal())));
+            BlockRegionTransform spawnTransformation = transformationList;
             for (EntityRef template : templates) {
                 template.send(new SpawnStructureEvent(spawnTransformation));
             }
@@ -355,6 +360,7 @@ public class Construction extends BaseComponentSystem {
             blockPos.put(new Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
         }
         settlement.send(new PlaceBlocks(blockPos));
+        dynParcel.setBuildingTypeName(building.name);
         return true;
     }
 }

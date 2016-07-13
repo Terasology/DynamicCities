@@ -42,6 +42,9 @@ import java.util.*;
 /**
  * This is used to keep track of possible buildings, their construction plans and attributes
  */
+
+//TODO: If a generator name is mispelled get another building type and remove that.
+
 @Share(value = BuildingManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class BuildingManager extends BaseComponentSystem {
@@ -127,23 +130,23 @@ public class BuildingManager extends BaseComponentSystem {
     }
 
 
-    public BuildingGenerator getGenerator(String generatorName) {
+    public Optional<BuildingGenerator> getGenerator(String generatorName) {
         Class generatorClass = GeneratorRegistry.GENERATORS.get(generatorName);
         for(BuildingGenerator generator : generators) {
             if (generator.getClass() == generatorClass) {
-                return generator;
+                return Optional.of(generator);
             }
         }
         logger.error("No generator found with identifier " + generatorName);
-        return null;
+        return Optional.empty();
     }
 
-    public EntityRef getTemplate(String templateName) {
+    public Optional<EntityRef> getTemplate(String templateName) {
         if (templates.containsKey(templateName)) {
-            return templates.get(templateName);
+            return Optional.of(templates.get(templateName));
         } else {
             logger.error("No template found with name " + templateName);
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -155,7 +158,11 @@ public class BuildingManager extends BaseComponentSystem {
         }
 
         for (String name : building.templateNames) {
-            templateList.add(templates.get(name));
+            Optional<EntityRef> templateOptional = getTemplate(name);
+            if (templateOptional.isPresent()) {
+                templateList.add(templateOptional.get());
+            }
+
         }
         return Optional.of(templateList);
     }
@@ -167,7 +174,11 @@ public class BuildingManager extends BaseComponentSystem {
             return Optional.empty();
         }
         for (String name : building.generatorNames) {
-            generatorList.add(getGenerator(name));
+            Optional<BuildingGenerator> generatorOptional = getGenerator(name);
+            if (generatorOptional.isPresent()) {
+                generatorList.add(generatorOptional.get());
+            }
+
         }
         return Optional.of(generatorList);
     }

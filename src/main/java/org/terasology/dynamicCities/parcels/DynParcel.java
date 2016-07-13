@@ -18,11 +18,7 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
-import org.terasology.dynamicCities.buildings.GenericBuildingData;
 import org.terasology.math.geom.Rect2i;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A parcel where buildings can be placed on.
@@ -30,13 +26,12 @@ import java.util.Set;
 
 public class DynParcel implements Parcel {
 
-    public Set<GenericBuildingData> genericBuildingData;
     public int height;
     public Zone zone;
 
     public Rect2i shape;
     public final Orientation orientation;
-
+    public String buildingTypeName;
     /**
      * Try to resolve differences between Cities parcels and DynParcel, especially the zone...
      * @param shape the shape of the lot
@@ -47,8 +42,6 @@ public class DynParcel implements Parcel {
         this.shape = shape;
         this.orientation = orientation;
         this.height = height;
-
-        genericBuildingData = new HashSet<>();
     }
 
 
@@ -80,25 +73,8 @@ public class DynParcel implements Parcel {
         return height;
     }
 
-    /**
-     * @param bldg the genericBuildingData to add
-     */
-    public void addGenericBuilding(GenericBuildingData bldg) {
-        genericBuildingData.add(bldg);
-    }
-
-    /**
-     * @return an unmodifiable view on all buildings in this lot
-     */
-    public Set<GenericBuildingData> getGenericBuildings() {
-        return genericBuildingData;
-    }
-
-    public DynParcel copy() {
-        DynParcel parcel = new DynParcel(shape, orientation, zone, height);
-        parcel.genericBuildingData = genericBuildingData;
-        return parcel;
-
+    public void setBuildingTypeName(String name) {
+        buildingTypeName = name;
     }
 
 

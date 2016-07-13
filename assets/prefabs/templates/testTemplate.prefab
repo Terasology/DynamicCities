@@ -23,7 +23,7 @@
             {
                 "structureTemplateType": "DynamicCities:building",
                 "front": "RIGHT",
-                "position": [-1, 0, 3]
+                "position": [0, 0, 0]
             }
         ]
     },
