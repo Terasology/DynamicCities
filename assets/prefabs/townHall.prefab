@@ -1,0 +1,8 @@
+{
+    "GenericBuilding" : {
+     "name" : "Townhall",
+     "generatorNames" : ["TownHallGenerator"],
+     "zone" : "GOVERNMENTAL"
+    }
+}
+

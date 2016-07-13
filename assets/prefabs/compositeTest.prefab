@@ -1,0 +1,9 @@
+{
+    "GenericBuilding" : {
+     "name" : "Testbuilding",
+     "templateNames" : ["testTemplate"],
+     "generatorNames" : ["TownHallGenerator", "RectHouseGenerator"],
+     "zone" : "RESIDENTIAL"
+    }
+}
+

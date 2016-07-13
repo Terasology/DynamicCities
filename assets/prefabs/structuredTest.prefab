@@ -1,0 +1,8 @@
+{
+    "GenericBuilding" : {
+     "name" : "Testbuilding",
+     "templateNames" : ["testTemplate"],
+     "zone" : "RESIDENTIAL"
+ }
+}
+

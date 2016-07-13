@@ -16,6 +16,7 @@
 
 package org.terasology.dynamicCities.parcels;
 
+import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.buildings.GenericBuildingData;
 import org.terasology.math.geom.Rect2i;
@@ -27,7 +28,7 @@ import java.util.Set;
  * A parcel where buildings can be placed on.
  */
 
-public class DynParcel {
+public class DynParcel implements Parcel {
 
     public Set<GenericBuildingData> genericBuildingData;
     public int height;
@@ -54,6 +55,7 @@ public class DynParcel {
     /**
      * @return the layout shape
      */
+    @Override
     public Rect2i getShape() {
         return this.shape;
     }
@@ -61,6 +63,7 @@ public class DynParcel {
     /**
      * @return the orientation of the parcel
      */
+    @Override
     public Orientation getOrientation() {
         return orientation;
     }
@@ -68,6 +71,7 @@ public class DynParcel {
     /**
      * @return the zone type that was assigned to this parcel
      */
+
     public Zone getZone() {
         return zone;
     }

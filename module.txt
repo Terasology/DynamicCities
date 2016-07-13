@@ -10,7 +10,7 @@
         },
         {
             "id" : "CommonWorld",
-            "minVersion" : "0.2.1"
+            "minVersion" : "0.2.2-SNAPSHOT"
         },
         {
             "id" : "Cities",
@@ -19,6 +19,10 @@
         {
             "id" : "Minimap",
             "minVersion" : "1.0.0-SNAPSHOT"
+        },
+        {
+            "id" : "StructureTemplates",
+            "minVersion" : "0.1.0-SNAPSHOT"
         }
      ],
     "isGameplay" : "true",

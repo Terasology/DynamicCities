@@ -1,0 +1,8 @@
+{
+    "GenericBuilding" : {
+     "name" : "Marketplace",
+     "generatorNames" : ["CommercialBuildingGenerator"],
+     "zone" : "COMMERCIAL"
+    }
+}
+

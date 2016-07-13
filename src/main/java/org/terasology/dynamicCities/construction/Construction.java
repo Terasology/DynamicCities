@@ -17,10 +17,12 @@ package org.terasology.dynamicCities.construction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.assets.management.AssetManager;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.bldg.Building;
 import org.terasology.cities.bldg.BuildingPart;
+import org.terasology.cities.bldg.gen.BuildingGenerator;
 import org.terasology.cities.deco.Decoration;
 import org.terasology.cities.door.Door;
 import org.terasology.cities.model.roof.Roof;
@@ -29,11 +31,11 @@ import org.terasology.cities.window.Window;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
+import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.events.PlayerTracker;
-import org.terasology.dynamicCities.gen.*;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
@@ -48,6 +50,7 @@ import org.terasology.dynamicCities.rasterizer.roofs.*;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -61,6 +64,10 @@ import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
+import org.terasology.structureTemplates.events.SpawnStructureEvent;
+import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
+import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
@@ -69,7 +76,10 @@ import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+
+//TODO: Move Generators and Templates to the BuildingManager
 @Share(value = Construction.class)
 @RegisterSystem
 public class Construction extends BaseComponentSystem {
@@ -89,6 +99,15 @@ public class Construction extends BaseComponentSystem {
     @In
     private BuildingManager buildingManager;
 
+    @In
+    private StructureTemplateProvider templateProviderSystem;
+
+    @In
+    private EntityManager entityManager;
+
+    @In
+    private AssetManager assetManager;
+
     private BlockTheme theme;
 
     private Block air;
@@ -102,14 +121,6 @@ public class Construction extends BaseComponentSystem {
     private final List<DoorRasterizer> doorRasterizers = new ArrayList<>();
     private final List<RoofRasterizer> roofRasterizers = new ArrayList<>();
     private final List<DecorationRasterizer> decorationRasterizers = new ArrayList<>();
-
-    private CommercialBuildingGenerator commercialBuildingGenerator;
-    private RectHouseGenerator rectHouseGenerator;
-    private SimpleChurchGenerator simpleChurchGenerator;
-    private TownHallGenerator townHallGenerator;
-    private DefaultBuildingGenerator defaultBuildingGenerator;
-
-    private List<BuildingGenerator> generators = new ArrayList<>();
 
     private Logger logger = LoggerFactory.getLogger(Construction.class);
 
@@ -172,19 +183,6 @@ public class Construction extends BaseComponentSystem {
         roofRasterizers.add(new HipRoofRasterizer(theme));
         roofRasterizers.add(new PentRoofRasterizer(theme));
         roofRasterizers.add(new SaddleRoofRasterizer(theme));
-
-
-        commercialBuildingGenerator = new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
-        rectHouseGenerator = new RectHouseGenerator();
-        simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
-        townHallGenerator = new TownHallGenerator();
-        defaultBuildingGenerator = new DefaultBuildingGenerator(worldProvider.getSeed().hashCode() / 3);
-
-        generators.add(commercialBuildingGenerator);
-        generators.add(rectHouseGenerator);
-        generators.add(simpleChurchGenerator);
-        generators.add(townHallGenerator);
-
 
     }
 
@@ -264,20 +262,27 @@ public class Construction extends BaseComponentSystem {
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
-        if (dynParcel.height == -9999) {
-            return false;
-        }
+        Rect2i shape = dynParcel.getShape();
         HeightMap hm = HeightMaps.constant(dynParcel.height);
         Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
-        /**
-         *
-         * TODO: Insert advanced building generation here
-         *
-         */
 
-        //dynParcel.assignZone();
-        Set<Building> buildings = (defaultBuildingGenerator.generate(dynParcel, hm));
+        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZone(dynParcel.getZone());
+        GenericBuildingComponent building;
+
+
+        if (!buildingOptional.isPresent()) {
+            return false;
+        } else {
+            building = buildingOptional.get();
+        }
+
+        if (dynParcel.height == -9999) {
+            return false;
+        }
+        /**
+         * Check for player collision
+         */
         Map<EntityRef, EntityRef> playerCityMap = playerTracker.getPlayerCityMap();
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
@@ -289,52 +294,67 @@ public class Construction extends BaseComponentSystem {
                     return false;
                 }
             }
-
         }
 
-        for (Building building : buildings) {
-            for (AbsDynBuildingRasterizer rasterizer : stdRasterizers) {
-                rasterizer.raster(rasterTarget, building, hm);
-            }
 
-            for (BuildingPart part : building.getParts()) {
-                for (Door door : part.getDoors()) {
-                    for (DoorRasterizer doorRasterizer : doorRasterizers) {
-                        doorRasterizer.tryRaster(rasterTarget, door, hm);
-                    }
+        /**
+         * Generate buildings with BuildingGenerators
+         */
+
+
+        Optional<List<BuildingGenerator>> generatorsOptional = buildingManager.getGeneratorsForBuilding(building);
+        if (generatorsOptional.isPresent()) {
+            List<BuildingGenerator> generators = generatorsOptional.get();
+            List<Building> compositeBuildings = generators.stream().map(generator -> generator.generate(dynParcel, hm)).collect(Collectors.toList());
+
+            for (Building compositeBuilding : compositeBuildings) {
+                for (AbsDynBuildingRasterizer rasterizer : stdRasterizers) {
+                    rasterizer.raster(rasterTarget, compositeBuilding, hm);
                 }
-                for (Window window : part.getWindows()) {
-                    for (WindowRasterizer windowRasterizer : windowRasterizers) {
-                        windowRasterizer.tryRaster(rasterTarget, window, hm);
+
+                for (BuildingPart part : compositeBuilding.getParts()) {
+                    for (Door door : part.getDoors()) {
+                        for (DoorRasterizer doorRasterizer : doorRasterizers) {
+                            doorRasterizer.tryRaster(rasterTarget, door, hm);
+                        }
                     }
-                }
-                for (Decoration decoration : part.getDecorations()) {
-                    for (DecorationRasterizer decorationRasterizer : decorationRasterizers) {
-                        decorationRasterizer.tryRaster(rasterTarget, decoration, hm);
+                    for (Window window : part.getWindows()) {
+                        for (WindowRasterizer windowRasterizer : windowRasterizers) {
+                            windowRasterizer.tryRaster(rasterTarget, window, hm);
+                        }
                     }
-                }
-                Roof roof = part.getRoof();
-                for (RoofRasterizer roofRasterizer : roofRasterizers) {
-                    roofRasterizer.tryRaster(rasterTarget, roof, hm);
+                    for (Decoration decoration : part.getDecorations()) {
+                        for (DecorationRasterizer decorationRasterizer : decorationRasterizers) {
+                            decorationRasterizer.tryRaster(rasterTarget, decoration, hm);
+                        }
+                    }
+                    Roof roof = part.getRoof();
+                    for (RoofRasterizer roofRasterizer : roofRasterizers) {
+                        roofRasterizer.tryRaster(rasterTarget, roof, hm);
+                    }
                 }
             }
         }
+        /**
+         * Generate buildings with StructuredTemplates
+         */
+
+        Optional<List<EntityRef>> templatesOptional = buildingManager.getTemplatesForBuilding(building);
+        if (templatesOptional.isPresent()) {
+            List<EntityRef> templates = templatesOptional.get();
+            BlockRegionTransform spawnTransformation = new BlockRegionMovement(new Vector3i(shape.maxX(), dynParcel.height, shape.minY()));
+            for (EntityRef template : templates) {
+                template.send(new SpawnStructureEvent(spawnTransformation));
+            }
+        }
+
+
+
         Map<Vector3i, Block> blockPos = new HashMap<>();
         for (BaseVector2i rectPos : dynParcel.getShape().contents()) {
             blockPos.put(new Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
         }
         settlement.send(new PlaceBlocks(blockPos));
         return true;
-    }
-
-    public BuildingGenerator getGenerator(String generatorName) {
-        Class generatorClass = GeneratorRegistry.GENERATORS.get(generatorName);
-        for(BuildingGenerator generator : generators) {
-            if (generator.getClass() == generatorClass) {
-                return generator;
-            }
-        }
-        logger.error("No generator found with identifier " + generatorName);
-        return null;
     }
 }

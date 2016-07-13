@@ -1,0 +1,6 @@
+{
+ "name" : "Testbuilding",
+ "generators" : ["DefaultBuildingGenerator"],
+ "zone" : "RESIDENTIAL"
+}
+

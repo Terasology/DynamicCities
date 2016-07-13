@@ -18,6 +18,11 @@ package org.terasology.dynamicCities.gen;
 
 import com.google.common.math.IntMath;
 import org.terasology.cities.bldg.Building;
+import org.terasology.cities.bldg.SimpleRoundHouse;
+import org.terasology.cities.bldg.gen.CommercialBuildingGenerator;
+import org.terasology.cities.bldg.gen.RectHouseGenerator;
+import org.terasology.cities.bldg.gen.SimpleChurchGenerator;
+import org.terasology.cities.bldg.gen.TownHallGenerator;
 import org.terasology.cities.door.SimpleDoor;
 import org.terasology.cities.window.SimpleWindow;
 import org.terasology.commonworld.Orientation;

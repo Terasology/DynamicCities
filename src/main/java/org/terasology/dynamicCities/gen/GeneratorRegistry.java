@@ -17,6 +17,10 @@ package org.terasology.dynamicCities.gen;
 
 
 import com.google.common.collect.ImmutableMap;
+import org.terasology.cities.bldg.gen.CommercialBuildingGenerator;
+import org.terasology.cities.bldg.gen.RectHouseGenerator;
+import org.terasology.cities.bldg.gen.SimpleChurchGenerator;
+import org.terasology.cities.bldg.gen.TownHallGenerator;
 
 import java.util.Map;
 

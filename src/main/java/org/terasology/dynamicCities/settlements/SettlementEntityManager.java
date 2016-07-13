@@ -98,6 +98,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         regionEntitiesStore = regionEntityManager.getRegionEntities();
         randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
         minimapSystem.addOverlay(new DistrictOverlay(this));
+        logger.info("test");
     }
 
     @Override
@@ -199,7 +200,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         EntityRef settlement = entityManager.create(locationComponent, districtGrid,
                 population, settlementName, regionEntities, parcels, buildingQueue, new ActiveSettlementComponent());
-
 
         return settlement;
     }
