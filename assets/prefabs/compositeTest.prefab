@@ -4,6 +4,8 @@
      "templateNames" : ["testTemplate"],
      "generatorNames" : ["TownHallGenerator", "RectHouseGenerator"],
      "zone" : "RESIDENTIAL"
+      "minSize" : 400,
+      "maxSize" : 900
     }
 }
 

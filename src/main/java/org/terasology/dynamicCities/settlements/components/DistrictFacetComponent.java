@@ -18,8 +18,10 @@ package org.terasology.dynamicCities.settlements.components;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
+import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
@@ -30,16 +32,16 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class DistrictFacetComponent implements Component {
 
-
+    /**
+     * TODO: Count the area for each district. Define consumption of zonearea for each district (evenly distributed atm).
+     * TODO: Assign districts similar to parcels (look up if needs are already fulfilled before placement)
+     */
     public Rect2i relativeRegion = Rect2i.EMPTY;
     public Rect2i worldRegion = Rect2i.EMPTY;
     public Rect2i gridWorldRegion = Rect2i.EMPTY;
@@ -47,14 +49,14 @@ public class DistrictFacetComponent implements Component {
     public int gridSize;
     public Vector2i center = new Vector2i();
     public List<Integer> districtMap;
-    public Map<String, String> districtTypeMap;
+    public List<Integer> districtSize;
+    public Map<String, DistrictType> districtTypeMap;
     public int districtCount;
     public List<Vector2i> districtCenters;
     public Logger logger = LoggerFactory.getLogger(DistrictFacetComponent.class);
     public DistrictFacetComponent() { }
 
-    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed) {
-
+    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, Culture culture) {
         worldRegion = border.expandTo2D(targetRegion);
         relativeRegion = border.expandTo2D(targetRegion.size());
         this.gridSize = gridSize;
@@ -67,7 +69,7 @@ public class DistrictFacetComponent implements Component {
         WhiteNoise randNumberGen = new WhiteNoise(seed);
         /**
          * The first two values will be the x-pos and y-pos
-         * Add additional random numbers for scattering
+         * Add additional random numbers or scale them for scattering
          */
         List<List<Float>> data = new ArrayList<>();
         Kmeans kmeans = new Kmeans();
@@ -87,38 +89,46 @@ public class DistrictFacetComponent implements Component {
         districtMap = IntStream.of(intMap).boxed().collect(Collectors.toList());
         districtTypeMap = new HashMap<>(districtMap.size());
         districtCenters = new ArrayList<>();
-        for(Vector2i districtCenter : kmeans.getCenters()) {
+        for (Vector2i districtCenter : kmeans.getCenters()) {
             districtCenters.add(districtCenter.mul(gridSize).add(worldRegion.min()));
         }
-        mapDistrictTypes();
-
-        int[] dim = new int[2];
-        dim[0] = relativeRegion.sizeX();
-        dim[1] = dim[0];
-        //MapVis visualizer = new MapVis(dim);
-        //visualizer.paint_CMap(Toolbox.arrayToMatrix(intMap, dim[0], dim[1]));
-
+        //Calc district sizes
+        districtSize = new ArrayList<>();
+        for (Integer cluster : districtMap) {
+            if (districtSize.contains(cluster)) {
+                districtSize.add(cluster, districtSize.get(cluster) + 1);
+            } else {
+                districtSize.add(cluster, 1);
+            }
+        }
+        mapDistrictTypes(districtManager, culture);
     }
 
 
-    private void mapDistrictTypes() {
+    private void mapDistrictTypes(DistrictManager districtManager, Culture culture) {
 
         class DistrictOrder {
             private int index = 0;
             private int cityCenters = 0;
-            public String next() {
+            private List<DistrictType> districtTypes = districtManager.getDistrictTypes();
+            public String next(int district) {
+                for (DistrictType districtType : districtTypes) {
+                    Set<String> zones = districtTypes.get(index).zones;
+
+                    for (String zone : zones) {
+                        if (culture.getBuildingNeedsForZone(zone) < zoneArea + districtSize.get(district) / (float) zones.size() ) {
+                            continue;
+                        }
+                    }
+                    
+                }
                 index++;
-                if (index == 5) {
-                    index = 1;
+                if (index == districtTypes.size()) {
+                    index = 0;
                 }
-                switch (index) {
-                    case 1:     cityCenters++;
-                                return (cityCenters < 2) ? DistrictType.CITYCENTER.toString() : DistrictType.OUTSKIRTS.toString();
-                    case 2:     return DistrictType.RESIDENTIAL.toString();
-                    case 3:     return DistrictType.COMMERCIAL.toString();
-                    case 4:     return DistrictType.OUTSKIRTS.toString();
-                    default:    return DistrictType.OUTSKIRTS.toString();
-                }
+
+
+
             }
         }
         DistrictOrder districtOrder = new DistrictOrder();
@@ -142,23 +152,6 @@ public class DistrictFacetComponent implements Component {
             }
         }
 
-        /* Completely random method:
-        for (int i = 0; i < districtCount; i++) {
-
-            int rand = (int) Math.round(Math.abs(Math.random() * 4));
-            switch (rand) {
-                case 1:     districtTypeMap.put(Integer.toString(i), DistrictType.RESIDENTIAL.toString());
-                            break;
-                case 2:     districtTypeMap.put(Integer.toString(i), DistrictType.COMMERCIAL.toString());
-                            break;
-                case 3:     districtTypeMap.put(Integer.toString(i), DistrictType.RESIDENTIAL.toString());
-                            break;
-                case 4:     districtTypeMap.put(Integer.toString(i), DistrictType.CITYCENTER.toString());
-                            break;
-                default:    districtTypeMap.put(Integer.toString(i), DistrictType.RESIDENTIAL.toString());
-                            break;
-            }
-        }*/
     }
 
     public DistrictType getDistrict(Vector2i worldPoint) {
@@ -166,7 +159,7 @@ public class DistrictFacetComponent implements Component {
     }
 
     public DistrictType getDistrict(int x, int y) {
-        return DistrictType.valueOf(districtTypeMap.get(Integer.toString(getWorld(x, y))));
+        return districtTypeMap.get(Integer.toString(getWorld(x, y)));
     }
 
     //Copy of the methods used to access the data. Maybe there is a better way than storing them all here

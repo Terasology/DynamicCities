@@ -2,7 +2,9 @@
     "GenericBuilding" : {
      "name" : "Townhall",
      "generatorNames" : ["TownHallGenerator"],
-     "zone" : "GOVERNMENTAL"
+     "zone" : "GOVERNMENTAL",
+     "minSize" : 400,
+     "maxSize" : 900
     }
 }
 

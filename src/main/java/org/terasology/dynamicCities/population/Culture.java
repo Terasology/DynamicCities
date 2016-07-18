@@ -13,36 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.terasology.dynamicCities.population;
 
-package org.terasology.dynamicCities.parcels;
 
-/**
- * As part of a urban zoning scheme.
- */
-public enum Zone {
+import org.terasology.entitySystem.Component;
 
-    /**
-     * Typically housing
-     */
-    RESIDENTIAL,
+import java.util.Map;
 
-    /**
-     * Churches, mosques, etc.
-     */
-    CLERICAL,
 
-    /**
-     * Town halls, etc.
-     */
-    GOVERNMENTAL,
+public class Culture implements Component {
 
-    /**
-     * Markets, storage sites, etc.
-     */
-    COMMERCIAL,
+    //Defines how much m^2 a population unit needs
+    public Map<String, Integer> buildingNeedPerZone;
 
-    /**
-     * Barracks, fortifications, etc.
-     */
-    MILITARY
+
+    public int getBuildingNeedsForZone(String zone) {
+        if (buildingNeedPerZone.containsKey(zone)) {
+            return buildingNeedPerZone.get(zone);
+        } else {
+            return 0;
+        }
+
+    }
 }

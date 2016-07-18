@@ -2,7 +2,9 @@
     "GenericBuilding" : {
      "name" : "Marketplace",
      "generatorNames" : ["CommercialBuildingGenerator"],
-     "zone" : "COMMERCIAL"
+     "zone" : "COMMERCIAL",
+     "minSize" : 300,
+     "maxSize" : 600
     }
 }
 

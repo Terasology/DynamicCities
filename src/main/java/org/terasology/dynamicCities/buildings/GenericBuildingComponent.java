@@ -30,12 +30,16 @@ public class GenericBuildingComponent implements Component {
     public List<String> templateNames;
     public List<String> generatorNames;
     public String zone;
+    public int minSize;
+    public int maxSize;
 
-    public GenericBuildingComponent(String name, boolean isComposite, List<String> templateNames, List<String> generatorNames, String zone) {
+    public GenericBuildingComponent(String name, boolean isComposite, List<String> templateNames, List<String> generatorNames, String zone, int minSize, int maxSize) {
         this.name = name;
         this.templateNames = templateNames;
         this.generatorNames = generatorNames;
         this.zone = zone;
+        this.minSize = minSize;
+        this.maxSize = maxSize;
     }
 
     /*

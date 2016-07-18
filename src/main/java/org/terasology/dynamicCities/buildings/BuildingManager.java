@@ -24,13 +24,14 @@ import org.terasology.cities.bldg.gen.*;
 import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.DefaultBuildingGenerator;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
-import org.terasology.dynamicCities.parcels.Zone;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
@@ -49,7 +50,7 @@ import java.util.*;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class BuildingManager extends BaseComponentSystem {
 
-    private Multimap<Zone, GenericBuildingComponent> buildings = MultimapBuilder.enumKeys(Zone.class).hashSetValues().build();
+    private Multimap<String, GenericBuildingComponent> buildings = MultimapBuilder.hashKeys().hashSetValues().build();
     private Logger logger = LoggerFactory.getLogger(BuildingManager.class);
     private MersenneRandom rng;
     private Map<String, EntityRef> templates = new HashMap<>();
@@ -61,6 +62,7 @@ public class BuildingManager extends BaseComponentSystem {
     private DefaultBuildingGenerator defaultBuildingGenerator;
 
     private List<BuildingGenerator> generators = new ArrayList<>();
+    private Map<String, Vector2i> minMaxSizePerZone = new HashMap<>();
 
     @In
     private Context context;
@@ -79,13 +81,14 @@ public class BuildingManager extends BaseComponentSystem {
         logger.info("Loading building assets");
         Set<Prefab> loadedPrefabs = assetManager.getLoadedAssets(Prefab.class);
         for (Prefab prefab : loadedPrefabs) {
+            //Get building data
             if (prefab.hasComponent(GenericBuildingComponent.class)) {
                 GenericBuildingComponent building = prefab.getComponent(GenericBuildingComponent.class);
-                if(Zone.valueOf(building.zone) == null) {
+                if(building.zone == null) {
                     logger.warn("Invalid zone type found for prefab " + prefab.getName() + ". Skipping building");
                     continue;
                 }
-                buildings.put(Zone.valueOf(building.zone), building);
+                buildings.put(building.zone, building);
                 logger.info("Loaded building prefab " + prefab.getName());
             }
 
@@ -98,9 +101,15 @@ public class BuildingManager extends BaseComponentSystem {
                 }
             }
         }
-        logger.info("Finished loading buildings. Number of building types: " + buildings.values().size() + " | Zones found: " + buildings.keySet().toString());
+        logger.info("Finished loading buildings. Number of building types: " + buildings.values().size() + " | Strings found: " + buildings.keySet().toString());
 
 
+        /**
+         * Initialising minMaxSizes
+         */
+        for(String zone : getZones()) {
+            minMaxSizePerZone.put(zone, getMinMaxForZone(zone));
+        }
         commercialBuildingGenerator = new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
         rectHouseGenerator = new RectHouseGenerator();
         simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
@@ -115,15 +124,30 @@ public class BuildingManager extends BaseComponentSystem {
         rng = new MersenneRandom(assetManager.hashCode() + buildings.hashCode());
     }
 
-    public List<GenericBuildingComponent> getBuildingsOfZone(Zone zone) {
+    public List<GenericBuildingComponent> getBuildingsOfZone(String zone) {
         return new ArrayList<>(buildings.get(zone));
     }
 
-    public Optional<GenericBuildingComponent> getRandomBuildingOfZone(Zone zone) {
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZone(String zone) {
         if (buildings.containsKey(zone)) {
             int max = buildings.get(zone).size();
             int index = rng.nextInt(max);
             return Optional.of((GenericBuildingComponent) buildings.get(zone).toArray()[index]);
+        }
+        logger.warn("No building types found for " + zone);
+        return Optional.empty();
+    }
+
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZone(String zone, Rect2i shape) {
+        if (buildings.containsKey(zone)) {
+            int parcelSize = shape.sizeX() * shape.sizeY();
+            int max = buildings.get(zone).size();
+            GenericBuildingComponent building;
+            do {
+                int index = rng.nextInt(max);
+                building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
+            } while (building.minSize > parcelSize || building.maxSize < parcelSize);
+            return Optional.of(building);
         }
         logger.warn("No building types found for " + zone.toString());
         return Optional.empty();
@@ -181,5 +205,30 @@ public class BuildingManager extends BaseComponentSystem {
 
         }
         return Optional.of(generatorList);
+    }
+
+    private Vector2i getMinMaxForZone(String zone) {
+        int min = 9999;
+        int max = 0;
+
+        for (GenericBuildingComponent building : buildings.get(zone)) {
+            int minTemp = building.minSize;
+            int maxTemp = building.maxSize;
+
+            min = (minTemp < min) ? minTemp : min;
+            max = (maxTemp > max) ? maxTemp : max;
+        }
+        if (min == 9999 || max == 0) {
+            logger.error("Could not find valid min and/or max building sizes for zone " + zone.toString());
+        }
+        return new Vector2i(min, max);
+    }
+
+    public Map<String, Vector2i> getMinMaxSizePerZone() {
+        return Collections.unmodifiableMap(minMaxSizePerZone);
+    }
+
+    public Set<String> getZones() {
+        return buildings.keySet();
     }
 }

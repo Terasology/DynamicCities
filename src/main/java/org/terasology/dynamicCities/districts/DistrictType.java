@@ -17,39 +17,27 @@ package org.terasology.dynamicCities.districts;
 
 
 import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.dynamicCities.parcels.Zone;
+import org.terasology.entitySystem.Component;
 import org.terasology.rendering.nui.Color;
 
-public enum DistrictType {
-    RESIDENTIAL (Color.YELLOW),
-    COMMERCIAL (Color.GREEN),
-    CITYCENTER (Color.BLUE),
-    OUTSKIRTS (Color.GREY),
-    BLOCKED (Color.TRANSPARENT);
+import java.util.Set;
 
-    private final Color color;
+//TODO: Convert it into a prefab system aaaaaaaand give mixing factors for zones
+public class DistrictType implements Component {
 
-    DistrictType(Color color) {
-        this.color = color;
-    }
+    public String name;
+    public Color color;
+    public Set<String> zones;
+
+    public DistrictType ( ) { }
+
     public boolean isValidType(DynParcel parcel) {
-        Zone zone = parcel.getZone();
+        String zone = parcel.getZone();
         return isValidType(zone);
     }
 
-    public boolean isValidType(Zone zone) {
-        switch (this) {
-            case RESIDENTIAL:   return (zone == Zone.RESIDENTIAL);
-            case COMMERCIAL:    return (zone == Zone.COMMERCIAL);
-            case CITYCENTER:    return (zone == Zone.CLERICAL || zone == Zone.GOVERNMENTAL);
-            case OUTSKIRTS:     return (zone == Zone.RESIDENTIAL || zone == Zone.COMMERCIAL);
-            case BLOCKED:       return false;
-            default:        return true;
-        }
-    }
-
-    public Color getColor() {
-        return color;
+    public boolean isValidType(String zone) {
+        return zones.contains(zone);
     }
 
 }

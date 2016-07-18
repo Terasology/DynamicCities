@@ -196,6 +196,10 @@ public class Construction extends BaseComponentSystem {
      */
     public int flatten(Rect2i area, int defaultHeight, Block filler) {
 
+        if (area.area() == 0) {
+            logger.error("The area which should be flattened is empty!");
+            return -9999;
+        }
         SurfaceHeightFacet surfaceHeightFacet = sample(area, defaultHeight);
         int meanHeight = 0;
         Vector3i setPos = new Vector3i();
@@ -268,7 +272,7 @@ public class Construction extends BaseComponentSystem {
         Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
 
-        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZone(dynParcel.getZone());
+        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZone(dynParcel.getZone(), dynParcel.getShape());
         GenericBuildingComponent building;
 
 
@@ -346,7 +350,7 @@ public class Construction extends BaseComponentSystem {
             BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
             transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
                     dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
-            //transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.fastAbs(dynParcel.orientation.ordinal())));
+            //transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
             BlockRegionTransform spawnTransformation = transformationList;
             for (EntityRef template : templates) {
                 template.send(new SpawnStructureEvent(spawnTransformation));
