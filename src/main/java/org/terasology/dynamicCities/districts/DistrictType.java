@@ -22,11 +22,12 @@ import org.terasology.rendering.nui.Color;
 
 import java.util.Set;
 
-//TODO: Convert it into a prefab system aaaaaaaand give mixing factors for zones
+//TODO: give mixing factors for zones
+//TODO: display color as hexadecimal
 public class DistrictType implements Component {
 
     public String name;
-    public Color color;
+    public int color;
     public Set<String> zones;
 
     public DistrictType ( ) { }
@@ -38,6 +39,10 @@ public class DistrictType implements Component {
 
     public boolean isValidType(String zone) {
         return zones.contains(zone);
+    }
+
+    public Color getColor() {
+        return new Color(color);
     }
 
 }

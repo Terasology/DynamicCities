@@ -22,7 +22,9 @@ import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
+import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.minimap.DistrictOverlay;
+import org.terasology.dynamicCities.parcels.CultureManager;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Culture;
@@ -86,6 +88,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     @In
     private BuildingManager buildingManager;
+
+    @In
+    private CultureManager cultureManager;
+
+    @In
+    private DistrictManager districtManager;
 
     private int minDistance = 500;
     private RegionEntities regionEntitiesStore;
@@ -175,7 +183,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Site site = siteRegion.getComponent(Site.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
         Population population = new Population(site.getPopulation());
-
+        Culture culture = cultureManager.getRandomCulture();
         //add surrounding regions to settlement
         RegionEntities regionEntities = new RegionEntities();
         getSurroundingRegions(regionCenter, regionEntities);
@@ -183,7 +191,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         //Create the district facet and DistrictTypeMap
         Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
         Border3D border = new Border3D(0, 0, 0);
-        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode());
+        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode(), districtManager, culture);
 
         if (districtGrid.districtMap.size() < 1) {
             logger.error("DistrictFacetComponent.districtMap not initialised!");

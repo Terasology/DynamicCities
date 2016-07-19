@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
 import org.terasology.cities.bldg.gen.*;
 import org.terasology.context.Context;
-import org.terasology.dynamicCities.gen.DefaultBuildingGenerator;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -59,7 +58,6 @@ public class BuildingManager extends BaseComponentSystem {
     private RectHouseGenerator rectHouseGenerator;
     private SimpleChurchGenerator simpleChurchGenerator;
     private TownHallGenerator townHallGenerator;
-    private DefaultBuildingGenerator defaultBuildingGenerator;
 
     private List<BuildingGenerator> generators = new ArrayList<>();
     private Map<String, Vector2i> minMaxSizePerZone = new HashMap<>();
@@ -114,7 +112,6 @@ public class BuildingManager extends BaseComponentSystem {
         rectHouseGenerator = new RectHouseGenerator();
         simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
         townHallGenerator = new TownHallGenerator();
-        defaultBuildingGenerator = new DefaultBuildingGenerator(worldProvider.getSeed().hashCode() / 3);
 
         generators.add(commercialBuildingGenerator);
         generators.add(rectHouseGenerator);

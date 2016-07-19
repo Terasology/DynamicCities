@@ -23,6 +23,7 @@ import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
 import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
+import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
@@ -54,6 +55,7 @@ public class DistrictFacetComponent implements Component {
     public int districtCount;
     public List<Vector2i> districtCenters;
     public Logger logger = LoggerFactory.getLogger(DistrictFacetComponent.class);
+    public ProbabilityDistribution<DistrictType> probabilityDistribution;
     public DistrictFacetComponent() { }
 
     public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, Culture culture) {
@@ -67,6 +69,8 @@ public class DistrictFacetComponent implements Component {
                 center.y() + targetRegion.sizeY() / (2 * gridSize));
         gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
         WhiteNoise randNumberGen = new WhiteNoise(seed);
+
+        probabilityDistribution = new ProbabilityDistribution<DistrictType>(seed);
         /**
          * The first two values will be the x-pos and y-pos
          * Add additional random numbers or scale them for scattering
@@ -106,7 +110,8 @@ public class DistrictFacetComponent implements Component {
 
 
     private void mapDistrictTypes(DistrictManager districtManager, Culture culture) {
-
+        Map<String, Integer> zoneArea = new HashMap<>();
+        probabilityDistribution.initialise();
         class DistrictOrder {
             private int index = 0;
             private int cityCenters = 0;
@@ -116,7 +121,7 @@ public class DistrictFacetComponent implements Component {
                     Set<String> zones = districtTypes.get(index).zones;
 
                     for (String zone : zones) {
-                        if (culture.getBuildingNeedsForZone(zone) < zoneArea + districtSize.get(district) / (float) zones.size() ) {
+                        if (culture.getBuildingNeedsForZone(zone) < zoneArea.get(zone) + districtSize.get(district) / (float) zones.size() ) {
                             continue;
                         }
                     }

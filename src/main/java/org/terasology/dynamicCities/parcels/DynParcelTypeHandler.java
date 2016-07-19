@@ -34,7 +34,7 @@ public class DynParcelTypeHandler extends SimpleTypeHandler<DynParcel> {
                 .put("posY", context.create(parcel.getShape().minY()))
                 .put("sizeX", context.create(parcel.getShape().sizeX()))
                 .put("sizeY", context.create(parcel.getShape().sizeY()))
-                .put("zone", context.create(parcel.getZone().name()))
+                .put("zone", context.create(parcel.getZone()))
                 .put("orientation", context.create(parcel.getOrientation().name()))
                 .build();
         return context.create(data);
@@ -45,6 +45,6 @@ public class DynParcelTypeHandler extends SimpleTypeHandler<DynParcel> {
         PersistedDataMap root = data.getAsValueMap();
         Rect2i shape = Rect2i.createFromMinAndSize(root.getAsInteger("posX"), root.getAsInteger("posY"),
                 root.getAsInteger("sizeX"), root.getAsInteger("sizeY"));
-        return new DynParcel(shape, Orientation.valueOf(root.getAsString("orientation")), Zone.valueOf(root.getAsString("zone")), root.getAsInteger("height"));
+        return new DynParcel(shape, Orientation.valueOf(root.getAsString("orientation")), root.getAsString("zone"), root.getAsInteger("height"));
     }
 }

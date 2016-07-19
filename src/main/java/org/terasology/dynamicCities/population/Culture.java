@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class Culture implements Component {
 
-    //Defines how much m^2 a population unit needs
+    //Defines how much blocks^2 a population unit needs
     public Map<String, Integer> buildingNeedPerZone;
 
 
@@ -33,6 +33,16 @@ public class Culture implements Component {
         } else {
             return 0;
         }
+    }
 
+    public int getProcentualOfZone(String zone) {
+        int total = 0;
+        for (Integer need : buildingNeedPerZone.values()) {
+            total += need;
+        }
+        if (total == 0) {
+            return -1;
+        }
+        return getBuildingNeedsForZone(zone) / total;
     }
 }
