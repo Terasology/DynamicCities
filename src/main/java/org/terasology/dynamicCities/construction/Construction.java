@@ -37,6 +37,7 @@ import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.events.PlayerTracker;
 import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
 import org.terasology.dynamicCities.rasterizer.doors.DoorRasterizer;
@@ -274,7 +275,7 @@ public class Construction extends BaseComponentSystem {
     }
 
     //the standard strategy used in Cities and StaticCities module
-    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
+    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, Culture culture) {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
         Rect2i shape = dynParcel.getShape();
@@ -282,7 +283,7 @@ public class Construction extends BaseComponentSystem {
         Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
 
-        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZone(dynParcel.getZone(), dynParcel.getShape());
+        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), culture);
         GenericBuildingComponent building;
 
 

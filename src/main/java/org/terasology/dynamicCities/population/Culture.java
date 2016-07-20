@@ -19,6 +19,7 @@ package org.terasology.dynamicCities.population;
 import org.terasology.entitySystem.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,6 +28,7 @@ public class Culture implements Component {
     //Defines how much blocks^2 a population unit needs
     public String name;
     public Map<String, Integer> buildingNeedPerZone;
+    public List<String> availableBuildings;
     public float growthRate;
 
 

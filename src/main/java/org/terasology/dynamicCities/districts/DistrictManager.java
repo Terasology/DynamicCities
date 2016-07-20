@@ -28,6 +28,7 @@ import org.terasology.registry.Share;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,7 +58,16 @@ public class DistrictManager extends BaseComponentSystem {
                 }
             }
         }
-        logger.info("Finished loading districts: " + districts.size() + " district types found: " + districts.toString());
+        String districtNames = "[";
+        Iterator<DistrictType> iter = districts.iterator();
+        while (iter.hasNext()) {
+            districtNames += iter.next().name;
+            if (iter.hasNext()) {
+                districtNames += ", ";
+            }
+        }
+        districtNames += "]";
+        logger.info("Finished loading districts: " + districts.size() + " district types found: " + districtNames);
     }
 
     public Optional<DistrictType> getDistrictFromName(String name) {

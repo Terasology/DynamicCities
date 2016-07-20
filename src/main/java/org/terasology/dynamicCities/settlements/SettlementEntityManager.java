@@ -281,12 +281,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     public void build(EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
-
+        Culture culture = settlement.getComponent(Culture.class);
         Set<DynParcel> removedParcels = new HashSet<>();
         Set<DynParcel> parcels = buildingQueue.buildingQueue;
 
         for (DynParcel dynParcel : parcels) {
-            if (constructer.buildParcel(dynParcel, settlement)) {
+            if (constructer.buildParcel(dynParcel, settlement, culture)) {
                 removedParcels.add(dynParcel);
             }
         }

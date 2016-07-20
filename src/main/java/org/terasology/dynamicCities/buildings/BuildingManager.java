@@ -27,6 +27,7 @@ import org.terasology.cities.bldg.gen.SimpleChurchGenerator;
 import org.terasology.cities.bldg.gen.TownHallGenerator;
 import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
+import org.terasology.dynamicCities.population.Culture;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
@@ -156,6 +157,27 @@ public class BuildingManager extends BaseComponentSystem {
                 building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
                 iter++;
             } while ((building.minSize > parcelSize || building.maxSize < parcelSize) && iter < 100);
+            if (iter >= 99) {
+                logger.error("No building types found for " + zone + "because no matching building for parcel size " + parcelSize + " was found!");
+                return Optional.empty();
+            }
+            return Optional.of(building);
+        }
+        logger.warn("No building types found for " + zone);
+        return Optional.empty();
+    }
+
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, Culture culture) {
+        if (buildings.containsKey(zone)) {
+            int parcelSize = shape.sizeX() * shape.sizeY();
+            int max = buildings.get(zone).size();
+            GenericBuildingComponent building;
+            int iter = 0;
+            do {
+                int index = rng.nextInt(max);
+                building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
+                iter++;
+            } while ((building.minSize > parcelSize || building.maxSize < parcelSize || !culture.availableBuildings.contains(building.name)) && iter < 100);
             if (iter >= 99) {
                 logger.error("No building types found for " + zone + "because no matching building for parcel size " + parcelSize + " was found!");
                 return Optional.empty();

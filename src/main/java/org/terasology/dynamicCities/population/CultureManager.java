@@ -28,6 +28,7 @@ import org.terasology.registry.Share;
 import org.terasology.utilities.random.MersenneRandom;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 @Share(CultureManager.class)
@@ -55,8 +56,12 @@ public class CultureManager extends BaseComponentSystem {
             }
         }
         String cultureNames = "[";
-        for (Culture culture : cultures) {
-            cultureNames += culture.name + ", ";
+        Iterator<Culture> iter = cultures.iterator();
+        while (iter.hasNext()) {
+            cultureNames += iter.next().name;
+            if (iter.hasNext()) {
+                cultureNames += ", ";
+            }
         }
         cultureNames += "]";
         logger.info("Finished loading cultures: " + cultures.size() + " culture types found: " + cultureNames);
