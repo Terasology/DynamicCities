@@ -1,11 +1,10 @@
 {
     "GenericBuilding" : {
      "name" : "Testbuilding",
-     "templateNames" : ["testTemplate"],
      "generatorNames" : ["TownHallGenerator", "RectHouseGenerator"],
-     "zone" : "RESIDENTIAL"
-      "minSize" : 400,
-      "maxSize" : 900
+     "zone" : "RESIDENTIAL",
+     "minSize" : 400,
+     "maxSize" : 900
     }
 }
 

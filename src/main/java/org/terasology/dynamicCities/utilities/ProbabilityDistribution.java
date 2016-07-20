@@ -18,13 +18,11 @@ package org.terasology.dynamicCities.utilities;
 import com.google.common.collect.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.math.IntegerRange;
 import org.terasology.math.TeraMath;
 import org.terasology.utilities.random.MersenneRandom;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Used to define a probability distribution for values of type T.
@@ -34,7 +32,7 @@ import java.util.Set;
 public class ProbabilityDistribution<T> {
 
     private Logger logger = LoggerFactory.getLogger(ProbabilityDistribution.class);
-    private Map<Range, T> ranges = new HashMap<>();
+    private Map<Range, T> ranges;
     private long seed;
     private MersenneRandom rng;
 
@@ -45,10 +43,11 @@ public class ProbabilityDistribution<T> {
     }
 
     public void initialise (Map<T, Float> probabilites) {
+        ranges = new HashMap<>();
         //check if sum of probabilites is 1
         Float sum = new Float(0);
         for (Float probability : probabilites.values()) {
-            sum++;
+            sum += probability;
         }
         if (!(TeraMath.fastAbs(sum - 1) < 0.01f)) {
             logger.error("Error initialising ProbabilityDistribution! Sum of probabilites was not 1!");

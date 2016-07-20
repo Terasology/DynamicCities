@@ -25,7 +25,13 @@ import org.terasology.dynamicCities.settlements.components.DistrictFacetComponen
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.*;
+import org.terasology.math.geom.BaseVector2i;
+import org.terasology.math.geom.Circle;
+import org.terasology.math.geom.Rect2f;
+import org.terasology.math.geom.Rect2fTransformer;
+import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2f;
+import org.terasology.math.geom.Vector2i;
 import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.rendering.nui.Canvas;
 import org.terasology.rendering.nui.Color;

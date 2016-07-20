@@ -33,7 +33,10 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -50,12 +53,11 @@ public class DistrictFacetComponent implements Component {
     public int gridSize;
     public Vector2i center = new Vector2i();
     public List<Integer> districtMap;
-    public List<Integer> districtSize;
+    public int[] districtSize;
     public Map<String, DistrictType> districtTypeMap;
     public int districtCount;
     public List<Vector2i> districtCenters;
     public Logger logger = LoggerFactory.getLogger(DistrictFacetComponent.class);
-    public ProbabilityDistribution<DistrictType> probabilityDistribution;
     public DistrictFacetComponent() { }
 
     public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, Culture culture) {
@@ -70,7 +72,6 @@ public class DistrictFacetComponent implements Component {
         gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
         WhiteNoise randNumberGen = new WhiteNoise(seed);
 
-        probabilityDistribution = new ProbabilityDistribution<DistrictType>(seed);
         /**
          * The first two values will be the x-pos and y-pos
          * Add additional random numbers or scale them for scattering
@@ -97,46 +98,19 @@ public class DistrictFacetComponent implements Component {
             districtCenters.add(districtCenter.mul(gridSize).add(worldRegion.min()));
         }
         //Calc district sizes
-        districtSize = new ArrayList<>();
+        districtSize = new int[districtCount];
         for (Integer cluster : districtMap) {
-            if (districtSize.contains(cluster)) {
-                districtSize.add(cluster, districtSize.get(cluster) + 1);
-            } else {
-                districtSize.add(cluster, 1);
-            }
+            districtSize[cluster] += 1;
         }
         mapDistrictTypes(districtManager, culture);
     }
 
 
     private void mapDistrictTypes(DistrictManager districtManager, Culture culture) {
-        Map<String, Integer> zoneArea = new HashMap<>();
-        probabilityDistribution.initialise();
-        class DistrictOrder {
-            private int index = 0;
-            private int cityCenters = 0;
-            private List<DistrictType> districtTypes = districtManager.getDistrictTypes();
-            public String next(int district) {
-                for (DistrictType districtType : districtTypes) {
-                    Set<String> zones = districtTypes.get(index).zones;
-
-                    for (String zone : zones) {
-                        if (culture.getBuildingNeedsForZone(zone) < zoneArea.get(zone) + districtSize.get(district) / (float) zones.size() ) {
-                            continue;
-                        }
-                    }
-                    
-                }
-                index++;
-                if (index == districtTypes.size()) {
-                    index = 0;
-                }
-
-
-
-            }
-        }
-        DistrictOrder districtOrder = new DistrictOrder();
+        Map<String, Float> zoneArea = new HashMap<>();
+        ProbabilityDistribution<DistrictType> probabilityDistribution = new ProbabilityDistribution<>(districtManager.hashCode() | 413357);
+        Map<String, Float> culturalNeedsPercentage = culture.getProcentualsForZone();
+        int totalAssignedArea = 0;
 
         for (int i = 0; i < districtCount; i++) {
             float min = 99999;
@@ -153,9 +127,39 @@ public class DistrictFacetComponent implements Component {
                 }
             }
             if (minCenter != null) {
-                districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), districtOrder.next());
+                totalAssignedArea += districtSize[i];
+
+                //Calculate probabilities
+                Map<DistrictType, Float> probabilites = new HashMap<>(districtManager.getDistrictTypes().size());
+                float totalDiff = 0;
+
+                for (DistrictType districtType : districtManager.getDistrictTypes()) {
+                    float diff = 0;
+                    Map<String, Float> tempZoneArea = new HashMap<>(zoneArea);
+                    for (String zone : districtType.zones) {
+                        float area = districtSize[i] / districtType.zones.size();
+                        tempZoneArea.put(zone, tempZoneArea.getOrDefault(zone, 0f) + area);
+                        diff += TeraMath.fastAbs(tempZoneArea.get(zone) / totalAssignedArea - culturalNeedsPercentage.get(zone));
+                    }
+                    diff = 1 / diff;
+                    probabilites.put(districtType, diff);
+                    totalDiff += diff;
+                }
+                for (DistrictType districtType : districtManager.getDistrictTypes()) {
+                    probabilites.put(districtType, probabilites.getOrDefault(districtType, 0f) / totalDiff);
+                }
+
+                //Assign District
+                probabilityDistribution.initialise(probabilites);
+                DistrictType nextDistrict = probabilityDistribution.get();
+                for (String zone : nextDistrict.zones) {
+                    float area = districtSize[i] / nextDistrict.zones.size();
+                    zoneArea.put(zone, zoneArea.getOrDefault(zone, 0f) + area);
+                }
+                districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), nextDistrict);
             }
         }
+        return;
 
     }
 

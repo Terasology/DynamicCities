@@ -19,7 +19,12 @@ package org.terasology.dynamicCities.parcels;
 import com.google.common.collect.ImmutableMap;
 import org.terasology.commonworld.Orientation;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.persistence.typeHandling.*;
+import org.terasology.persistence.typeHandling.DeserializationContext;
+import org.terasology.persistence.typeHandling.PersistedData;
+import org.terasology.persistence.typeHandling.PersistedDataMap;
+import org.terasology.persistence.typeHandling.RegisterTypeHandler;
+import org.terasology.persistence.typeHandling.SerializationContext;
+import org.terasology.persistence.typeHandling.SimpleTypeHandler;
 
 import java.util.Map;
 

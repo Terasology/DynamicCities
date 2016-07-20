@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DFloatFacet;
-import org.terasology.dynamicCities.facets.Grid2DObjectFacet;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;

@@ -2,7 +2,9 @@
     "GenericBuilding" : {
      "name" : "Testbuilding",
      "templateNames" : ["testTemplate"],
-     "zone" : "RESIDENTIAL"
+     "zone" : "RESIDENTIAL",
+     "minSize" : 200,
+     "maxSize" : 250
  }
 }
 

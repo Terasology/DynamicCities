@@ -21,14 +21,19 @@ import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
+import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.world.generator.plugin.RegisterPlugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Share(DistrictManager.class)
-@RegisterPlugin
+@RegisterSystem(RegisterMode.AUTHORITY)
 public class DistrictManager extends BaseComponentSystem {
 
     private Logger logger = LoggerFactory.getLogger(DistrictManager.class);
@@ -57,7 +62,7 @@ public class DistrictManager extends BaseComponentSystem {
 
     public Optional<DistrictType> getDistrictFromName(String name) {
         for (DistrictType districtType : districts) {
-            if (districtType.name == name) {
+            if (districtType.name.equals(name)) {
                 return Optional.of(districtType);
             }
         }

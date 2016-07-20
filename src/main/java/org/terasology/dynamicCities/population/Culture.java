@@ -18,13 +18,16 @@ package org.terasology.dynamicCities.population;
 
 import org.terasology.entitySystem.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
 public class Culture implements Component {
 
     //Defines how much blocks^2 a population unit needs
+    public String name;
     public Map<String, Integer> buildingNeedPerZone;
+    public float growthRate;
 
 
     public int getBuildingNeedsForZone(String zone) {
@@ -35,8 +38,8 @@ public class Culture implements Component {
         }
     }
 
-    public int getProcentualOfZone(String zone) {
-        int total = 0;
+    public float getProcentualOfZone(String zone) {
+        float total = 0;
         for (Integer need : buildingNeedPerZone.values()) {
             total += need;
         }
@@ -44,5 +47,12 @@ public class Culture implements Component {
             return -1;
         }
         return getBuildingNeedsForZone(zone) / total;
+    }
+    public Map<String, Float> getProcentualsForZone () {
+        Map<String, Float> procentuals = new HashMap<>(buildingNeedPerZone.size());
+        for (String zone : buildingNeedPerZone.keySet()) {
+            procentuals.put(zone, getProcentualOfZone(zone));
+        }
+        return procentuals;
     }
 }

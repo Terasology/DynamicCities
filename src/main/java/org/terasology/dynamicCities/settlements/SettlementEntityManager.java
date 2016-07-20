@@ -24,10 +24,10 @@ import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.minimap.DistrictOverlay;
-import org.terasology.dynamicCities.parcels.CultureManager;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Culture;
+import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.Population;
 import org.terasology.dynamicCities.population.PopulationConstants;
 import org.terasology.dynamicCities.region.RegionEntityManager;
@@ -52,7 +52,12 @@ import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.*;
+import org.terasology.math.geom.BaseVector2i;
+import org.terasology.math.geom.Circle;
+import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3f;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
@@ -62,7 +67,11 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Current tasks: Rewrite site to settlement conversion: Check sides and remove sitecomponent if all 
@@ -109,7 +118,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         regionEntitiesStore = regionEntityManager.getRegionEntities();
         randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
         minimapSystem.addOverlay(new DistrictOverlay(this));
-        logger.info("test");
     }
 
     @Override
@@ -207,11 +215,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementName.yOffset = 20;
         settlementName.scale = 20;
 
-
-        EntityRef settlement = entityManager.create(locationComponent, districtGrid,
+        return entityManager.create(locationComponent, districtGrid, culture,
                 population, settlementName, regionEntities, parcels, buildingQueue, new ActiveSettlementComponent());
-
-        return settlement;
     }
 
     /**
@@ -330,16 +335,16 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         /**
          * grow population
          */
-        population.grow();
+        population.grow(culture.growthRate);
 
         /**
          * TODO: Generate more random rectangles (currently only squares).
          */
         for (String zone : zones) {
-            while (culture.getBuildingNeedsForZone(zone) - parcels.areaPerZone.get(zone) > minMaxSizes.get(zone).x() && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
+            while (culture.getBuildingNeedsForZone(zone) * population.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).x() && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
                 int iter = 0;
-                int size = Math.round(TeraMath.fastAbs(rng.nextInt((int) Math.round(Math.sqrt((double) minMaxSizes.get(zone).x())),
-                        (int) Math.round(Math.sqrt(minMaxSizes.get(zone).y())))));
+                int size = Math.round(TeraMath.fastAbs(rng.nextInt((int) Math.ceil(Math.sqrt((double) minMaxSizes.get(zone).x())),
+                        (int) Math.floor(Math.sqrt(minMaxSizes.get(zone).y())))));
                 Rect2i shape;
                 Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(5));
                 Vector2i rectPosition = new Vector2i();

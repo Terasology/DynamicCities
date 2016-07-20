@@ -21,6 +21,7 @@ import org.terasology.math.geom.Rect2i;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,11 +39,12 @@ public class ParcelList implements Component {
         maxBuildRadius = 0;
         minBuildRadius = 60;
         parcels = new ArrayList<>();
+        areaPerZone = new HashMap<>();
     }
 
     public void addParcel(DynParcel parcel) {
         parcels.add(parcel);
-        String zone = parcel.getZone().toString();
+        String zone = parcel.getZone();
         if (areaPerZone.containsKey(zone)) {
             areaPerZone.put(zone, areaPerZone.get(zone) + parcel.getShape().area());
         } else {

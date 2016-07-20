@@ -20,7 +20,11 @@ import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
-import org.terasology.cities.bldg.gen.*;
+import org.terasology.cities.bldg.gen.BuildingGenerator;
+import org.terasology.cities.bldg.gen.CommercialBuildingGenerator;
+import org.terasology.cities.bldg.gen.RectHouseGenerator;
+import org.terasology.cities.bldg.gen.SimpleChurchGenerator;
+import org.terasology.cities.bldg.gen.TownHallGenerator;
 import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -37,7 +41,13 @@ import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.utilities.random.MersenneRandom;
 import org.terasology.world.WorldProvider;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * This is used to keep track of possible buildings, their construction plans and attributes
@@ -140,13 +150,19 @@ public class BuildingManager extends BaseComponentSystem {
             int parcelSize = shape.sizeX() * shape.sizeY();
             int max = buildings.get(zone).size();
             GenericBuildingComponent building;
+            int iter = 0;
             do {
                 int index = rng.nextInt(max);
                 building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
-            } while (building.minSize > parcelSize || building.maxSize < parcelSize);
+                iter++;
+            } while ((building.minSize > parcelSize || building.maxSize < parcelSize) && iter < 100);
+            if (iter >= 99) {
+                logger.error("No building types found for " + zone + "because no matching building for parcel size " + parcelSize + " was found!");
+                return Optional.empty();
+            }
             return Optional.of(building);
         }
-        logger.warn("No building types found for " + zone.toString());
+        logger.warn("No building types found for " + zone);
         return Optional.empty();
     }
 
@@ -216,7 +232,7 @@ public class BuildingManager extends BaseComponentSystem {
             max = (maxTemp > max) ? maxTemp : max;
         }
         if (min == 9999 || max == 0) {
-            logger.error("Could not find valid min and/or max building sizes for zone " + zone.toString());
+            logger.error("Could not find valid min and/or max building sizes for zone " + zone);
         }
         return new Vector2i(min, max);
     }

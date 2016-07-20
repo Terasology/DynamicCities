@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.parcels;
+package org.terasology.dynamicCities.population;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
-import org.terasology.dynamicCities.population.Culture;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
+import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.utilities.random.MersenneRandom;
-import org.terasology.world.generator.plugin.RegisterPlugin;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Share(CultureManager.class)
-@RegisterPlugin
+@RegisterSystem(RegisterMode.AUTHORITY)
 public class CultureManager extends BaseComponentSystem {
     private Logger logger = LoggerFactory.getLogger(Culture.class);
     private Set<Culture> cultures = new HashSet<>();
@@ -54,7 +54,12 @@ public class CultureManager extends BaseComponentSystem {
                 }
             }
         }
-        logger.info("Finished loading cultures: " + cultures.size() + " district types found: " + cultures.toString());
+        String cultureNames = "[";
+        for (Culture culture : cultures) {
+            cultureNames += culture.name + ", ";
+        }
+        cultureNames += "]";
+        logger.info("Finished loading cultures: " + cultures.size() + " culture types found: " + cultureNames);
         rng = new MersenneRandom(assetManager.hashCode() * 5 + this.hashCode());
     }
 

@@ -46,7 +46,13 @@ import org.terasology.dynamicCities.rasterizer.parts.HollowBuildingPartRasterize
 import org.terasology.dynamicCities.rasterizer.parts.RectPartRasterizer;
 import org.terasology.dynamicCities.rasterizer.parts.RoundPartRasterizer;
 import org.terasology.dynamicCities.rasterizer.parts.StaircaseRasterizer;
-import org.terasology.dynamicCities.rasterizer.roofs.*;
+import org.terasology.dynamicCities.rasterizer.roofs.ConicRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.DomeRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.FlatRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.HipRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.PentRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.RoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
@@ -76,7 +82,11 @@ import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
