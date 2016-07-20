@@ -16,8 +16,6 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
@@ -53,11 +51,11 @@ public class DistrictFacetComponent implements Component {
     public int gridSize;
     public Vector2i center = new Vector2i();
     public List<Integer> districtMap;
-    public int[] districtSize;
+    public List<Integer> districtSize;
     public Map<String, DistrictType> districtTypeMap;
     public int districtCount;
     public List<Vector2i> districtCenters;
-    public Logger logger = LoggerFactory.getLogger(DistrictFacetComponent.class);
+
     public DistrictFacetComponent() { }
 
     public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, Culture culture) {
@@ -98,10 +96,12 @@ public class DistrictFacetComponent implements Component {
             districtCenters.add(districtCenter.mul(gridSize).add(worldRegion.min()));
         }
         //Calc district sizes
-        districtSize = new int[districtCount];
+        int[] tempSize = new int[districtCount];
         for (Integer cluster : districtMap) {
-            districtSize[cluster] += 1;
+            tempSize[cluster] += 1;
         }
+        districtSize = new ArrayList<>();
+        districtSize = IntStream.of(tempSize).boxed().collect(Collectors.toList());
         mapDistrictTypes(districtManager, culture);
     }
 
@@ -127,7 +127,7 @@ public class DistrictFacetComponent implements Component {
                 }
             }
             if (minCenter != null) {
-                totalAssignedArea += districtSize[i];
+                totalAssignedArea += districtSize.get(i);
 
                 //Calculate probabilities
                 Map<DistrictType, Float> probabilites = new HashMap<>(districtManager.getDistrictTypes().size());
@@ -137,7 +137,7 @@ public class DistrictFacetComponent implements Component {
                     float diff = 0;
                     Map<String, Float> tempZoneArea = new HashMap<>(zoneArea);
                     for (String zone : districtType.zones) {
-                        float area = districtSize[i] / districtType.zones.size();
+                        float area = districtSize.get(i) / districtType.zones.size();
                         tempZoneArea.put(zone, tempZoneArea.getOrDefault(zone, 0f) + area);
                         diff += TeraMath.fastAbs(tempZoneArea.get(zone) / totalAssignedArea - culturalNeedsPercentage.get(zone));
                     }
@@ -153,7 +153,7 @@ public class DistrictFacetComponent implements Component {
                 probabilityDistribution.initialise(probabilites);
                 DistrictType nextDistrict = probabilityDistribution.get();
                 for (String zone : nextDistrict.zones) {
-                    float area = districtSize[i] / nextDistrict.zones.size();
+                    float area = districtSize.get(i) / nextDistrict.zones.size();
                     zoneArea.put(zone, zoneArea.getOrDefault(zone, 0f) + area);
                 }
                 districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), nextDistrict);

@@ -69,6 +69,7 @@ import org.terasology.world.generation.Border3D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private EntityManager entityManager;
 
-    private SettlementEntities settlementEntities;
+    private EntityRef settlementEntities;
 
     @In
     private RegionEntityManager regionEntityManager;
@@ -114,7 +115,11 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @Override
     public void postBegin() {
-        settlementEntities = new SettlementEntities();
+        Iterator<EntityRef> settlementEntitiesIterator = entityManager.getEntitiesWith(SettlementEntities.class).iterator();
+        settlementEntities = settlementEntitiesIterator.hasNext() ? settlementEntitiesIterator.next() : null;
+        if (settlementEntities == null) {
+            settlementEntities = entityManager.create(new SettlementEntities());
+        }
         regionEntitiesStore = regionEntityManager.getRegionEntities();
         randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
         minimapSystem.addOverlay(new DistrictOverlay(this));
@@ -150,15 +155,17 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     @ReceiveEvent(components = {ActiveSettlementComponent.class})
     public void registerSettlement(SettlementRegisterEvent event, EntityRef settlement) {
-        settlementEntities.add(settlement);
+        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
+        container.add(settlement);
+        settlementEntities.saveComponent(container);
     }
 
 
     public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
-
-        for (String vector2iString : settlementEntities.getMap().keySet()) {
+        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
+        for (String vector2iString : container.getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance) {
                 return false;
@@ -171,7 +178,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         if (!regionEntitiesStore.cellIsLoaded(pos)) {
             return true;
         }
-        for (String vector2iString : settlementEntities.getMap().keySet()) {
+
+        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
+        for (String vector2iString : container.getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
                 return false;
@@ -387,7 +396,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     public SettlementEntities getSettlementEntities() {
-        return settlementEntities;
+        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
+        return container;
     }
 
 }

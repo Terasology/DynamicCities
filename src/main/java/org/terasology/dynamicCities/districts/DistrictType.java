@@ -18,12 +18,14 @@ package org.terasology.dynamicCities.districts;
 
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.entitySystem.Component;
+import org.terasology.reflection.MappedContainer;
 import org.terasology.rendering.nui.Color;
 
 import java.util.Set;
 
 //TODO: give mixing factors for zones
 //TODO: display color as hexadecimal
+@MappedContainer
 public class DistrictType implements Component {
 
     public String name;
