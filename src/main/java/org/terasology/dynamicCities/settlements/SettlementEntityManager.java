@@ -37,9 +37,13 @@ import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
+import org.terasology.dynamicCities.settlements.components.MarketComponent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.dynamicCities.sites.Site;
 import org.terasology.dynamicCities.utilities.Toolbox;
+import org.terasology.economy.components.InfiniteStorageComponent;
+import org.terasology.economy.components.MarketSubscriberComponent;
+import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -194,13 +198,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     private EntityRef createSettlement(EntityRef siteRegion) {
-
+        EntityRef settlementEntity = entityManager.create();
         Vector2i regionCenter = new Vector2i(siteRegion.getComponent(LocationComponent.class).getLocalPosition().x(),
                                              siteRegion.getComponent(LocationComponent.class).getLocalPosition().z());
         Site site = siteRegion.getComponent(Site.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
         Population population = new Population(site.getPopulation());
         Culture culture = cultureManager.getRandomCulture();
+
         //add surrounding regions to settlement
         RegionEntities regionEntities = new RegionEntities();
         getSurroundingRegions(regionCenter, regionEntities);
@@ -209,23 +214,46 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode(), districtManager, culture);
-
         if (districtGrid.districtMap.size() < 1) {
             logger.error("DistrictFacetComponent.districtMap not initialised!");
         }
+
+        //Storage for parcels
         ParcelList parcels = new ParcelList(1);
 
+        //Storage for incomplete parcels
         BuildingQueue buildingQueue = new BuildingQueue();
 
+        //NameTagStuff
         NameTagComponent settlementName = new NameTagComponent();
         settlementName.text = "testcity regions: " + regionEntities.regionEntities.size() + " " + population.populationSize;
-
         settlementName.textColor = Color.CYAN;
         settlementName.yOffset = 20;
         settlementName.scale = 20;
 
-        return entityManager.create(locationComponent, districtGrid, culture,
-                population, settlementName, regionEntities, parcels, buildingQueue, new ActiveSettlementComponent());
+        //Marketstuff
+        EntityRef market = entityManager.create(new InfiniteStorageComponent(1));
+        MarketSubscriberComponent marketSubscriberComponent = new MarketSubscriberComponent(1);
+        marketSubscriberComponent.consumptionStorage = market;
+        marketSubscriberComponent.productStorage = settlementEntity;
+        marketSubscriberComponent.productionInterval = 100;
+        marketSubscriberComponent.production.put(population.popResourceType, Math.round(culture.growthRate));
+        MarketComponent marketComponent = new MarketComponent(market);
+
+        settlementEntity.addComponent(locationComponent);
+        settlementEntity.addComponent(districtGrid);
+        settlementEntity.addComponent(culture);
+        settlementEntity.addComponent(population);
+        settlementEntity.addComponent(settlementName);
+        settlementEntity.addComponent(regionEntities);
+        settlementEntity.addComponent(parcels);
+        settlementEntity.addComponent(buildingQueue);
+        settlementEntity.addComponent(marketComponent);
+        settlementEntity.addComponent(marketSubscriberComponent);
+        settlementEntity.addComponent(new ActiveSettlementComponent());
+
+        settlementEntity.send(new SubscriberRegistrationEvent());
+        return settlementEntity;
     }
 
     /**
@@ -302,6 +330,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
         NameTagComponent nameTagComponent = settlement.getComponent(NameTagComponent.class);
         Culture culture = settlement.getComponent(Culture.class);
+        MarketSubscriberComponent marketSubscriberComponent = settlement.getComponent(MarketSubscriberComponent.class);
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
         Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
@@ -341,10 +370,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             return;
         }
 
-        /**
-         * grow population
-         */
-        population.grow(culture.growthRate);
+
 
         /**
          * TODO: Generate more random rectangles (currently only squares).
@@ -387,6 +413,11 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 buildingSpawned++;
             }
         }
+        /**
+         * grow population
+         */
+        population.capacity = parcels.areaPerZone.getOrDefault("RESIDENTIAL", 0);
+
 
         nameTagComponent.text =  nameTagComponent.text.replaceAll(Float.toString((population.populationSize - PopulationConstants.GROWTH_RATE)), Float.toString(population.populationSize));
         settlement.saveComponent(parcels);

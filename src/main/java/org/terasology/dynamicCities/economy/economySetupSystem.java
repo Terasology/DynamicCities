@@ -13,33 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
+package org.terasology.dynamicCities.economy;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.dynamicCities.population.PopulationStorageHandler;
+import org.terasology.economy.systems.StorageHandlerLibrary;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.registry.In;
 
-public class Population implements Component {
+@RegisterSystem
+public class economySetupSystem extends BaseComponentSystem {
 
+    @In
+    private StorageHandlerLibrary storageHandlerLibrary;
 
-    public float populationSize;
-    public float health;
-    public int capacity;
-    public String popResourceType = "popUnit";
-    public Population(int size) {
-        populationSize = size;
+    @Override
+    public void postBegin() {
+        storageHandlerLibrary.registerHandler(new PopulationStorageHandler());
     }
-
-    public Population() { }
-
-    public Population(String arg) {
-        if (arg.equals("test")) {
-            capacity = 999;
-        }
-    }
-
-    public void grow(float growthRate) {
-        populationSize += growthRate /* * populationSize*/;
-    }
-
-
 }

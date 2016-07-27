@@ -21,6 +21,10 @@
             "minVersion" : "1.0.0-SNAPSHOT"
         },
         {
+            "id" : "Economy",
+            "minVersion" : "0.1.0-SNAPSHOT"
+        },
+        {
             "id" : "StructureTemplates",
             "minVersion" : "0.1.0-SNAPSHOT"
         }
