@@ -31,7 +31,7 @@ import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.Population;
 import org.terasology.dynamicCities.population.PopulationConstants;
 import org.terasology.dynamicCities.region.RegionEntityManager;
-import org.terasology.dynamicCities.region.components.RegionEntities;
+import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
@@ -109,9 +109,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private DistrictManager districtManager;
 
-    private int minDistance = 500;
-    private RegionEntities regionEntitiesStore;
-    private int settlementMaxRadius = 96;
+    private int minDistance = 1000;
+    private RegionEntitiesComponent regionEntitiesComponentStore;
+    private int settlementMaxRadius = 256;
     private int counter = 50;
     private int timer = 0;
     private Noise randNumGen;
@@ -124,9 +124,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         if (settlementEntities == null) {
             settlementEntities = entityManager.create(new SettlementEntities());
         }
-        regionEntitiesStore = regionEntityManager.getRegionEntities();
-        randNumGen = new WhiteNoise(regionEntitiesStore.hashCode() & 0x921233);
+        regionEntitiesComponentStore = regionEntityManager.getRegionEntitiesComponent();
+        randNumGen = new WhiteNoise(regionEntitiesComponentStore.hashCode() & 0x921233);
         minimapSystem.addOverlay(new DistrictOverlay(this));
+
     }
 
     @Override
@@ -140,7 +141,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         for (EntityRef siteRegion : uncheckedSiteRegions) {
             boolean checkDistance = checkMinDistance(siteRegion);
             boolean checkBuildArea = checkBuildArea(siteRegion);
-            if (checkDistance && regionEntitiesStore.checkSidesLoadedNear(siteRegion)
+            if (checkDistance && regionEntitiesComponentStore.checkSidesLoadedNear(siteRegion)
                     && checkBuildArea) {
                 EntityRef newSettlement = createSettlement(siteRegion);
                 newSettlement.send(new SettlementRegisterEvent());
@@ -179,7 +180,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     public boolean checkMinDistanceCell(Vector2i pos) {
-        if (!regionEntitiesStore.cellIsLoaded(pos)) {
+        if (!regionEntitiesComponentStore.cellIsLoaded(pos)) {
             return true;
         }
 
@@ -207,8 +208,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Culture culture = cultureManager.getRandomCulture();
 
         //add surrounding regions to settlement
-        RegionEntities regionEntities = new RegionEntities();
-        getSurroundingRegions(regionCenter, regionEntities);
+        RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
+        getSurroundingRegions(regionCenter, regionEntitiesComponent);
 
         //Create the district facet and DistrictTypeMap
         Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
@@ -226,7 +227,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         //NameTagStuff
         NameTagComponent settlementName = new NameTagComponent();
-        settlementName.text = "testcity regions: " + regionEntities.regionEntities.size() + " " + population.populationSize;
+        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + population.populationSize;
         settlementName.textColor = Color.CYAN;
         settlementName.yOffset = 20;
         settlementName.scale = 20;
@@ -236,7 +237,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         MarketSubscriberComponent marketSubscriberComponent = new MarketSubscriberComponent(1);
         marketSubscriberComponent.consumptionStorage = market;
         marketSubscriberComponent.productStorage = settlementEntity;
-        marketSubscriberComponent.productionInterval = 100;
+        marketSubscriberComponent.productionInterval = 1;
         marketSubscriberComponent.production.put(population.popResourceType, Math.round(culture.growthRate));
         MarketComponent marketComponent = new MarketComponent(market);
 
@@ -245,7 +246,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.addComponent(culture);
         settlementEntity.addComponent(population);
         settlementEntity.addComponent(settlementName);
-        settlementEntity.addComponent(regionEntities);
+        settlementEntity.addComponent(regionEntitiesComponent);
         settlementEntity.addComponent(parcels);
         settlementEntity.addComponent(buildingQueue);
         settlementEntity.addComponent(marketComponent);
@@ -261,7 +262,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
      * @param pos
      * @return
      */
-    private void getSurroundingRegions(Vector2i pos, RegionEntities assignedRegions) {
+    private void getSurroundingRegions(Vector2i pos, RegionEntitiesComponent assignedRegions) {
         Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-3, -3, 3, 3);
         Circle settlementCircle = new Circle(pos.toVector2f(), settlementMaxRadius);
         Vector2i regionWorldPos = new Vector2i();
@@ -270,8 +271,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
 
             if (settlementCircle.contains(regionWorldPos)) {
-                EntityRef region = regionEntitiesStore.getNearest(regionWorldPos);
-                if (regionEntitiesStore.getNearest(pos) == null) {
+                EntityRef region = regionEntitiesComponentStore.getNearest(regionWorldPos);
+                if (regionEntitiesComponentStore.getNearest(pos) == null) {
                     throw new NullPointerException();
                 }
                 if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
@@ -293,9 +294,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             Vector2i regionWorldPos = new Vector2i(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
 
             if (settlementCircle.contains(regionWorldPos)) {
-                EntityRef region = regionEntitiesStore.getNearest(regionWorldPos);
+                EntityRef region = regionEntitiesComponentStore.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(RoughnessFacetComponent.class)) {
-                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > 0.3) {
+                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > 99) {
                         unusableRegionsCount++;
                     }
                 }
@@ -416,10 +417,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         /**
          * grow population
          */
-        population.capacity = parcels.areaPerZone.getOrDefault("RESIDENTIAL", 0);
+        for (String residentialZone : culture.residentialZones) {
+            population.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
+        }
 
 
-        nameTagComponent.text =  nameTagComponent.text.replaceAll(Float.toString((population.populationSize - PopulationConstants.GROWTH_RATE)), Float.toString(population.populationSize));
+
+        nameTagComponent.text =  Float.toString(population.populationSize);
         settlement.saveComponent(parcels);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(population);

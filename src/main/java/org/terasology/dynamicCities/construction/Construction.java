@@ -57,8 +57,11 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.economy.components.MarketSubscriberComponent;
+import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
@@ -367,9 +370,31 @@ public class Construction extends BaseComponentSystem {
                 template.send(new SpawnStructureEvent(spawnTransformation));
             }
         }
+        /**
+         * Generate the building entity if there is one.
+         */
+        if (building.isEntity) {
+            Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
+            if (entityPrefab.isPresent()) {
+                dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
+                //Remove the GenericBuildingComponent as it is already saved by its building name in the DynParcel.class
+                dynParcel.buildingEntity.removeComponent(GenericBuildingComponent.class);
+                if (dynParcel.buildingEntity.hasComponent(MarketSubscriberComponent.class)) {
+                    MarketSubscriberComponent marketSubscriberComponent = dynParcel.buildingEntity.getComponent(MarketSubscriberComponent.class);
+                    marketSubscriberComponent.productStorage = dynParcel.buildingEntity;
+                    marketSubscriberComponent.consumptionStorage = dynParcel.buildingEntity;
+                    dynParcel.buildingEntity.saveComponent(marketSubscriberComponent);
+
+                    dynParcel.buildingEntity.send(new SubscriberRegistrationEvent());
+                }
+            }
+        }
 
 
 
+        /**
+         * Send block-change event to refresh the minimap
+         */
         Map<Vector3i, Block> blockPos = new HashMap<>();
         for (BaseVector2i rectPos : dynParcel.getShape().contents()) {
             blockPos.put(new Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);

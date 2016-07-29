@@ -29,6 +29,7 @@ public class Culture implements Component {
     public String name;
     public Map<String, Integer> buildingNeedPerZone;
     public List<String> availableBuildings;
+    public List<String> residentialZones;
     public float growthRate;
 
 

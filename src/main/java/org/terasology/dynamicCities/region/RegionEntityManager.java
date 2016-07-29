@@ -17,7 +17,7 @@ package org.terasology.dynamicCities.region;
 
 
 import org.terasology.dynamicCities.region.components.ActiveRegionComponent;
-import org.terasology.dynamicCities.region.components.RegionEntities;
+import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.components.UnregisteredRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
@@ -44,11 +44,11 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
     @In
     private SettlementEntityManager settlementEntities;
 
-    private RegionEntities regionEntities;
+    private RegionEntitiesComponent regionEntitiesComponent;
 
     @Override
     public void initialise() {
-        regionEntities = new RegionEntities(96);
+        regionEntitiesComponent = new RegionEntitiesComponent(96);
     }
 
     private int counter = 100;
@@ -61,7 +61,7 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
     public void update(float delta) {
         Iterable<EntityRef> unregisteredRegions = entityManager.getEntitiesWith(UnregisteredRegionComponent.class);
         for (EntityRef region : unregisteredRegions) {
-            regionEntities.add(region);
+            regionEntitiesComponent.add(region);
             region.removeComponent(UnregisteredRegionComponent.class);
             region.addComponent(new UnassignedRegionComponent());
             NameTagComponent nT = region.getComponent(NameTagComponent.class);
@@ -69,16 +69,16 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
             region.saveComponent(nT);
         }
 
-        counter--;
+        counter++;
 
         if (counter != 0) {
             return;
         }
 
-        for (String posString : regionEntities.cellGrid.keySet()) {
-            if (!regionEntities.processed.contains(posString) && (!settlementEntities.checkMinDistanceCell(posString)
-                    || regionEntities.checkSidesLoadedLong(posString))) {
-                regionEntities.clearCell(posString);
+        for (String posString : regionEntitiesComponent.cellGrid.keySet()) {
+            if (!regionEntitiesComponent.processed.contains(posString) && (!settlementEntities.checkMinDistanceCell(posString)
+                    /*|| regionEntitiesComponent.checkSidesLoadedLong(posString)*/)) {
+                regionEntitiesComponent.clearCell(posString);
             }
         }
         counter = 100;
@@ -94,7 +94,7 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
     }
 
     
-    public RegionEntities getRegionEntities() {
-        return regionEntities;
+    public RegionEntitiesComponent getRegionEntitiesComponent() {
+        return regionEntitiesComponent;
     }
 }
