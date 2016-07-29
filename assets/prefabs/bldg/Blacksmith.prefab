@@ -1,0 +1,11 @@
+{
+    "GenericBuilding" : {
+     "name" : "Marketplace",
+     "templateNames" : ["smithyTemplate"],
+     "zone" : "COMMERCIAL",
+     "minSize" : 144,
+     "maxSize" : 300,
+     "isEntity" : true
+    }
+}
+

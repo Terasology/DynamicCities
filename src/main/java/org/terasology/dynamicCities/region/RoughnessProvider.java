@@ -39,7 +39,7 @@ import org.terasology.world.generator.plugin.RegisterPlugin;
  */
 public class RoughnessProvider implements FacetProvider {
 
-    private final int gridSize = 32;
+    private final int gridSize = 4;
 
 
     @Override

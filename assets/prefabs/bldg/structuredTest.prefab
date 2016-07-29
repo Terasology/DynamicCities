@@ -4,7 +4,7 @@
      "templateNames" : ["testTemplate"],
      "zone" : "RESIDENTIAL",
      "minSize" : 200,
-     "maxSize" : 250
+     "maxSize" : 400
  }
 }
 

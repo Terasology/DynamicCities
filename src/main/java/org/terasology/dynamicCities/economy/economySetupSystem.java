@@ -19,10 +19,11 @@ package org.terasology.dynamicCities.economy;
 import org.terasology.dynamicCities.population.PopulationStorageHandler;
 import org.terasology.economy.systems.StorageHandlerLibrary;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.registry.In;
 
-@RegisterSystem
+@RegisterSystem(RegisterMode.AUTHORITY)
 public class economySetupSystem extends BaseComponentSystem {
 
     @In

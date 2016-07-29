@@ -66,6 +66,7 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
+import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
@@ -74,11 +75,11 @@ import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
+import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
+import org.terasology.structureTemplates.util.BlockRegionUtilities;
+import org.terasology.structureTemplates.util.transform.*;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
@@ -357,16 +358,17 @@ public class Construction extends BaseComponentSystem {
         /**
          * Generate buildings with StructuredTemplates
          */
-
         Optional<List<EntityRef>> templatesOptional = buildingManager.getTemplatesForBuilding(building);
         if (templatesOptional.isPresent()) {
             List<EntityRef> templates = templatesOptional.get();
-            BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
-            transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
-                    dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
-            //transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
-            BlockRegionTransform spawnTransformation = transformationList;
             for (EntityRef template : templates) {
+                BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
+                transformationList.addTransformation(BlockRegionUtilities.setOnCenterXZ(template.getComponent(SpawnBlockRegionsComponent.class)));
+                transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
+                transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
+                        dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
+                BlockRegionTransform spawnTransformation = transformationList;
+
                 template.send(new SpawnStructureEvent(spawnTransformation));
             }
         }
