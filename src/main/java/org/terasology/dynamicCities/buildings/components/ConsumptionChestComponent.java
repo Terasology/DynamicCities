@@ -13,33 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
+package org.terasology.dynamicCities.buildings.components;
 
 
 import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.Vector3i;
 
-public class Population implements Component {
+import java.util.List;
 
-
-    public float populationSize;
-    public float health;
-    public int capacity;
-    public String popResourceType = "popUnit";
-    public Population(int size) {
-        populationSize = size;
-    }
-
-    public Population() { }
-
-    public Population(String arg) {
-        if (arg.equals("test")) {
-            capacity = 999;
-        }
-    }
-
-    public void grow(float growthRate) {
-        populationSize += growthRate /* * populationSize*/;
-    }
-
-
+public class ConsumptionChestComponent implements Component {
+    /**
+     * Position of the chest of which resources should be drawn out
+     */
+    public List<Vector3i> positions;
 }

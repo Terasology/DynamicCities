@@ -98,6 +98,7 @@ public class BuildingManager extends BaseComponentSystem {
                     continue;
                 }
                 buildings.put(building.zone, building);
+                building.resourceUrn = prefab.getUrn().toString();
                 logger.info("Loaded building prefab " + prefab.getName());
             }
 

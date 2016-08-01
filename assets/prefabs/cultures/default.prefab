@@ -3,6 +3,7 @@
         "name" : "develop clan",
         "buildingNeedPerZone" : {"GOVERNMENTAL" : 2, "CLERICAL" : 2, "RESIDENTIAL" : 8, "COMMERCIAL" : 4},
         "growthRate" : 30,
-        "availableBuildings" : ["Marketplace", "House", "SimpleChurch", "Testbuilding", "Townhall"]
+        "availableBuildings" : ["Marketplace", "House", "SimpleChurch", "Testbuilding", "Townhall"],
+        "residentialZones" : ["RESIDENTIAL"]
     }
 }

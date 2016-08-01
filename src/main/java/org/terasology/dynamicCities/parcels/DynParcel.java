@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
+import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.math.geom.Rect2i;
 
 /**
@@ -32,6 +33,7 @@ public class DynParcel implements Parcel {
     public Rect2i shape;
     public final Orientation orientation;
     public String buildingTypeName;
+    public EntityRef buildingEntity;
     /**
      * Try to resolve differences between Cities parcels and DynParcel, especially the zone...
      * @param shape the shape of the lot

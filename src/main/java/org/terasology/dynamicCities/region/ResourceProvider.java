@@ -32,7 +32,7 @@ import org.terasology.world.generator.plugin.RegisterPlugin;
  */
 public class ResourceProvider implements FacetProvider {
 
-    private final int gridSize = 4;
+    private final int gridSize = 32;
 
 
     @Override
