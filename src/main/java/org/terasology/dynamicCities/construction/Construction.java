@@ -33,12 +33,12 @@ import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.buildings.components.ChestStorageComponent;
+import org.terasology.dynamicCities.buildings.components.ConsumptionChestComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
-import org.terasology.dynamicCities.buildings.components.ConsumptionChestComponent;
 import org.terasology.dynamicCities.events.PlayerTracker;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.population.Culture;
@@ -74,7 +74,10 @@ import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.*;
+import org.terasology.math.geom.BaseVector2i;
+import org.terasology.math.geom.BaseVector3i;
+import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
@@ -83,7 +86,10 @@ import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
-import org.terasology.structureTemplates.util.transform.*;
+import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
+import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -330,8 +336,6 @@ public class Construction extends BaseComponentSystem {
         /**
          * Generate buildings with BuildingGenerators
          */
-
-
         Optional<List<BuildingGenerator>> generatorsOptional = buildingManager.getGeneratorsForBuilding(building);
         if (generatorsOptional.isPresent()) {
             List<BuildingGenerator> generators = generatorsOptional.get();
@@ -418,8 +422,11 @@ public class Construction extends BaseComponentSystem {
         return true;
     }
 
+    /**
+     * Catches the spawn of a structure template on a parcel and assigns potential chest entities to the parcels entity
+     */
     @ReceiveEvent
-    public void OnSpawnDynamicStructure(OnSpawnDynamicStructureEvent event, EntityRef entityRef) {
+    public void catchOnSpawnDynamicStructure(OnSpawnDynamicStructureEvent event, EntityRef entityRef) {
         entityRef.send(new SpawnStructureEvent(event.getTransformation()));
         ChestStorageComponent chestStorageComponent = new ChestStorageComponent();
 
@@ -427,8 +434,8 @@ public class Construction extends BaseComponentSystem {
             ConsumptionChestComponent consumptionChestComponent = entityRef.getComponent(ConsumptionChestComponent.class);
             chestStorageComponent.consumptionChests = new ArrayList<>();
             for (Vector3i pos : consumptionChestComponent.positions) {
-                pos = event.getTransformation().transformVector3i(pos);
-                chestStorageComponent.consumptionChests.add(blockEntityRegistry.getBlockEntityAt(pos));
+                Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
+                chestStorageComponent.consumptionChests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
             }
         }
         if (entityRef.hasComponent(ProductionChestComponent.class)) {

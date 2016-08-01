@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
+package org.terasology.dynamicCities.economy;
 
 
+import org.terasology.dynamicCities.population.Population;
 import org.terasology.economy.StorageComponentHandler;
 import org.terasology.entitySystem.Component;
 
