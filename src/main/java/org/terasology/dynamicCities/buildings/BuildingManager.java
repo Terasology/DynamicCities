@@ -114,11 +114,10 @@ public class BuildingManager extends BaseComponentSystem {
 
             //Get Templates
             if (prefab.hasComponent(SpawnBlockRegionsComponent.class)) {
-                if (prefab.getName().contains("DynamicCities")) {
-                    EntityRef template = entityManager.create(prefab);
-                    templates.put(prefab.getName().toLowerCase(), template);
-                    logger.info("StructuredTemplate " + prefab.getName() + " loaded successfully.");
-                }
+                EntityRef template = entityManager.create(prefab);
+                templates.put(prefab.getName().toLowerCase(), template);
+                logger.info("StructuredTemplate " + prefab.getName() + " loaded successfully.");
+
             }
         }
         logger.info("Finished loading buildings. Number of building types: " + buildings.values().size() + " | Strings found: " + buildings.keySet().toString());
