@@ -1,7 +1,7 @@
 {
     "GenericBuilding" : {
      "name" : "Marketplace",
-     "templateNames" : ["smithyTemplate"],
+     "templateNames" : ["DynamicCities:smithyTemplate"],
      "zone" : "COMMERCIAL",
      "minSize" : 188,
      "maxSize" : 300,

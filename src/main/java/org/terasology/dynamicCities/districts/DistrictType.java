@@ -21,7 +21,7 @@ import org.terasology.entitySystem.Component;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.rendering.nui.Color;
 
-import java.util.Set;
+import java.util.List;
 
 //TODO: give mixing factors for zones
 //TODO: display color as hexadecimal
@@ -30,7 +30,7 @@ public class DistrictType implements Component {
 
     public String name;
     public int color;
-    public Set<String> zones;
+    public List<String> zones;
 
     public DistrictType ( ) { }
 

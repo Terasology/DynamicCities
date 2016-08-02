@@ -28,6 +28,7 @@ import org.terasology.cities.bldg.gen.TownHallGenerator;
 import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
 import org.terasology.dynamicCities.population.Culture;
+import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
@@ -97,8 +98,17 @@ public class BuildingManager extends BaseComponentSystem {
                     logger.warn("Invalid zone type found for prefab " + prefab.getName() + ". Skipping building");
                     continue;
                 }
-                buildings.put(building.zone, building);
+
                 building.resourceUrn = prefab.getUrn().toString();
+                building.name = building.name.toLowerCase();
+                building.zone = building.zone.toLowerCase();
+                if (building.generatorNames != null) {
+                    Toolbox.stringsToLowerCase(building.generatorNames);
+                }
+                if (building.templateNames != null) {
+                    Toolbox.stringsToLowerCase(building.templateNames);
+                }
+                buildings.put(building.zone, building);
                 logger.info("Loaded building prefab " + prefab.getName());
             }
 
@@ -106,7 +116,7 @@ public class BuildingManager extends BaseComponentSystem {
             if (prefab.hasComponent(SpawnBlockRegionsComponent.class)) {
                 if (prefab.getName().contains("DynamicCities")) {
                     EntityRef template = entityManager.create(prefab);
-                    templates.put(prefab.getName().split(":")[1], template);
+                    templates.put(prefab.getName().toLowerCase(), template);
                     logger.info("StructuredTemplate " + prefab.getName() + " loaded successfully.");
                 }
             }

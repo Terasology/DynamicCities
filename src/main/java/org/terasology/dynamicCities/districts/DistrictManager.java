@@ -19,6 +19,7 @@ package org.terasology.dynamicCities.districts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
+import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -52,12 +53,14 @@ public class DistrictManager extends BaseComponentSystem {
             if (prefab.hasComponent(DistrictType.class)) {
                 DistrictType districtType = prefab.getComponent(DistrictType.class);
                 if (!districtType.zones.isEmpty()) {
+                    Toolbox.stringsToLowerCase(districtType.zones);
                     districts.add(districtType);
                 } else {
                     logger.warn("Found district prefab with empty zone list");
                 }
             }
         }
+
         String districtNames = "[";
         Iterator<DistrictType> iter = districts.iterator();
         while (iter.hasNext()) {

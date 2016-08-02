@@ -19,6 +19,7 @@ package org.terasology.dynamicCities.population;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
+import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
@@ -50,8 +51,12 @@ public class CultureManager extends BaseComponentSystem {
                 Culture culture = prefab.getComponent(Culture.class);
                 if (!culture.buildingNeedPerZone.isEmpty()) {
                     cultures.add(culture);
+                    culture.buildingNeedPerZone = Toolbox.stringsToLowerCase(culture.buildingNeedPerZone);
                 } else {
                     logger.warn("Found culture prefab with empty buildingNeedPerZone list");
+                }
+                if (culture.availableBuildings != null) {
+                    Toolbox.stringsToLowerCase(culture.availableBuildings);
                 }
             }
         }

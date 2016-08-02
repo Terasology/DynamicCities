@@ -139,7 +139,10 @@ public class DistrictFacetComponent implements Component {
                     for (String zone : districtType.zones) {
                         float area = districtSize.get(i) / districtType.zones.size();
                         tempZoneArea.put(zone, tempZoneArea.getOrDefault(zone, 0f) + area);
-                        if (tempZoneArea.get(zone) / totalAssignedArea > culturalNeedsPercentage.get(zone)) {
+                        if (!culturalNeedsPercentage.containsKey(zone)) {
+                            diff = Float.MAX_VALUE;
+                        }
+                        else if (tempZoneArea.get(zone) / totalAssignedArea > culturalNeedsPercentage.get(zone)) {
                             diff = 9999999f;
                         } else {
                             diff += TeraMath.fastAbs(tempZoneArea.get(zone) / totalAssignedArea - culturalNeedsPercentage.get(zone));

@@ -27,12 +27,9 @@ import java.util.Map;
 public abstract class GeneratorRegistry {
 
     public static final Map<String, Class> GENERATORS = new ImmutableMap.Builder<String, Class>()
-            .put("CommercialBuildingGenerator", CommercialBuildingGenerator.class)
-            .put("RectHouseGenerator", RectHouseGenerator.class)
-            .put("SimpleChurchGenerator", SimpleChurchGenerator.class)
-            .put("TownHallGenerator", TownHallGenerator.class)
+            .put("commercialbuildinggenerator", CommercialBuildingGenerator.class)
+            .put("recthousegenerator", RectHouseGenerator.class)
+            .put("simplechurchgenerator", SimpleChurchGenerator.class)
+            .put("townhallgenerator", TownHallGenerator.class)
             .build();
-
-
-
 }
