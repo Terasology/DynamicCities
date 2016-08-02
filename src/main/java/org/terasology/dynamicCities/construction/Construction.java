@@ -32,8 +32,8 @@ import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
+import org.terasology.dynamicCities.buildings.components.ChestPositionsComponent;
 import org.terasology.dynamicCities.buildings.components.ChestStorageComponent;
-import org.terasology.dynamicCities.buildings.components.ConsumptionChestComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
@@ -332,6 +332,27 @@ public class Construction extends BaseComponentSystem {
             }
         }
 
+        /**
+         * Generate the building entity if there is one.
+         */
+        if (building.isEntity) {
+            Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
+            if (entityPrefab.isPresent()) {
+                dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
+                //Remove the GenericBuildingComponent as it is already saved by its building name in the DynParcel.class
+                dynParcel.buildingEntity.removeComponent(GenericBuildingComponent.class);
+
+
+                if (dynParcel.buildingEntity.hasComponent(MarketSubscriberComponent.class)) {
+                    MarketSubscriberComponent marketSubscriberComponent = dynParcel.buildingEntity.getComponent(MarketSubscriberComponent.class);
+                    marketSubscriberComponent.productStorage = dynParcel.buildingEntity;
+                    marketSubscriberComponent.consumptionStorage = dynParcel.buildingEntity;
+                    dynParcel.buildingEntity.saveComponent(marketSubscriberComponent);
+
+                    dynParcel.buildingEntity.send(new SubscriberRegistrationEvent());
+                }
+            }
+        }
 
         /**
          * Generate buildings with BuildingGenerators
@@ -382,31 +403,13 @@ public class Construction extends BaseComponentSystem {
                 transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
                         dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
                 BlockRegionTransform spawnTransformation = transformationList;
-
-                template.send(new OnSpawnDynamicStructureEvent(spawnTransformation, dynParcel.buildingEntity));
-            }
-        }
-        /**
-         * Generate the building entity if there is one.
-         */
-        if (building.isEntity) {
-            Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
-            if (entityPrefab.isPresent()) {
-                dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
-                //Remove the GenericBuildingComponent as it is already saved by its building name in the DynParcel.class
-                dynParcel.buildingEntity.removeComponent(GenericBuildingComponent.class);
-
-
-                if (dynParcel.buildingEntity.hasComponent(MarketSubscriberComponent.class)) {
-                    MarketSubscriberComponent marketSubscriberComponent = dynParcel.buildingEntity.getComponent(MarketSubscriberComponent.class);
-                    marketSubscriberComponent.productStorage = dynParcel.buildingEntity;
-                    marketSubscriberComponent.consumptionStorage = dynParcel.buildingEntity;
-                    dynParcel.buildingEntity.saveComponent(marketSubscriberComponent);
-
-                    dynParcel.buildingEntity.send(new SubscriberRegistrationEvent());
+                template.send(new SpawnStructureEvent(spawnTransformation));
+                if (building.isEntity) {
+                    template.send(new OnSpawnDynamicStructureEvent(spawnTransformation, dynParcel.buildingEntity));
                 }
             }
         }
+
 
 
 
@@ -427,29 +430,30 @@ public class Construction extends BaseComponentSystem {
      */
     @ReceiveEvent
     public void catchOnSpawnDynamicStructure(OnSpawnDynamicStructureEvent event, EntityRef entityRef) {
-        entityRef.send(new SpawnStructureEvent(event.getTransformation()));
-        ChestStorageComponent chestStorageComponent = new ChestStorageComponent();
+        if (!entityRef.hasComponent(ChestPositionsComponent.class) && !entityRef.hasComponent(ProductionChestComponent.class)) {
+            return;
+        }
 
-        if (entityRef.hasComponent(ConsumptionChestComponent.class)) {
-            ConsumptionChestComponent consumptionChestComponent = entityRef.getComponent(ConsumptionChestComponent.class);
-            chestStorageComponent.consumptionChests = new ArrayList<>();
-            for (Vector3i pos : consumptionChestComponent.positions) {
+        ChestStorageComponent chestStorageComponent = new ChestStorageComponent();
+        if (entityRef.hasComponent(ChestPositionsComponent.class)) {
+            ChestPositionsComponent chestPositionsComponent = entityRef.getComponent(ChestPositionsComponent.class);
+            chestStorageComponent.chests = new ArrayList<>();
+            for (Vector3i pos : chestPositionsComponent.positions) {
                 Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
-                chestStorageComponent.consumptionChests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
+                chestStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
             }
         }
         if (entityRef.hasComponent(ProductionChestComponent.class)) {
-            if (chestStorageComponent.consumptionChests == null) {
-                chestStorageComponent.consumptionChests = new ArrayList<>();
+            if (chestStorageComponent.chests == null) {
+                chestStorageComponent.chests = new ArrayList<>();
             }
             ProductionChestComponent productionChestComponent = entityRef.getComponent(ProductionChestComponent.class);
 
             for (Vector3i pos : productionChestComponent.positions) {
                 pos = event.getTransformation().transformVector3i(pos);
-                chestStorageComponent.consumptionChests.add(blockEntityRegistry.getBlockEntityAt(pos));
+                chestStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(pos));
             }
         }
-
 
         event.getBuildingEntity().addComponent(chestStorageComponent);
     }

@@ -3,9 +3,13 @@
      "name" : "Marketplace",
      "templateNames" : ["smithyTemplate"],
      "zone" : "COMMERCIAL",
-     "minSize" : 144,
+     "minSize" : 188,
      "maxSize" : 300,
      "isEntity" : true
+    },
+    "MarketSubscriber" : {
+     "production" : {"core:torch" : 10},
+     "productionInterval" : 100
     }
 }
 

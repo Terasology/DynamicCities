@@ -23,13 +23,17 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.registry.In;
 
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class economySetupSystem extends BaseComponentSystem {
+public class EconomySetupSystem extends BaseComponentSystem {
 
     @In
     private StorageHandlerLibrary storageHandlerLibrary;
 
+    @In
+    private BuildingStorageHandler buildingStorageHandler;
     @Override
     public void postBegin() {
+
         storageHandlerLibrary.registerHandler(new PopulationStorageHandler());
+        storageHandlerLibrary.registerHandler(buildingStorageHandler);
     }
 }

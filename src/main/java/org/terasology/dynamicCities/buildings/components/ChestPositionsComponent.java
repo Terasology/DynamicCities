@@ -21,9 +21,10 @@ import org.terasology.math.geom.Vector3i;
 
 import java.util.List;
 
-public class ConsumptionChestComponent implements Component {
+public class ChestPositionsComponent implements Component {
     /**
-     * Position of the chest of which resources should be drawn out
+     * Position of the chest in the local coordinate space of a template of which resources should be drawn out
+     * Important: Add this to the structure template prefab and not to the building prefab.
      */
     public List<Vector3i> positions;
 }

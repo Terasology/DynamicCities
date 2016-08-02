@@ -24,6 +24,5 @@ import java.util.List;
  * This stores references to chests for a building entity. They are distinguished into chests to draw resources from and chests to store into.
  */
 public class ChestStorageComponent implements Component {
-    public List<EntityRef> consumptionChests;
-    public List<EntityRef> productionChests;
+    public List<EntityRef> chests;
 }

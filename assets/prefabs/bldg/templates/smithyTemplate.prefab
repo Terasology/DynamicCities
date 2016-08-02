@@ -154,5 +154,9 @@
                         { "blockType": "engine:air", "region": { "min": [3, 2, 0], "size": [3, 1, 1]}},
                         { "blockType": "engine:air", "region": { "min": [8, 1, 0], "size": [5, 4, 1]}}
         ]
+    },
+    "ChestPositions" : {
+        "positions" : [[8, 1, -7]]
+
     }
 }
