@@ -344,6 +344,7 @@ public class Construction extends BaseComponentSystem {
 
 
                 if (dynParcel.buildingEntity.hasComponent(MarketSubscriberComponent.class)) {
+                    dynParcel.buildingEntity.setAlwaysRelevant(true);
                     MarketSubscriberComponent marketSubscriberComponent = dynParcel.buildingEntity.getComponent(MarketSubscriberComponent.class);
                     marketSubscriberComponent.productStorage = dynParcel.buildingEntity;
                     marketSubscriberComponent.consumptionStorage = dynParcel.buildingEntity;

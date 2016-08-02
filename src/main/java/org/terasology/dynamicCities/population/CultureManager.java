@@ -57,6 +57,13 @@ public class CultureManager extends BaseComponentSystem {
                 }
                 if (culture.availableBuildings != null) {
                     Toolbox.stringsToLowerCase(culture.availableBuildings);
+                } else {
+                    logger.warn("No available Buildings defined for culture " + culture.name);
+                }
+                if (culture.residentialZones != null) {
+                    Toolbox.stringsToLowerCase(culture.residentialZones);
+                } else {
+                    logger.warn("No residential zones defined for culture " + culture.name);
                 }
             }
         }
