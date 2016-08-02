@@ -48,9 +48,9 @@ import java.util.Set;
  * This handles entities with multiple storage entities, mainly building-entities with chests
  * TODO: Delete consumption/production chest differentiation
  */
-@Share(BuildingStorageHandler.class)
+@Share(ChestStorageHandler.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class BuildingStorageHandler  extends BaseComponentSystem implements StorageComponentHandler<ChestStorageComponent> {
+public class ChestStorageHandler extends BaseComponentSystem implements StorageComponentHandler<ChestStorageComponent> {
 
     @In
     private AssetManager assetManager;
@@ -68,7 +68,7 @@ public class BuildingStorageHandler  extends BaseComponentSystem implements Stor
     private InventoryManager inventoryManager;
 
     private BlockItemFactory blockItemFactory;
-    private Logger logger = LoggerFactory.getLogger(BuildingStorageHandler.class);
+    private Logger logger = LoggerFactory.getLogger(ChestStorageHandler.class);
 
     @Override
     public void initialise() {
