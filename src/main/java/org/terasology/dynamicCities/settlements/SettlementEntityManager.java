@@ -29,7 +29,6 @@ import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.Population;
-import org.terasology.dynamicCities.population.PopulationConstants;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
@@ -254,6 +253,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.addComponent(new ActiveSettlementComponent());
 
         settlementEntity.send(new SubscriberRegistrationEvent());
+        settlementEntity.setAlwaysRelevant(true);
         return settlementEntity;
     }
 
