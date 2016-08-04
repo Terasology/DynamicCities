@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.parcels.ParcelList;
-import org.terasology.dynamicCities.settlements.SettlementEntityManager;
+import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
@@ -39,12 +39,12 @@ import org.terasology.rendering.nui.Color;
 public class DistrictOverlay implements MinimapOverlay {
 
 
-    private SettlementEntityManager settlementEntityManager;
+    private EntityRef settlementCachingEntity;
     private Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
 
 
-    public DistrictOverlay(SettlementEntityManager settlementEntityManager) {
-        this.settlementEntityManager = settlementEntityManager;
+    public DistrictOverlay(EntityRef entityRef) {
+        this.settlementCachingEntity = entityRef;
 
 
     }
@@ -56,11 +56,14 @@ public class DistrictOverlay implements MinimapOverlay {
          * Color rectangles of the district grid in a zone specific color.
          *
          */
-
+        if (!settlementCachingEntity.hasComponent(SettlementsCacheComponent.class)) {
+            logger.error("No SettlementCacheComponent found!");
+            return;
+        }
         Rect2f screenRect = Rect2f.createFromMinAndSize(new Vector2f(canvas.getRegion().minX(), canvas.getRegion().minY()),
                 new Vector2f(canvas.getRegion().maxX(), canvas.getRegion().maxY()));
         Rect2fTransformer t = new Rect2fTransformer(worldRect, screenRect);
-        for (EntityRef settlement : settlementEntityManager.getSettlementEntities().getMap().values()) {
+        for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).getMap().values()) {
             if (!settlement.isActive()) {
                 continue;
             }
@@ -72,7 +75,7 @@ public class DistrictOverlay implements MinimapOverlay {
                 return;
             }
             if (parcelList == null) {
-                logger.error("Cannot find parcellist component for settlement: " + settlement.toString());
+                logger.error("Cannot find parcel-list component for settlement: " + settlement.toString());
                 return;
             }
             if (districtFacet == null) {

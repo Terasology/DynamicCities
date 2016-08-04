@@ -19,8 +19,9 @@ package org.terasology.dynamicCities.events;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.parcels.ParcelList;
-import org.terasology.dynamicCities.settlements.SettlementEntities;
+import org.terasology.dynamicCities.settlements.SettlementCachingSystem;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
+import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -63,7 +64,10 @@ public class PlayerTracker extends BaseComponentSystem {
     @In
     private SettlementEntityManager settlementEntityManager;
 
-    private SettlementEntities knownSettlements;
+    @In
+    private SettlementCachingSystem settlementCachingSystem;
+
+    private SettlementsCacheComponent knownSettlements;
     private final Map<EntityRef, EntityRef> prevLoc = new HashMap<>();
 
     /**
@@ -76,7 +80,7 @@ public class PlayerTracker extends BaseComponentSystem {
         LocationComponent loc = entity.getComponent(LocationComponent.class);
         Vector3f worldPos3d = loc.getWorldPosition();
         Vector2f worldPos = new Vector2f(worldPos3d.x, worldPos3d.z);
-        knownSettlements = settlementEntityManager.getSettlementEntities();
+        knownSettlements = settlementCachingSystem.getSettlementEntitiesComponent();
         Client client = networkSystem.getOwner(entity);
 
         // TODO: entity can be AI-controlled, too. These don't have an owner

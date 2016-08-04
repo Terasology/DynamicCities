@@ -21,17 +21,17 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.network.Replicate;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@MappedContainer
-public final class SettlementEntities implements Component {
+@Replicate
+public final class SettlementsCacheComponent implements Component {
 
     public Map<String, EntityRef> settlementEntities = new HashMap<>();
 
-    public SettlementEntities() { }
+    public SettlementsCacheComponent() { }
 
     public void add(EntityRef settlement) {
         Vector3f pos3f = settlement.getComponent(LocationComponent.class).getWorldPosition();

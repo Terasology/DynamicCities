@@ -23,7 +23,6 @@ import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.Construction;
 import org.terasology.dynamicCities.districts.DistrictManager;
-import org.terasology.dynamicCities.minimap.DistrictOverlay;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.Culture;
@@ -45,7 +44,6 @@ import org.terasology.economy.components.MarketSubscriberComponent;
 import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -72,7 +70,6 @@ import org.terasology.world.generation.Border3D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,6 +105,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private DistrictManager districtManager;
 
+    @In
+    private SettlementCachingSystem settlementCachingSystem;
+
     private int minDistance = 1000;
     private RegionEntitiesComponent regionEntitiesComponentStore;
     private int settlementMaxRadius = 256;
@@ -118,19 +118,20 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @Override
     public void postBegin() {
-        Iterator<EntityRef> settlementEntitiesIterator = entityManager.getEntitiesWith(SettlementEntities.class).iterator();
-        settlementEntities = settlementEntitiesIterator.hasNext() ? settlementEntitiesIterator.next() : null;
-        if (settlementEntities == null) {
-            settlementEntities = entityManager.create(new SettlementEntities());
-        }
+
+        settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         regionEntitiesComponentStore = regionEntityManager.getRegionEntitiesComponent();
         randNumGen = new WhiteNoise(regionEntitiesComponentStore.hashCode() & 0x921233);
-        minimapSystem.addOverlay(new DistrictOverlay(this));
 
     }
 
     @Override
     public void update(float delta) {
+        if (!settlementCachingSystem.isInitialised()) {
+            return;
+        } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
+            settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
+        }
         counter--;
         timer++;
         if (counter != 0) {
@@ -154,21 +155,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             growSettlement(settlement, timer);
             build(settlement);
         }
-        counter = 100;
-    }
-
-    @ReceiveEvent(components = {ActiveSettlementComponent.class})
-    public void registerSettlement(SettlementRegisterEvent event, EntityRef settlement) {
-        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
-        container.add(settlement);
-        settlementEntities.saveComponent(container);
+        counter = 500;
     }
 
 
     public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
-        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
         for (String vector2iString : container.getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance) {
@@ -183,7 +177,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             return true;
         }
 
-        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
         for (String vector2iString : container.getMap().keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
@@ -430,9 +424,5 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.saveComponent(buildingQueue);
     }
 
-    public SettlementEntities getSettlementEntities() {
-        SettlementEntities container = settlementEntities.getComponent(SettlementEntities.class);
-        return container;
-    }
 
 }

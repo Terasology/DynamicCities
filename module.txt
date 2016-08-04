@@ -27,6 +27,10 @@
         {
             "id" : "StructureTemplates",
             "minVersion" : "0.1.0-SNAPSHOT"
+        },
+        {
+            "id" : "StructuralResources",
+            "minVersion" : "0.2.1-SNAPSHOT"
         }
      ],
     "isGameplay" : "true",
