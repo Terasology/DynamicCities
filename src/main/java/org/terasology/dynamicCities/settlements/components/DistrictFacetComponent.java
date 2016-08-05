@@ -28,6 +28,7 @@ import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.network.Replicate;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 
@@ -44,16 +45,27 @@ public class DistrictFacetComponent implements Component {
      * TODO: Count the area for each district. Define consumption of zonearea for each district (evenly distributed atm).
      * TODO: Assign districts similar to parcels (look up if needs are already fulfilled before placement)
      */
+    @Replicate
     public Rect2i relativeRegion = Rect2i.EMPTY;
+    @Replicate
     public Rect2i worldRegion = Rect2i.EMPTY;
+    @Replicate
     public Rect2i gridWorldRegion = Rect2i.EMPTY;
+    @Replicate
     public Rect2i gridRelativeRegion = Rect2i.EMPTY;
+    @Replicate
     public int gridSize;
+    @Replicate
     public Vector2i center = new Vector2i();
+    @Replicate
     public List<Integer> districtMap;
+    @Replicate
     public List<Integer> districtSize;
+    @Replicate
     public Map<String, DistrictType> districtTypeMap;
+    @Replicate
     public int districtCount;
+    @Replicate
     public List<Vector2i> districtCenters;
 
     public DistrictFacetComponent() { }

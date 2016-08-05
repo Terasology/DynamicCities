@@ -63,7 +63,7 @@ public class DistrictOverlay implements MinimapOverlay {
         Rect2f screenRect = Rect2f.createFromMinAndSize(new Vector2f(canvas.getRegion().minX(), canvas.getRegion().minY()),
                 new Vector2f(canvas.getRegion().maxX(), canvas.getRegion().maxY()));
         Rect2fTransformer t = new Rect2fTransformer(worldRect, screenRect);
-        for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).getMap().values()) {
+        for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
             if (!settlement.isActive()) {
                 continue;
             }

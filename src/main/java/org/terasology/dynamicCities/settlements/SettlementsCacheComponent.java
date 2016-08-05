@@ -23,13 +23,16 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.network.Replicate;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@Replicate
-public final class SettlementsCacheComponent implements Component {
 
-    public Map<String, EntityRef> settlementEntities = new HashMap<>();
+public final class SettlementsCacheComponent implements Component {
+    @Replicate
+    public Map<String, EntityRef> settlementEntities;
+
+    @Replicate
+    public List<EntityRef> networkCache;
 
     public SettlementsCacheComponent() { }
 
@@ -44,8 +47,5 @@ public final class SettlementsCacheComponent implements Component {
         return settlementEntities.get(position.toString());
     }
 
-    public Map<String, EntityRef> getMap() {
-        return settlementEntities;
-    }
 
 }

@@ -59,6 +59,7 @@ import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
@@ -163,7 +164,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
         SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
-        for (String vector2iString : container.getMap().keySet()) {
+        for (String vector2iString : container.settlementEntities.keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance) {
                 return false;
@@ -178,7 +179,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
 
         SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
-        for (String vector2iString : container.getMap().keySet()) {
+        for (String vector2iString : container.settlementEntities.keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
                 return false;
@@ -234,6 +235,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         marketSubscriberComponent.production.put(population.popResourceType, Math.round(culture.growthRate));
         MarketComponent marketComponent = new MarketComponent(market);
 
+
+        NetworkComponent networkComponent = new NetworkComponent();
+        networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
         settlementEntity.addComponent(locationComponent);
         settlementEntity.addComponent(districtGrid);
         settlementEntity.addComponent(culture);
@@ -245,6 +249,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.addComponent(marketComponent);
         settlementEntity.addComponent(marketSubscriberComponent);
         settlementEntity.addComponent(new ActiveSettlementComponent());
+        settlementEntity.addComponent(networkComponent);
 
         settlementEntity.send(new SubscriberRegistrationEvent());
         settlementEntity.setAlwaysRelevant(true);

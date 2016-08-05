@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.ArrayList;
@@ -31,7 +32,9 @@ public class ParcelList implements Component {
     public Map<String, Integer> areaPerZone;
 
     public float minBuildRadius;
+    @Replicate
     public float maxBuildRadius;
+
     public List<DynParcel> parcels;
 
     public ParcelList() { }

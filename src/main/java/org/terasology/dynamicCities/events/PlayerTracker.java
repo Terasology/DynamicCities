@@ -92,7 +92,7 @@ public class PlayerTracker extends BaseComponentSystem {
         String name = client.getName();
 
         EntityRef newSettlement = null;
-        for (EntityRef settlement : knownSettlements.getMap().values()) {
+        for (EntityRef settlement : knownSettlements.settlementEntities.values()) {
             float radius = 0;
             if (settlement.hasComponent(ParcelList.class)) {
                 radius = settlement.getComponent(ParcelList.class).maxBuildRadius;

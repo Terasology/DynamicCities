@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.settlements;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.events.OnEnterSettlementEvent;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.events.AddDistrictOverlayEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
@@ -27,12 +28,13 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.players.event.OnPlayerSpawnedEvent;
-import org.terasology.network.Client;
+import org.terasology.network.NetworkComponent;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 @Share(SettlementCachingSystem.class)
@@ -51,28 +53,35 @@ public class SettlementCachingSystem extends BaseComponentSystem {
     private Logger logger = LoggerFactory.getLogger(SettlementCachingSystem.class);
 
     private boolean isInitialised;
+
     @Override
     public void postBegin() {
         Iterator<EntityRef> settlementEntitiesIterator = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
         settlementEntities = settlementEntitiesIterator.hasNext() ? settlementEntitiesIterator.next() : null;
         if (settlementEntities == null) {
-            settlementEntities = entityManager.create(new SettlementsCacheComponent());
+            NetworkComponent networkComponent = new NetworkComponent();
+            networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
+            SettlementsCacheComponent settlementsCacheComponent = new SettlementsCacheComponent();
+            settlementsCacheComponent.settlementEntities = new HashMap<>();
+            settlementsCacheComponent.networkCache = new ArrayList<>();
+            settlementEntities = entityManager.create(settlementsCacheComponent, networkComponent);
             settlementEntities.setAlwaysRelevant(true);
         }
         isInitialised = true;
+
     }
 
     @ReceiveEvent(components = {ActiveSettlementComponent.class})
     public void registerSettlement(SettlementRegisterEvent event, EntityRef settlement) {
         SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
         container.add(settlement);
+        container.networkCache.add(settlement);
         settlementEntities.saveComponent(container);
     }
 
     @ReceiveEvent
-    public void addOverlayToClient(OnPlayerSpawnedEvent event, EntityRef player) {
-        Client client1 = networkSystem.getOwner(player);
-        client1.getEntity().send(new AddDistrictOverlayEvent(settlementEntities));
+    public void addOverlayToClient(OnEnterSettlementEvent event, EntityRef player) {
+        player.send(new AddDistrictOverlayEvent());
 
     }
     public SettlementsCacheComponent getSettlementEntitiesComponent() {
