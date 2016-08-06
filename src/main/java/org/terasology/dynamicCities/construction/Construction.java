@@ -399,7 +399,7 @@ public class Construction extends BaseComponentSystem {
             List<EntityRef> templates = templatesOptional.get();
             for (EntityRef template : templates) {
                 BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
-                transformationList.addTransformation(BlockRegionUtilities.setOnCenterXZ(template.getComponent(SpawnBlockRegionsComponent.class)));
+                 transformationList.addTransformation(new BlockRegionMovement(BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))));
                 transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
                 transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
                         dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
