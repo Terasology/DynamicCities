@@ -13,33 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
-
+package org.terasology.dynamicCities.buildings.components;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.entity.EntityRef;
 
-public class Population implements Component {
+import java.util.List;
 
-
-    public float populationSize;
-    public float health;
-    public int capacity;
-    public String popResourceType = "popUnit";
-    public Population(int size) {
-        populationSize = size;
-    }
-
-    public Population() { }
-
-    public Population(String arg) {
-        if (arg.equals("test")) {
-            capacity = 999;
-        }
-    }
-
-    public void grow(float growthRate) {
-        populationSize += growthRate /* * populationSize*/;
-    }
-
-
+/**
+ * This stores references to chests for a building entity. They are distinguished into chests to draw resources from and chests to store into.
+ */
+public class ChestStorageComponent implements Component {
+    public List<EntityRef> chests;
 }

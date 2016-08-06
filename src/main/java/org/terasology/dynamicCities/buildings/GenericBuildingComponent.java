@@ -30,30 +30,8 @@ public class GenericBuildingComponent implements Component {
     public List<String> templateNames;
     public List<String> generatorNames;
     public String zone;
-
-    public GenericBuildingComponent(String name, boolean isComposite, List<String> templateNames, List<String> generatorNames, String zone) {
-        this.name = name;
-        this.templateNames = templateNames;
-        this.generatorNames = generatorNames;
-        this.zone = zone;
-    }
-
-    /*
-    public GenericBuildingComponent(String name, boolean isComposite, String generatorNames, String zone) {
-        this.name = name;
-        this.generatorNames = new ArrayList<>();
-        this.generatorNames.add(generatorNames);
-        this.zone = zone;
-    }
-    */
-    public GenericBuildingComponent() { }
-
-    public List<String> getBuildingGenerators() {
-        return generatorNames;
-    }
-    public List<String> getStructuredTemplates() {
-        return templateNames;
-    }
-
-
+    public int minSize;
+    public int maxSize;
+    public boolean isEntity;
+    public String resourceUrn;
 }

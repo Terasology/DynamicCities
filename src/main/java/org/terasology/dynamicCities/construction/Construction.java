@@ -32,11 +32,16 @@ import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
+import org.terasology.dynamicCities.buildings.components.ChestPositionsComponent;
+import org.terasology.dynamicCities.buildings.components.ChestStorageComponent;
+import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
+import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.events.PlayerTracker;
 import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
 import org.terasology.dynamicCities.rasterizer.doors.DoorRasterizer;
@@ -46,16 +51,29 @@ import org.terasology.dynamicCities.rasterizer.parts.HollowBuildingPartRasterize
 import org.terasology.dynamicCities.rasterizer.parts.RectPartRasterizer;
 import org.terasology.dynamicCities.rasterizer.parts.RoundPartRasterizer;
 import org.terasology.dynamicCities.rasterizer.parts.StaircaseRasterizer;
-import org.terasology.dynamicCities.rasterizer.roofs.*;
+import org.terasology.dynamicCities.rasterizer.roofs.ConicRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.DomeRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.FlatRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.HipRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.PentRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.RoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.economy.components.MarketSubscriberComponent;
+import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
+import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
@@ -64,11 +82,15 @@ import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
+import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
+import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
+import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
+import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
@@ -76,13 +98,17 @@ import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
 //TODO: Move Generators and Templates to the BuildingManager
 @Share(value = Construction.class)
-@RegisterSystem
+@RegisterSystem(RegisterMode.AUTHORITY)
 public class Construction extends BaseComponentSystem {
 
     @In
@@ -90,6 +116,9 @@ public class Construction extends BaseComponentSystem {
 
     @In
     private BlockManager blockManager;
+
+    @In
+    private BlockEntityRegistry blockEntityRegistry;
 
     @In
     private PlayerTracker playerTracker;
@@ -109,6 +138,10 @@ public class Construction extends BaseComponentSystem {
     @In
     private AssetManager assetManager;
 
+    @In
+    private InventoryManager inventoryManager;
+
+
     private BlockTheme theme;
 
     private Block air;
@@ -116,7 +149,6 @@ public class Construction extends BaseComponentSystem {
     private Block water;
     private Block defaultBlock;
     private int maxMinDeviation = 40;
-
     private final List<AbsDynBuildingRasterizer> stdRasterizers = new ArrayList<>();
     private final List<WindowRasterizer> windowRasterizers = new ArrayList<>();
     private final List<DoorRasterizer> doorRasterizers = new ArrayList<>();
@@ -184,7 +216,6 @@ public class Construction extends BaseComponentSystem {
         roofRasterizers.add(new HipRoofRasterizer(theme));
         roofRasterizers.add(new PentRoofRasterizer(theme));
         roofRasterizers.add(new SaddleRoofRasterizer(theme));
-
     }
 
     /**
@@ -196,6 +227,10 @@ public class Construction extends BaseComponentSystem {
      */
     public int flatten(Rect2i area, int defaultHeight, Block filler) {
 
+        if (area.area() == 0) {
+            logger.error("The area which should be flattened is empty!");
+            return -9999;
+        }
         SurfaceHeightFacet surfaceHeightFacet = sample(area, defaultHeight);
         int meanHeight = 0;
         Vector3i setPos = new Vector3i();
@@ -260,7 +295,7 @@ public class Construction extends BaseComponentSystem {
     }
 
     //the standard strategy used in Cities and StaticCities module
-    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
+    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, Culture culture) {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
         Rect2i shape = dynParcel.getShape();
@@ -268,7 +303,7 @@ public class Construction extends BaseComponentSystem {
         Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
 
-        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZone(dynParcel.getZone());
+        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), culture);
         GenericBuildingComponent building;
 
 
@@ -291,18 +326,38 @@ public class Construction extends BaseComponentSystem {
         for (EntityRef player : playerCityMap.keySet()) {
             if (playerCityMap.get(player) == settlement) {
                 LocationComponent playerLocation = player.getComponent(LocationComponent.class);
-                if (dynParcel.getShape().contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
+                if (playerLocation != null && dynParcel.getShape().contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
                     return false;
                 }
             }
         }
 
+        /**
+         * Generate the building entity if there is one.
+         */
+        if (building.isEntity) {
+            Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
+            if (entityPrefab.isPresent()) {
+                dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
+                //Remove the GenericBuildingComponent as it is already saved by its building name in the DynParcel.class
+                dynParcel.buildingEntity.removeComponent(GenericBuildingComponent.class);
+
+
+                if (dynParcel.buildingEntity.hasComponent(MarketSubscriberComponent.class)) {
+                    dynParcel.buildingEntity.setAlwaysRelevant(true);
+                    MarketSubscriberComponent marketSubscriberComponent = dynParcel.buildingEntity.getComponent(MarketSubscriberComponent.class);
+                    marketSubscriberComponent.productStorage = dynParcel.buildingEntity;
+                    marketSubscriberComponent.consumptionStorage = dynParcel.buildingEntity;
+                    dynParcel.buildingEntity.saveComponent(marketSubscriberComponent);
+
+                    dynParcel.buildingEntity.send(new SubscriberRegistrationEvent());
+                }
+            }
+        }
 
         /**
          * Generate buildings with BuildingGenerators
          */
-
-
         Optional<List<BuildingGenerator>> generatorsOptional = buildingManager.getGeneratorsForBuilding(building);
         if (generatorsOptional.isPresent()) {
             List<BuildingGenerator> generators = generatorsOptional.get();
@@ -339,22 +394,29 @@ public class Construction extends BaseComponentSystem {
         /**
          * Generate buildings with StructuredTemplates
          */
-
         Optional<List<EntityRef>> templatesOptional = buildingManager.getTemplatesForBuilding(building);
         if (templatesOptional.isPresent()) {
             List<EntityRef> templates = templatesOptional.get();
-            BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
-            transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
-                    dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
-            //transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.fastAbs(dynParcel.orientation.ordinal())));
-            BlockRegionTransform spawnTransformation = transformationList;
             for (EntityRef template : templates) {
+                BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
+                transformationList.addTransformation(BlockRegionUtilities.setOnCenterXZ(template.getComponent(SpawnBlockRegionsComponent.class)));
+                transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
+                transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
+                        dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
+                BlockRegionTransform spawnTransformation = transformationList;
                 template.send(new SpawnStructureEvent(spawnTransformation));
+                if (building.isEntity) {
+                    template.send(new OnSpawnDynamicStructureEvent(spawnTransformation, dynParcel.buildingEntity));
+                }
             }
         }
 
 
 
+
+        /**
+         * Send block-change event to refresh the minimap
+         */
         Map<Vector3i, Block> blockPos = new HashMap<>();
         for (BaseVector2i rectPos : dynParcel.getShape().contents()) {
             blockPos.put(new Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
@@ -363,4 +425,38 @@ public class Construction extends BaseComponentSystem {
         dynParcel.setBuildingTypeName(building.name);
         return true;
     }
+
+    /**
+     * Catches the spawn of a structure template on a parcel and assigns potential chest entities to the parcels entity
+     */
+    @ReceiveEvent
+    public void catchOnSpawnDynamicStructure(OnSpawnDynamicStructureEvent event, EntityRef entityRef) {
+        if (!entityRef.hasComponent(ChestPositionsComponent.class) && !entityRef.hasComponent(ProductionChestComponent.class)) {
+            return;
+        }
+
+        ChestStorageComponent chestStorageComponent = new ChestStorageComponent();
+        if (entityRef.hasComponent(ChestPositionsComponent.class)) {
+            ChestPositionsComponent chestPositionsComponent = entityRef.getComponent(ChestPositionsComponent.class);
+            chestStorageComponent.chests = new ArrayList<>();
+            for (Vector3i pos : chestPositionsComponent.positions) {
+                Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
+                chestStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
+            }
+        }
+        if (entityRef.hasComponent(ProductionChestComponent.class)) {
+            if (chestStorageComponent.chests == null) {
+                chestStorageComponent.chests = new ArrayList<>();
+            }
+            ProductionChestComponent productionChestComponent = entityRef.getComponent(ProductionChestComponent.class);
+
+            for (Vector3i pos : productionChestComponent.positions) {
+                pos = event.getTransformation().transformVector3i(pos);
+                chestStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(pos));
+            }
+        }
+
+        event.getBuildingEntity().addComponent(chestStorageComponent);
+    }
+
 }

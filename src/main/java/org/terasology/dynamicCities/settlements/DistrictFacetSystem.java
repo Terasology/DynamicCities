@@ -13,33 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
+package org.terasology.dynamicCities.settlements;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
+import org.terasology.entitySystem.systems.RegisterSystem;
 
-public class Population implements Component {
-
-
-    public float populationSize;
-    public float health;
-    public int capacity;
-    public String popResourceType = "popUnit";
-    public Population(int size) {
-        populationSize = size;
-    }
-
-    public Population() { }
-
-    public Population(String arg) {
-        if (arg.equals("test")) {
-            capacity = 999;
-        }
-    }
-
-    public void grow(float growthRate) {
-        populationSize += growthRate /* * populationSize*/;
-    }
+@RegisterSystem(RegisterMode.AUTHORITY)
+public class DistrictFacetSystem extends BaseComponentSystem {
 
 
 }

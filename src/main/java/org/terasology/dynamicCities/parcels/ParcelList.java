@@ -18,22 +18,23 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @MappedContainer
 public class ParcelList implements Component {
 
-    public int residentialArea;
-    public int commercialArea;
-    public int militaryArea;
-    public int clericalArea;
-    public int governmentalArea;
+    public Map<String, Integer> areaPerZone;
 
     public float minBuildRadius;
+    @Replicate
     public float maxBuildRadius;
+
     public List<DynParcel> parcels;
 
     public ParcelList() { }
@@ -41,22 +42,16 @@ public class ParcelList implements Component {
         maxBuildRadius = 0;
         minBuildRadius = 60;
         parcels = new ArrayList<>();
+        areaPerZone = new HashMap<>();
     }
 
     public void addParcel(DynParcel parcel) {
         parcels.add(parcel);
-        switch (parcel.getZone()) {
-            case CLERICAL:      clericalArea += parcel.getShape().area();
-                                break;
-            case RESIDENTIAL:   residentialArea += parcel.getShape().area();
-                                break;
-            case COMMERCIAL:    commercialArea += parcel.getShape().area();
-                                break;
-            case GOVERNMENTAL:  governmentalArea += parcel.getShape().area();
-                                break;
-            case MILITARY:      militaryArea += parcel.getShape().area();
-                                break;
-            default:            break;
+        String zone = parcel.getZone();
+        if (areaPerZone.containsKey(zone)) {
+            areaPerZone.put(zone, areaPerZone.get(zone) + parcel.getShape().area());
+        } else {
+            areaPerZone.put(zone, parcel.getShape().area());
         }
     }
 

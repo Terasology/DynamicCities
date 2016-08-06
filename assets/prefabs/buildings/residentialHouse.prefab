@@ -2,7 +2,9 @@
     "GenericBuilding" : {
      "name" : "House",
      "generatorNames" : ["RectHouseGenerator"],
-     "zone" : "RESIDENTIAL"
+     "zone" : "RESIDENTIAL",
+     "minSize" : 200,
+     "maxSize" : 500
     }
 }
 

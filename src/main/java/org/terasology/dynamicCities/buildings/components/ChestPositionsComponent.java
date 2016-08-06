@@ -13,36 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.terasology.dynamicCities.buildings.components;
 
-package org.terasology.dynamicCities.parcels;
 
-/**
- * As part of a urban zoning scheme.
- */
-public enum Zone {
+import org.terasology.entitySystem.Component;
+import org.terasology.math.geom.Vector3i;
 
+import java.util.List;
+
+public class ChestPositionsComponent implements Component {
     /**
-     * Typically housing
+     * Position of the chest in the local coordinate space of a template of which resources should be drawn out
+     * Important: Add this to the structure template prefab and not to the building prefab.
      */
-    RESIDENTIAL,
-
-    /**
-     * Churches, mosques, etc.
-     */
-    CLERICAL,
-
-    /**
-     * Town halls, etc.
-     */
-    GOVERNMENTAL,
-
-    /**
-     * Markets, storage sites, etc.
-     */
-    COMMERCIAL,
-
-    /**
-     * Barracks, fortifications, etc.
-     */
-    MILITARY
+    public List<Vector3i> positions;
 }

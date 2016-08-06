@@ -16,18 +16,8 @@
 package parcels;
 
 
-import org.junit.Before;
-import org.junit.Test;
-import org.terasology.commonworld.Orientation;
-import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.dynamicCities.parcels.ParcelList;
-import org.terasology.dynamicCities.parcels.Zone;
-import org.terasology.math.geom.Rect2i;
-
-import static org.junit.Assert.assertEquals;
-
 public class ParcelListTest {
-
+/*
     public ParcelList parcels;
     public Rect2i[] shapes;
     @Before
@@ -56,4 +46,5 @@ public class ParcelListTest {
         assertEquals(100, parcels.residentialArea);
         assertEquals(100, parcels.governmentalArea);
     }
+    */
 }

@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @MappedContainer
-public class RegionEntities implements Component {
+public class RegionEntitiesComponent implements Component {
 
     public Map<String, EntityRef> regionEntities;
     public int gridSize;
@@ -41,13 +41,13 @@ public class RegionEntities implements Component {
     public List<String> processed;
     public int cellSize;
 
-    public RegionEntities() {
+    public RegionEntitiesComponent() {
         regionEntities = new HashMap<>();
         cellGrid = new HashMap<>();
         processed = new ArrayList<>();
     }
 
-    public RegionEntities(int gridSize) {
+    public RegionEntitiesComponent(int gridSize) {
         regionEntities = new HashMap<>();
         cellGrid = new HashMap<>();
         processed = new ArrayList<>();

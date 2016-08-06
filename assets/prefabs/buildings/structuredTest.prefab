@@ -1,0 +1,10 @@
+{
+    "GenericBuilding" : {
+     "name" : "Testbuilding",
+     "templateNames" : ["DynamicCities:testTemplate"],
+     "zone" : "RESIDENTIAL",
+     "minSize" : 200,
+     "maxSize" : 400
+ }
+}
+

@@ -17,28 +17,5 @@
             { "blockType": "engine:air", "region": { "min": [-1, 3, 3], "size": [3, 1, 1]}},
             { "blockType": "engine:air", "region": { "min": [-1, 1, 4], "size": [3, 3, 1]}}
         ]
-    },
-    "ScheduleStructurePlacement" : {
-        "placementsToSchedule": [
-            {
-                "structureTemplateType": "DynamicCities:building",
-                "front": "RIGHT",
-                "position": [0, 0, 0]
-            }
-        ]
-    },
-    "CheckBlockRegionCondition" : {
-        "checksToPerform": [
-            {"condition": "StructureTemplates:IsGroundLike", "region" :{"min": [-3, -1, 1], "size": [7, 7, 6]}}
-        ]
-    },
-    /* For debugging purposes it is an item: */
-    "parent" : "engine:iconItem",
-    "DisplayName" : {
-        "name" : "Spawn dungeon corridor right turn"
-    },
-    "Item" : {
-        "icon" : "engine:items#whiteRecipe"
-    },
-    "SpawnStructureAction": {}
+    }
 }

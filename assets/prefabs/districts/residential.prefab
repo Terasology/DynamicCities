@@ -1,0 +1,7 @@
+{
+    "DistrictType" : {
+        "name" : "residential",
+        "color" : 435324,
+        "zones" : ["RESIDENTIAL"]
+    }
+}

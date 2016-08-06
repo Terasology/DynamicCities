@@ -19,6 +19,13 @@ package org.terasology.dynamicCities.utilities;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 public class Toolbox {
 
     public static Vector3f stringToVector3f(String string) {
@@ -78,5 +85,20 @@ public class Toolbox {
             }
         }
         return matrix;
+    }
+    public static void stringsToLowerCase(List strings) {
+        ListIterator<String> iterator = strings.listIterator();
+        while (iterator.hasNext())
+        {
+            iterator.set(iterator.next().toLowerCase());
+        }
+    }
+    public static Map<String, Integer> stringsToLowerCase(Map<String, Integer> map) {
+        Set<String> keySet = Collections.unmodifiableSet(map.keySet());
+        Map<String, Integer> newMap = new HashMap<>();
+        for (String key : keySet) {
+            newMap.put(key.toLowerCase(), map.get(key));
+        }
+        return newMap;
     }
 }
