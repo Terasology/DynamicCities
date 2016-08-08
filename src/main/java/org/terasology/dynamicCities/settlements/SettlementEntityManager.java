@@ -52,7 +52,6 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
 import org.terasology.math.Region3i;
-import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
 import org.terasology.math.geom.Rect2i;
@@ -310,16 +309,22 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     public void build(EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
         Culture culture = settlement.getComponent(Culture.class);
+        ParcelList parcelList = settlement.getComponent(ParcelList.class);
         Set<DynParcel> removedParcels = new HashSet<>();
-        Set<DynParcel> parcels = buildingQueue.buildingQueue;
+        Set<DynParcel> parcelsInQueue = buildingQueue.buildingQueue;
 
-        for (DynParcel dynParcel : parcels) {
+
+        for (DynParcel dynParcel : parcelsInQueue) {
             if (constructer.buildParcel(dynParcel, settlement, culture)) {
                 removedParcels.add(dynParcel);
             }
         }
-        parcels.removeAll(removedParcels);
+        parcelsInQueue.removeAll(removedParcels);
+        for (DynParcel dynParcel : removedParcels) {
+            parcelList.addParcel(dynParcel);
+        }
         settlement.saveComponent(buildingQueue);
+        settlement.saveComponent(parcelList);
     }
 
     public void growSettlement(EntityRef settlement, int time) {
@@ -377,11 +382,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             while (culture.getBuildingNeedsForZone(zone) * population.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
                     && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
                 int iter = 0;
-
-                int sizeX = Math.round(TeraMath.fastAbs(rng.nextInt(minMaxSizes.get(zone).get(0).x(),
-                        minMaxSizes.get(zone).get(1).x())));
-                int sizeY = Math.round(TeraMath.fastAbs(rng.nextInt(minMaxSizes.get(zone).get(0).y(),
-                        minMaxSizes.get(zone).get(1).y())));
+                int minSize = (minMaxSizes.get(zone).get(0).getX() < minMaxSizes.get(zone).get(0).getY())
+                        ? minMaxSizes.get(zone).get(0).getX() : minMaxSizes.get(zone).get(0).getY();
+                int maxSize = (minMaxSizes.get(zone).get(1).getX() < minMaxSizes.get(zone).get(1).getY())
+                        ? minMaxSizes.get(zone).get(1).getX() : minMaxSizes.get(zone).get(1).getY();
+                int sizeX = rng.nextInt(minSize, maxSize);
+                int sizeY = rng.nextInt(minSize, maxSize);
                 Rect2i shape;
                 Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(5));
                 Vector2i rectPosition = new Vector2i();
@@ -423,10 +429,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             population.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
         }
 
-
+        //Note: Saving of the actual parcel list happens when they are successfully build in the build() method
+        //This is due to ensuring that changes made while constructing are added
 
         nameTagComponent.text =  Float.toString(population.populationSize);
-        settlement.saveComponent(parcels);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(population);
         settlement.saveComponent(buildingQueue);

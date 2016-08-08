@@ -31,7 +31,7 @@ public class DynParcel implements Parcel {
     public String zone;
 
     public Rect2i shape;
-    public final Orientation orientation;
+    public Orientation orientation;
     public String buildingTypeName;
     public EntityRef buildingEntity;
     /**

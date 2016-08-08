@@ -25,8 +25,10 @@ import org.terasology.cities.bldg.gen.CommercialBuildingGenerator;
 import org.terasology.cities.bldg.gen.RectHouseGenerator;
 import org.terasology.cities.bldg.gen.SimpleChurchGenerator;
 import org.terasology.cities.bldg.gen.TownHallGenerator;
+import org.terasology.commonworld.Orientation;
 import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
+import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -186,8 +188,7 @@ public class BuildingManager extends BaseComponentSystem {
                 int index = rng.nextInt(max);
                 building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
                 iter++;
-            } while ((building.minSize.x > shape.sizeX() || building.minSize.y > shape.sizeY()
-                    || building.maxSize.x < shape.sizeX() || building.maxSize.y < shape.sizeY() || !culture.availableBuildings.contains(building.name)) && iter < 100);
+            } while ((!isFitting(shape, building) || !culture.availableBuildings.contains(building.name)) && iter < 100);
             if (iter >= 55) {
                 GenericBuildingComponent scaledDownBuilding = entityManager.getComponentLibrary().copy(findBiggestFittingBuilding(shape, zone));
                 scaledDownBuilding.isScaledDown = true;
@@ -306,5 +307,36 @@ public class BuildingManager extends BaseComponentSystem {
         }
 
         return fittingBuilding;
+    }
+
+    private boolean isFitting(Rect2i shape, GenericBuildingComponent building) {
+        boolean checkNorthSouth = building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
+                && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY();
+        boolean checkEastWest = building.minSize.x < shape.sizeY() && building.minSize.y < shape.sizeX()
+                && building.maxSize.x > shape.sizeY() && building.maxSize.y > shape.sizeX();
+        return checkEastWest && checkNorthSouth;
+    }
+
+    //Checks whether the building needs to be rotated in order to fit on the parcel
+    public boolean needsRotation(DynParcel parcel, GenericBuildingComponent building) {
+        Rect2i shape = parcel.shape;
+        Orientation orientation = parcel.orientation;
+        if (orientation == Orientation.NORTH || orientation == Orientation.SOUTH) {
+            if (building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
+                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY()) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        } else {
+            if (building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
+                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY()) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
     }
 }

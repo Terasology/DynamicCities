@@ -28,6 +28,7 @@ import org.terasology.cities.door.Door;
 import org.terasology.cities.model.roof.Roof;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.window.Window;
+import org.terasology.commonworld.Orientation;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
@@ -73,7 +74,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
-import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
@@ -367,6 +367,22 @@ public class Construction extends BaseComponentSystem {
         }
 
         /**
+         * Checks for rotation
+         */
+        boolean needsRotation = buildingManager.needsRotation(dynParcel, building);
+        if (needsRotation) {
+            switch (dynParcel.getOrientation()) {
+                case NORTH: dynParcel.orientation = Orientation.EAST;
+                    break;
+                case SOUTH: dynParcel.orientation = Orientation.WEST;
+                    break;
+                case WEST: dynParcel.orientation = Orientation.NORTH;
+                    break;
+                case EAST: dynParcel.orientation = Orientation.SOUTH;
+                    break;
+            }
+        }
+        /**
          * Generate buildings with BuildingGenerators
          */
         Optional<List<BuildingGenerator>> generatorsOptional = buildingManager.getGeneratorsForBuilding(building);
@@ -411,7 +427,19 @@ public class Construction extends BaseComponentSystem {
             for (EntityRef template : templates) {
                 BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
                 transformationList.addTransformation(new BlockRegionMovement(BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))));
-                transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
+                int rotationAmount;
+                switch (dynParcel.orientation.ordinal() / 2) {
+                    case 0: rotationAmount = 0;
+                        break;
+                    case 1: rotationAmount = 3;
+                        break;
+                    case 2: rotationAmount = 2;
+                        break;
+                    case 3: rotationAmount = 1;
+                        break;
+                    default: rotationAmount = 0;
+                }
+                transformationList.addTransformation(new HorizontalBlockRegionRotation(rotationAmount));
                 transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
                         dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
                 BlockRegionTransform spawnTransformation = transformationList;
