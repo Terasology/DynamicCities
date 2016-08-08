@@ -33,7 +33,9 @@ import org.terasology.network.NetworkMode;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.In;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 @RegisterSystem(RegisterMode.CLIENT)
 public class DistrictFacetOverlaySystem extends BaseComponentSystem {
@@ -55,28 +57,29 @@ public class DistrictFacetOverlaySystem extends BaseComponentSystem {
 
     private EntityRef clientEntity;
 
-    private boolean isOverlayAdded;
+    private Map<EntityRef, Boolean> isOverlayAdded;
 
     @Override
     public void initialise() {
         if (networkSystem.getMode() == NetworkMode.CLIENT) {
             clientEntity = networkSystem.getServer().getClientEntity();
         }
+        isOverlayAdded = new HashMap<>();
     }
     @ReceiveEvent
     public void onAddOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.CLIENT) {
-            if (clientEntity.getComponent(ClientComponent.class).character.getId() == entityRef.getId() && !isOverlayAdded) {
+            if (clientEntity.getComponent(ClientComponent.class).character.getId() == entityRef.getId() && !isOverlayAdded.getOrDefault(entityRef, false)) {
                 Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
                 if (entityRefs.hasNext()) {
                     minimapSystem.addOverlay(new DistrictOverlay((entityRefs.next())));
-                    isOverlayAdded = true;
+                    isOverlayAdded.put(entityRef, true);
                 } else {
                     logger.error("No SettlementCache found! Unable to create district overlay");
                 }
             }
         }
-        if (networkSystem.getMode() == NetworkMode.DEDICATED_SERVER && !isOverlayAdded) {
+        if (networkSystem.getMode() == NetworkMode.DEDICATED_SERVER && !isOverlayAdded.getOrDefault(entityRef, false)) {
             if (localPlayer.getCharacterEntity() == entityRef) {
                 Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
                 if (entityRefs.hasNext()) {
