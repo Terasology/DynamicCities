@@ -24,11 +24,11 @@ import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -36,7 +36,7 @@ import org.terasology.rendering.nui.Color;
 
 @Share(value = RegionEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class RegionEntityManager extends BaseComponentSystem implements UpdateSubscriberSystem {
+public class RegionEntityManager extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
@@ -51,37 +51,14 @@ public class RegionEntityManager extends BaseComponentSystem implements UpdateSu
         regionEntitiesComponent = new RegionEntitiesComponent(96);
     }
 
-    private int counter = 100;
-
-    /**
-     * Current Task: play around with intervals of deletion
-     * @param delta The time (in seconds) since the last engine update.
-     */
-    @Override
-    public void update(float delta) {
-        Iterable<EntityRef> unregisteredRegions = entityManager.getEntitiesWith(UnregisteredRegionComponent.class);
-        for (EntityRef region : unregisteredRegions) {
-            regionEntitiesComponent.add(region);
-            region.removeComponent(UnregisteredRegionComponent.class);
-            region.addComponent(new UnassignedRegionComponent());
-            NameTagComponent nT = region.getComponent(NameTagComponent.class);
-            nT.textColor = Color.GREEN;
-            region.saveComponent(nT);
-        }
-
-        counter++;
-
-        if (counter != 0) {
-            return;
-        }
-
-        for (String posString : regionEntitiesComponent.cellGrid.keySet()) {
-            if (!regionEntitiesComponent.processed.contains(posString) && (!settlementEntities.checkMinDistanceCell(posString)
-                    /*|| regionEntitiesComponent.checkSidesLoadedLong(posString)*/)) {
-                regionEntitiesComponent.clearCell(posString);
-            }
-        }
-        counter = 100;
+    @ReceiveEvent(components = {UnregisteredRegionComponent.class})
+    public void registerRegion(OnActivatedComponent event, EntityRef region) {
+        regionEntitiesComponent.add(region);
+        region.removeComponent(UnregisteredRegionComponent.class);
+        region.addComponent(new UnassignedRegionComponent());
+        NameTagComponent nT = region.getComponent(NameTagComponent.class);
+        nT.textColor = Color.GREEN;
+        region.saveComponent(nT);
     }
 
     @ReceiveEvent(components = {UnassignedRegionComponent.class})

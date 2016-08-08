@@ -77,6 +77,7 @@ import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
@@ -310,7 +311,8 @@ public class Construction extends BaseComponentSystem {
             building = buildingOptional.get();
         }
         if (building.isScaledDown) {
-            dynParcel.shape = Rect2i.createFromMinAndSize(dynParcel.shape.min(), building.maxSize);
+            Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
+            dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));
         }
 
         //Flatten the parcel area
