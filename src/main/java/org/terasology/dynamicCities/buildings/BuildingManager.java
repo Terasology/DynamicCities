@@ -72,7 +72,7 @@ public class BuildingManager extends BaseComponentSystem {
     private TownHallGenerator townHallGenerator;
 
     private List<BuildingGenerator> generators = new ArrayList<>();
-    private Map<String, Vector2i> minMaxSizePerZone = new HashMap<>();
+    private Map<String, List<Vector2i>> minMaxSizePerZone = new HashMap<>();
 
     @In
     private Context context;
@@ -158,7 +158,6 @@ public class BuildingManager extends BaseComponentSystem {
 
     public Optional<GenericBuildingComponent> getRandomBuildingOfZone(String zone, Rect2i shape) {
         if (buildings.containsKey(zone)) {
-            int parcelSize = shape.sizeX() * shape.sizeY();
             int max = buildings.get(zone).size();
             GenericBuildingComponent building;
             int iter = 0;
@@ -166,9 +165,10 @@ public class BuildingManager extends BaseComponentSystem {
                 int index = rng.nextInt(max);
                 building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
                 iter++;
-            } while ((building.minSize > parcelSize || building.maxSize < parcelSize) && iter < 100);
+            } while ((building.minSize.x > shape.minX() || building.minSize.y > shape.minY()
+                    || building.maxSize.x < shape.maxX() || building.maxSize.y < shape.maxY()) && iter < 100);
             if (iter >= 99) {
-                logger.error("No building types found for " + zone + "because no matching building for parcel size " + parcelSize + " was found!");
+                logger.error("No building types found for " + zone + "because no matching building for parcel " + shape.toString() +  " was found!");
                 return Optional.empty();
             }
             return Optional.of(building);
@@ -179,7 +179,6 @@ public class BuildingManager extends BaseComponentSystem {
 
     public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, Culture culture) {
         if (buildings.containsKey(zone)) {
-            int parcelSize = shape.sizeX() * shape.sizeY();
             int max = buildings.get(zone).size();
             GenericBuildingComponent building;
             int iter = 0;
@@ -187,10 +186,12 @@ public class BuildingManager extends BaseComponentSystem {
                 int index = rng.nextInt(max);
                 building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
                 iter++;
-            } while ((building.minSize > parcelSize || building.maxSize < parcelSize || !culture.availableBuildings.contains(building.name)) && iter < 100);
-            if (iter >= 99) {
-                logger.error("No building types found for " + zone + "because no matching building for parcel size " + parcelSize + " was found!");
-                return Optional.empty();
+            } while ((building.minSize.x > shape.sizeX() || building.minSize.y > shape.sizeY()
+                    || building.maxSize.x < shape.sizeX() || building.maxSize.y < shape.sizeY() || !culture.availableBuildings.contains(building.name)) && iter < 100);
+            if (iter >= 55) {
+                GenericBuildingComponent scaledDownBuilding = entityManager.getComponentLibrary().copy(findBiggestFittingBuilding(shape, zone));
+                scaledDownBuilding.isScaledDown = true;
+                return Optional.of(scaledDownBuilding);
             }
             return Optional.of(building);
         }
@@ -252,28 +253,58 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.of(generatorList);
     }
 
-    private Vector2i getMinMaxForZone(String zone) {
-        int min = 9999;
-        int max = 0;
+    private List<Vector2i> getMinMaxForZone(String zone) {
+        int minX = 9999;
+        int maxX = 0;
+        int minY = 9999;
+        int maxY = 0;
 
         for (GenericBuildingComponent building : buildings.get(zone)) {
-            int minTemp = building.minSize;
-            int maxTemp = building.maxSize;
+            int minTempX = building.minSize.x;
+            int minTempY = building.minSize.y;
+            int maxTempX = building.maxSize.x;
+            int maxTempY = building.maxSize.y;
 
-            min = (minTemp < min) ? minTemp : min;
-            max = (maxTemp > max) ? maxTemp : max;
+            minX = (minTempX < minX) ? minTempX : minX;
+            maxX = (maxTempX > maxX) ? maxTempX : maxX;
+            minY = (minTempY < minY) ? minTempY : minY;
+            maxY = (maxTempY > maxY) ? maxTempY : maxY;
         }
-        if (min == 9999 || max == 0) {
+        if (minX == 9999 || maxX == 0 || minY == 9999 || maxY == 0) {
             logger.error("Could not find valid min and/or max building sizes for zone " + zone);
         }
-        return new Vector2i(min, max);
+
+        List<Vector2i> minMaxSize = new ArrayList<>(2);
+        minMaxSize.add(new Vector2i(minX, minY));
+        minMaxSize.add(new Vector2i(maxX, maxY));
+        return minMaxSize;
     }
 
-    public Map<String, Vector2i> getMinMaxSizePerZone() {
+    public Map<String, List<Vector2i>> getMinMaxSizePerZone() {
         return Collections.unmodifiableMap(minMaxSizePerZone);
     }
 
     public Set<String> getZones() {
         return buildings.keySet();
+    }
+
+    private GenericBuildingComponent findBiggestFittingBuilding (Rect2i shape, String zone) {
+        int maxX = 0;
+        int maxY = 0;
+        GenericBuildingComponent fittingBuilding = null;
+        for (GenericBuildingComponent buildingComponent : buildings.get(zone)) {
+            int tempX = buildingComponent.minSize.x;
+            int tempY = buildingComponent.minSize.y;
+
+            if (tempY <= shape.sizeY() && tempX <= shape.sizeX()) {
+                if (maxX < tempX && maxY < tempY) {
+                    maxX = tempX;
+                    maxY = tempY;
+                    fittingBuilding = buildingComponent;
+                }
+            }
+        }
+
+        return fittingBuilding;
     }
 }

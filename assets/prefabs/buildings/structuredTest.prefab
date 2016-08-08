@@ -3,8 +3,8 @@
      "name" : "Testbuilding",
      "templateNames" : ["DynamicCities:testTemplate"],
      "zone" : "RESIDENTIAL",
-     "minSize" : 200,
-     "maxSize" : 400
+     "minSize" : [14, 14],
+     "maxSize" : [20, 20]
  }
 }
 

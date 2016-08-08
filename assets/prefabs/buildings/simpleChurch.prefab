@@ -3,8 +3,8 @@
      "name" : "SimpleChurch",
      "generatorNames" : ["SimpleChurchGenerator"],
      "zone" : "CLERICAL",
-     "minSize" : 400,
-     "maxSize" : 900
+     "minSize" : [20, 20],
+     "maxSize" : [30, 30]
     }
 }
 

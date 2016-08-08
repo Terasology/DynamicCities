@@ -156,7 +156,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             growSettlement(settlement, timer);
             build(settlement);
         }
-        counter = 500;
+        counter = 100;
     }
 
 
@@ -231,7 +231,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         MarketSubscriberComponent marketSubscriberComponent = new MarketSubscriberComponent(1);
         marketSubscriberComponent.consumptionStorage = market;
         marketSubscriberComponent.productStorage = settlementEntity;
-        marketSubscriberComponent.productionInterval = 1;
+        marketSubscriberComponent.productionInterval = 1000;
         marketSubscriberComponent.production.put(population.popResourceType, Math.round(culture.growthRate));
         MarketComponent marketComponent = new MarketComponent(market);
 
@@ -339,7 +339,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         int maxIterations = 40;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
-        Map<String, Vector2i> minMaxSizes = buildingManager.getMinMaxSizePerZone();
+        Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
 
         if (population == null) {
             logger.error("No population found or was uninitialised!");
@@ -372,27 +372,30 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
 
-        /**
-         * TODO: Generate more random rectangles (currently only squares).
-         */
+
         for (String zone : zones) {
-            while (culture.getBuildingNeedsForZone(zone) * population.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).x() && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
+            while (culture.getBuildingNeedsForZone(zone) * population.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
+                    && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
                 int iter = 0;
-                int size = Math.round(TeraMath.fastAbs(rng.nextInt((int) Math.ceil(Math.sqrt((double) minMaxSizes.get(zone).x())),
-                        (int) Math.floor(Math.sqrt(minMaxSizes.get(zone).y())))));
+
+                int sizeX = Math.round(TeraMath.fastAbs(rng.nextInt(minMaxSizes.get(zone).get(0).x(),
+                        minMaxSizes.get(zone).get(1).x())));
+                int sizeY = Math.round(TeraMath.fastAbs(rng.nextInt(minMaxSizes.get(zone).get(0).y(),
+                        minMaxSizes.get(zone).get(1).y())));
                 Rect2i shape;
                 Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(5));
                 Vector2i rectPosition = new Vector2i();
                 float radius;
                 //Place parcel randomly until it hits the right district
                 //For now: Just place is somewhere non intersecting
+                //TODO: Add some more advanced spawn distributions, e.g. several ellipses overlapping in the settlement center.
                 do {
                     iter++;
                     float angle = rng.nextFloat(0, 360);
                     radius = rng.nextFloat(0, minRadius);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
-                    shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), size, size);
+                    shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
                 } while ((!parcels.isNotIntersecting(shape)
                         || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)))
                         && iter != maxIterations);

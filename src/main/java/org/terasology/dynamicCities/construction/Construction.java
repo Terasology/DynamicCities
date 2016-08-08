@@ -296,26 +296,37 @@ public class Construction extends BaseComponentSystem {
 
     //the standard strategy used in Cities and StaticCities module
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, Culture culture) {
-        RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
-        dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
-        Rect2i shape = dynParcel.getShape();
-        HeightMap hm = HeightMaps.constant(dynParcel.height);
-        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
-                new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
 
-        Optional<GenericBuildingComponent> buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), culture);
+        /**
+         * get the building or shrink parcel size if no fitting building was found.
+         */
+        Optional<GenericBuildingComponent> buildingOptional;
         GenericBuildingComponent building;
-
+        buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), culture);
 
         if (!buildingOptional.isPresent()) {
             return false;
         } else {
             building = buildingOptional.get();
         }
+        if (building.isScaledDown) {
+            dynParcel.shape = Rect2i.createFromMinAndSize(dynParcel.shape.min(), building.maxSize);
+        }
+
+        //Flatten the parcel area
+        dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
+
+        RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
+        Rect2i shape = dynParcel.shape;
+        HeightMap hm = HeightMaps.constant(dynParcel.height);
+        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
+                new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
 
         if (dynParcel.height == -9999) {
             return false;
         }
+
+
         /**
          * Check for player collision
          */
@@ -399,7 +410,7 @@ public class Construction extends BaseComponentSystem {
             List<EntityRef> templates = templatesOptional.get();
             for (EntityRef template : templates) {
                 BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
-                transformationList.addTransformation(BlockRegionUtilities.setOnCenterXZ(template.getComponent(SpawnBlockRegionsComponent.class)));
+                transformationList.addTransformation(new BlockRegionMovement(BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))));
                 transformationList.addTransformation(new HorizontalBlockRegionRotation(TeraMath.clamp(TeraMath.fastAbs(dynParcel.orientation.ordinal()), 0, 4)));
                 transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
                         dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));

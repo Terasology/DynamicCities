@@ -160,7 +160,8 @@ public class DistrictFacetComponent implements Component {
                             diff += TeraMath.fastAbs(tempZoneArea.get(zone) / totalAssignedArea - culturalNeedsPercentage.get(zone));
                         }
                     }
-                    diff = 1 / diff;
+
+                    diff = (diff == 0) ? 0 : 1 / diff;
                     probabilites.put(districtType, diff);
                     totalDiff += diff;
                 }

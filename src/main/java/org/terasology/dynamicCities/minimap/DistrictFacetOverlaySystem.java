@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements;
+package org.terasology.dynamicCities.minimap;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.dynamicCities.minimap.DistrictOverlay;
+import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.dynamicCities.settlements.events.AddDistrictOverlayEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -33,7 +33,9 @@ import org.terasology.network.NetworkMode;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.In;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 @RegisterSystem(RegisterMode.CLIENT)
 public class DistrictFacetOverlaySystem extends BaseComponentSystem {
@@ -55,28 +57,42 @@ public class DistrictFacetOverlaySystem extends BaseComponentSystem {
 
     private EntityRef clientEntity;
 
-    private boolean isOverlayAdded;
+    private Map<EntityRef, Boolean> isOverlayAdded;
+
+    private boolean isOverlaySinglePlayerAdded;
 
     @Override
     public void initialise() {
         if (networkSystem.getMode() == NetworkMode.CLIENT) {
             clientEntity = networkSystem.getServer().getClientEntity();
         }
+        isOverlayAdded = new HashMap<>();
     }
     @ReceiveEvent
     public void onAddOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
+        if (networkSystem.getMode() == NetworkMode.NONE && !isOverlaySinglePlayerAdded) {
+            Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+            if (entityRefs.hasNext()) {
+                minimapSystem.addOverlay(new DistrictOverlay((entityRefs.next())));
+                isOverlaySinglePlayerAdded = true;
+            } else {
+                logger.error("No SettlementCache found! Unable to create district overlay");
+            }
+        } else if(isOverlaySinglePlayerAdded) {
+            return;
+        }
         if (networkSystem.getMode() == NetworkMode.CLIENT) {
-            if (clientEntity.getComponent(ClientComponent.class).character.getId() == entityRef.getId() && !isOverlayAdded) {
+            if (clientEntity.getComponent(ClientComponent.class).character.getId() == entityRef.getId() && !isOverlayAdded.getOrDefault(entityRef, false)) {
                 Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
                 if (entityRefs.hasNext()) {
                     minimapSystem.addOverlay(new DistrictOverlay((entityRefs.next())));
-                    isOverlayAdded = true;
+                    isOverlayAdded.put(entityRef, true);
                 } else {
                     logger.error("No SettlementCache found! Unable to create district overlay");
                 }
             }
         }
-        if (networkSystem.getMode() == NetworkMode.DEDICATED_SERVER && !isOverlayAdded) {
+        if (networkSystem.getMode() == NetworkMode.DEDICATED_SERVER && !isOverlayAdded.getOrDefault(entityRef, false)) {
             if (localPlayer.getCharacterEntity() == entityRef) {
                 Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
                 if (entityRefs.hasNext()) {

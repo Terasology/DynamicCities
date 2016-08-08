@@ -3,8 +3,8 @@
      "name" : "House",
      "generatorNames" : ["RectHouseGenerator"],
      "zone" : "RESIDENTIAL",
-     "minSize" : 200,
-     "maxSize" : 500
+     "minSize" : [14, 14],
+     "maxSize" : [22, 22]
     }
 }
 

@@ -3,8 +3,8 @@
      "name" : "Marketplace",
      "generatorNames" : ["CommercialBuildingGenerator"],
      "zone" : "COMMERCIAL",
-     "minSize" : 300,
-     "maxSize" : 600,
+     "minSize" : [17, 17],
+     "maxSize" : [24, 24]
      "isEntity" : true
     },
     "MarketSubscriber" : {

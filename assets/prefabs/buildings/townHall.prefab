@@ -3,8 +3,8 @@
      "name" : "Townhall",
      "generatorNames" : ["TownHallGenerator"],
      "zone" : "GOVERNMENTAL",
-     "minSize" : 600,
-     "maxSize" : 900
+     "minSize" : [25, 25],
+     "maxSize" : [30, 30]
     }
 }
 
