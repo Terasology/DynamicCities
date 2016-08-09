@@ -157,7 +157,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             growSettlement(settlement, timer);
             build(settlement);
         }
-        counter = 20;
+        counter = 1000;
     }
 
 
@@ -252,6 +252,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         settlementEntity.send(new SubscriberRegistrationEvent());
         settlementEntity.setAlwaysRelevant(true);
+
+
         return settlementEntity;
     }
 
@@ -263,7 +265,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private void getSurroundingRegions(Vector2i pos, EntityRef settlement) {
         RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
-        float radius = parcelList.maxBuildRadius;
+        float radius = parcelList.minBuildRadius;
         int size = (Math.round(radius / 32) >= 1) ? Math.round(radius / 32) : 1;
         Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-size, -size, size, size);
         Circle settlementCircle = new Circle(pos.toVector2f(), radius);
@@ -326,10 +328,11 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 removedParcels.add(dynParcel);
             }
         }
-        parcelsInQueue.removeAll(removedParcels);
         for (DynParcel dynParcel : removedParcels) {
             parcelList.addParcel(dynParcel);
         }
+        parcelsInQueue.removeAll(removedParcels);
+
         settlement.saveComponent(buildingQueue);
         settlement.saveComponent(parcelList);
     }
@@ -347,9 +350,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
         Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
-        float minRadius = parcels.minBuildRadius;
-        float maxRadius = parcels.maxBuildRadius;
-        int maxIterations = 40;
+
+        int maxIterations = 100;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
@@ -383,14 +385,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             return;
         }
 
-        Vector2i regionCenter = new Vector2i(locationComponent.getLocalPosition().x(),
-                locationComponent.getLocalPosition().z());
-        getSurroundingRegions(regionCenter, settlement);
 
-        //Remove trees in city area
-        for (EntityRef region : regionEntitiesComponent.regionEntities.values()) {
-            treeRemovalSystem.removeTreesInRegion(region);
-        }
 
         for (String zone : zones) {
             while (culture.getBuildingNeedsForZone(zone) * population.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
@@ -412,26 +407,36 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 do {
                     iter++;
                     float angle = rng.nextFloat(0, 360);
-                    radius = rng.nextFloat(0, minRadius);
+                    radius = rng.nextFloat(0, parcels.minBuildRadius);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
-                } while ((!parcels.isNotIntersecting(shape)
+                    if (radius > parcels.minBuildRadius) {
+                        logger.error("WTF IS GOING ON?");
+                    }
+                } while ((!parcels.isNotIntersecting(shape) || !buildingQueue.isNotIntersecting(shape)
                         || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)))
                         && iter != maxIterations);
                 //Grow settlement radius if no valid area was found
-                if (iter == maxIterations && minRadius < SettlementConstants.SETTLEMENT_RADIUS) {
-                    minRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
+                if (iter == maxIterations && parcels.minBuildRadius < SettlementConstants.SETTLEMENT_RADIUS) {
+                    parcels.minBuildRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
+                    //Remove trees in city area and add region entities
+                    Vector2i regionCenter = new Vector2i(locationComponent.getLocalPosition().x(),
+                            locationComponent.getLocalPosition().z());
+                    getSurroundingRegions(regionCenter, settlement);
+                    for (EntityRef region : regionEntitiesComponent.regionEntities.values()) {
+                        treeRemovalSystem.removeTreesInRegion(region);
+                    }
+
                     break;
                 } else if (iter == maxIterations) {
                     break;
                 }
-                if (radius > maxRadius) {
+                if (radius > parcels.maxBuildRadius) {
                     parcels.maxBuildRadius = radius;
                 }
 
                 DynParcel newParcel = new DynParcel(shape, orientation, zone, Math.round(locationComponent.getLocalPosition().y()));
-                parcels.addParcel(newParcel);
                 buildingQueue.buildingQueue.add(newParcel);
                 buildingSpawned++;
             }
@@ -443,13 +448,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             population.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
         }
 
-        //Note: Saving of the actual parcel list happens when they are successfully build in the build() method
+        //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
         //This is due to ensuring that changes made while constructing are added
 
         nameTagComponent.text =  Float.toString(population.populationSize);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(population);
         settlement.saveComponent(buildingQueue);
+        settlement.saveComponent(parcels);
     }
 
 

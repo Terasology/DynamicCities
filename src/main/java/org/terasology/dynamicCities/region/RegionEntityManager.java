@@ -68,7 +68,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         regionEntitiesComponent = new RegionEntitiesComponent(gridSize);
     }
 
-    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class, ResourceFacetComponent.class})
+    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class, ResourceFacetComponent.class, NameTagComponent.class})
     public void registerRegion(OnActivatedComponent event, EntityRef region) {
         add(region);
         region.removeComponent(UnregisteredRegionComponent.class);
