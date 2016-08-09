@@ -54,7 +54,7 @@ public class TreeRasterizer implements WorldRasterizer {
             BaseVector3i pos = entry.getKey();
             TreeGenerator treeGen = entry.getValue();
             int seed = relativeToWorld(facet, pos).hashCode();
-            Random random = new FastRandom(seed);
+            Random random = new FastRandom(0);
             treeGen.generate(blockManager, chunk, random, pos.x(), pos.y(), pos.z(), resourceFacet);
         }
     }

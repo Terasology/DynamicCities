@@ -37,6 +37,7 @@ public class TreeGeneratorLSystem extends AbstractTreeGenerator {
 
     public static final float MAX_ANGLE_OFFSET = (float) Math.toRadians(5);
 
+
     /* SETTINGS */
     private BlockUri leafType;
     private BlockUri barkType;
@@ -55,7 +56,7 @@ public class TreeGeneratorLSystem extends AbstractTreeGenerator {
      */
     public TreeGeneratorLSystem(String initialAxiom, Map<Character, LSystemRule> ruleSet, int maxDepth, float angle) {
         this.initialAxiom = initialAxiom;
-    
+
         recursiveGenerator = new RecursiveTreeGeneratorLSystem(maxDepth, angle, ruleSet);
     }
 
@@ -81,5 +82,21 @@ public class TreeGeneratorLSystem extends AbstractTreeGenerator {
     public TreeGeneratorLSystem setBarkType(BlockUri b) {
         barkType = b;
         return this;
+    }
+
+    public RecursiveTreeGeneratorLSystem getRecursiveGenerator() {
+        return recursiveGenerator;
+    }
+
+    public BlockUri getLeafType() {
+        return leafType;
+    }
+
+    public BlockUri getBarkType() {
+        return barkType;
+    }
+
+    public String getInitialAxiom() {
+        return initialAxiom;
     }
 }

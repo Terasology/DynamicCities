@@ -40,4 +40,9 @@ public class TreeGeneratorCactus extends AbstractTreeGenerator {
         cactusType = b;
         return this;
     }
+
+    public BlockUri getCactusType() {
+        return cactusType;
+    }
+
 }

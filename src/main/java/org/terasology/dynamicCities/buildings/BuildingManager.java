@@ -110,6 +110,9 @@ public class BuildingManager extends BaseComponentSystem {
                 if (building.templateNames != null) {
                     Toolbox.stringsToLowerCase(building.templateNames);
                 }
+                if (buildings.containsKey(prefab.getName().toLowerCase())) {
+                    logger.warn("Overwritten building with name " + prefab.getName());
+                }
                 buildings.put(building.zone, building);
                 logger.info("Loaded building prefab " + prefab.getName());
             }
@@ -117,6 +120,9 @@ public class BuildingManager extends BaseComponentSystem {
             //Get Templates
             if (prefab.hasComponent(SpawnBlockRegionsComponent.class)) {
                 EntityRef template = entityManager.create(prefab);
+                if (templates.containsKey(prefab.getName().toLowerCase())) {
+                    logger.warn("Overwritten template with name " + prefab.getName());
+                }
                 templates.put(prefab.getName().toLowerCase(), template);
                 logger.info("StructuredTemplate " + prefab.getName() + " loaded successfully.");
 
@@ -190,11 +196,10 @@ public class BuildingManager extends BaseComponentSystem {
                 iter++;
             } while ((!isFitting(shape, building) || !culture.availableBuildings.contains(building.name)) && iter < 100);
             if (iter >= 55) {
-                GenericBuildingComponent scaledDownBuilding = entityManager.getComponentLibrary().copy(findBiggestFittingBuilding(shape, zone));
-                scaledDownBuilding.isScaledDown = true;
-                return Optional.of(scaledDownBuilding);
+                building = entityManager.getComponentLibrary().copy(findBiggestFittingBuilding(shape, zone));
+                building.isScaledDown = true;
             }
-            return Optional.of(building);
+            return Optional.of(entityManager.getComponentLibrary().copy(building));
         }
         logger.warn("No building types found for " + zone);
         return Optional.empty();

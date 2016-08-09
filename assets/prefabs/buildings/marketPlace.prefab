@@ -4,7 +4,7 @@
      "generatorNames" : ["CommercialBuildingGenerator"],
      "zone" : "COMMERCIAL",
      "minSize" : [17, 17],
-     "maxSize" : [24, 24]
+     "maxSize" : [24, 24],
      "isEntity" : true
     },
     "MarketSubscriber" : {

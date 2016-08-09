@@ -20,8 +20,10 @@ import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
+import org.terasology.dynamicCities.region.components.TreeFacetComponent;
 import org.terasology.dynamicCities.region.components.UnregisteredRegionComponent;
 import org.terasology.dynamicCities.sites.SiteFacet;
+import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
@@ -55,14 +57,17 @@ public class RegionEntityProvider implements EntityProvider {
         if (checkCorners(worldRegion, surfaceHeightFacet)) {
             RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
             ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
+            TreeFacet treeFacet = region.getFacet(TreeFacet.class);
             SiteFacet siteFacet = region.getFacet(SiteFacet.class);
 
             EntityStore entityStore = new EntityStore();
 
             RoughnessFacetComponent roughnessFacetComponent = new RoughnessFacetComponent(roughnessFacet);
             ResourceFacetComponent resourceFacetComponent = new ResourceFacetComponent(resourceFacet);
+            TreeFacetComponent treeFacetComponent = new TreeFacetComponent(treeFacet);
             entityStore.addComponent(roughnessFacetComponent);
             entityStore.addComponent(resourceFacetComponent);
+            entityStore.addComponent(treeFacetComponent);
 
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
             entityStore.addComponent(locationComponent);

@@ -14,40 +14,44 @@
  * limitations under the License.
  */
 
-package org.terasology.dynamicCities.world.trees;
+package org.terasology.dynamicCities.construction;
 
-import org.terasology.dynamicCities.facets.ResourceFacet;
+import org.terasology.dynamicCities.region.components.TreeGeneratorContainer;
 import org.terasology.math.LSystemRule;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.collection.CharSequenceIterator;
 import org.terasology.utilities.random.Random;
+import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
-import org.terasology.world.chunks.CoreChunk;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Encapsulates the recursive algorithm for the generator of trees
  */
 
-public class RecursiveTreeGeneratorLSystem {
+public class RecursiveTreeGeneratorLSystemRemover {
 
-    private int maxDepth;
-    private float angle;
-    private Map<Character, LSystemRule> ruleSet;
+    public int maxDepth;
+    public float angle;
+    public Map<Character, LSystemRule> ruleSet;
+    private WorldProvider worldProvider;
 
-    public RecursiveTreeGeneratorLSystem(int maxDepth, float angle, Map<Character, LSystemRule> ruleSet) {
+    public RecursiveTreeGeneratorLSystemRemover(int maxDepth, float angle, Map<Character, LSystemRule> ruleSet, WorldProvider worldProvider) {
         this.angle = angle;
         this.maxDepth = maxDepth;
         this.ruleSet = ruleSet;
+        this.worldProvider = worldProvider;
     }
 
-    public void recurse(CoreChunk view, Random rand, int posX, int posY, int posZ, float angleOffset,
+    public void recurse(Random rand, int posX, int posY, int posZ, float angleOffset,
                         CharSequenceIterator axiomIterator, Vector3f position, Matrix4f rotation,
-                        Block bark, Block leaf, int depth, AbstractTreeGenerator treeGenerator, ResourceFacet resourceFacet) {
+                        Block air, int depth) {
         Matrix4f tempRotation = new Matrix4f();
         while (axiomIterator.hasNext()) {
             char c = axiomIterator.nextChar();
@@ -55,11 +59,14 @@ public class RecursiveTreeGeneratorLSystem {
                 case 'G':
                 case 'F':
                     // Tree trunk
-
-                    treeGenerator.safelySetBlock(view, posX + (int) position.x + 1, posY + (int) position.y, posZ + (int) position.z, bark, resourceFacet);
-                    treeGenerator.safelySetBlock(view, posX + (int) position.x - 1, posY + (int) position.y, posZ + (int) position.z, bark, resourceFacet);
-                    treeGenerator.safelySetBlock(view, posX + (int) position.x, posY + (int) position.y, posZ + (int) position.z + 1, bark, resourceFacet);
-                    treeGenerator.safelySetBlock(view, posX + (int) position.x, posY + (int) position.y, posZ + (int) position.z - 1, bark, resourceFacet);
+                    Vector3i pos1 = new Vector3i(posX + (int) position.x + 1, posY + (int) position.y, posZ + (int) position.z);
+                    Vector3i pos2 = new Vector3i(posX + (int) position.x - 1, posY + (int) position.y, posZ + (int) position.z);
+                    Vector3i pos3 = new Vector3i(posX + (int) position.x, posY + (int) position.y, posZ + (int) position.z + 1);
+                    Vector3i pos4 = new Vector3i(posX + (int) position.x, posY + (int) position.y, posZ + (int) position.z - 1);
+                    worldProvider.setBlock(pos1, air);
+                    worldProvider.setBlock(pos2, air);
+                    worldProvider.setBlock(pos3, air);
+                    worldProvider.setBlock(pos4, air);
 
                     // Generate leaves
                     if (depth > 1) {
@@ -71,11 +78,14 @@ public class RecursiveTreeGeneratorLSystem {
                                     if (Math.abs(x) == size && Math.abs(y) == size && Math.abs(z) == size) {
                                         continue;
                                     }
-
-                                    treeGenerator.safelySetBlock(view, posX + (int) position.x + x + 1, posY + (int) position.y + y, posZ + z + (int) position.z, leaf, resourceFacet);
-                                    treeGenerator.safelySetBlock(view, posX + (int) position.x + x - 1, posY + (int) position.y + y, posZ + z + (int) position.z, leaf, resourceFacet);
-                                    treeGenerator.safelySetBlock(view, posX + (int) position.x + x, posY + (int) position.y + y, posZ + z + (int) position.z + 1, leaf, resourceFacet);
-                                    treeGenerator.safelySetBlock(view, posX + (int) position.x + x, posY + (int) position.y + y, posZ + z + (int) position.z - 1, leaf, resourceFacet);
+                                    pos1 = new Vector3i(posX + (int) position.x + x + 1, posY + (int) position.y + y, posZ + z + (int) position.z);
+                                    pos2 = new Vector3i(posX + (int) position.x + x - 1, posY + (int) position.y + y, posZ + z + (int) position.z);
+                                    pos3 = new Vector3i(posX + (int) position.x + x, posY + (int) position.y + y, posZ + z + (int) position.z + 1);
+                                    pos4 = new Vector3i(posX + (int) position.x + x, posY + (int) position.y + y, posZ + z + (int) position.z - 1);
+                                    worldProvider.setBlock(pos1, air);
+                                    worldProvider.setBlock(pos2, air);
+                                    worldProvider.setBlock(pos3, air);
+                                    worldProvider.setBlock(pos4, air);
                                 }
                             }
                         }
@@ -87,7 +97,7 @@ public class RecursiveTreeGeneratorLSystem {
                     position.add(dir);
                     break;
                 case '[':
-                    recurse(view, rand, posX, posY, posZ, angleOffset, axiomIterator, new Vector3f(position), new Matrix4f(rotation), bark, leaf, depth, treeGenerator, resourceFacet);
+                    recurse(rand, posX, posY, posZ, angleOffset, axiomIterator, new Vector3f(position), new Matrix4f(rotation), air, depth);
                     break;
                 case ']':
                     return;
@@ -130,21 +140,19 @@ public class RecursiveTreeGeneratorLSystem {
                         break;
                     }
 
-                    recurse(view, rand, posX, posY, posZ, angleOffset, new CharSequenceIterator(rule.getAxiom()),
-                        position, rotation, bark, leaf, depth + 1, treeGenerator, resourceFacet);
+                    recurse(rand, posX, posY, posZ, angleOffset, new CharSequenceIterator(rule.getAxiom()),
+                        position, rotation, air, depth + 1);
             }
         }
     }
-    public int getMaxDepth() {
-        return maxDepth;
-    }
 
-    public float getAngle() {
-        return angle;
-    }
-
-    public Map<Character, LSystemRule> getRuleSet() {
-        return ruleSet;
+    public void applySettings(TreeGeneratorContainer treeGeneratorContainer) {
+        maxDepth = treeGeneratorContainer.maxDepth;
+        angle = treeGeneratorContainer.angle;
+        ruleSet = new HashMap<>();
+        for (Map.Entry<String, LSystemRule> entry : treeGeneratorContainer.ruleSet.entrySet()) {
+            ruleSet.put(entry.getKey().charAt(0), entry.getValue());
+        }
     }
 
 }

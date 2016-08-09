@@ -261,6 +261,8 @@ public class Construction extends BaseComponentSystem {
                 }
             }
         }
+
+
         return meanHeight;
     }
 
@@ -297,7 +299,11 @@ public class Construction extends BaseComponentSystem {
 
     //the standard strategy used in Cities and StaticCities module
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, Culture culture) {
-
+        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
+                new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
+        if (!worldProvider.isRegionRelevant(region)) {
+            return false;
+        }
         /**
          * get the building or shrink parcel size if no fitting building was found.
          */
@@ -313,6 +319,8 @@ public class Construction extends BaseComponentSystem {
         if (building.isScaledDown) {
             Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
             dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));
+            region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
+                    new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
         }
 
         //Flatten the parcel area
@@ -321,8 +329,7 @@ public class Construction extends BaseComponentSystem {
         RasterTarget rasterTarget = new WorldRasterTarget(worldProvider, theme, dynParcel.shape);
         Rect2i shape = dynParcel.shape;
         HeightMap hm = HeightMaps.constant(dynParcel.height);
-        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
-                new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
+
 
         if (dynParcel.height == -9999) {
             return false;
@@ -333,9 +340,7 @@ public class Construction extends BaseComponentSystem {
          * Check for player collision
          */
         Map<EntityRef, EntityRef> playerCityMap = playerTracker.getPlayerCityMap();
-        if (!worldProvider.isRegionRelevant(region)) {
-            return false;
-        }
+
         for (EntityRef player : playerCityMap.keySet()) {
             if (playerCityMap.get(player) == settlement) {
                 LocationComponent playerLocation = player.getComponent(LocationComponent.class);
@@ -429,6 +434,7 @@ public class Construction extends BaseComponentSystem {
             for (EntityRef template : templates) {
                 BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
                 transformationList.addTransformation(new BlockRegionMovement(BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))));
+                //Transform Commonworlds rotation to StructureTemplates rotation
                 int rotationAmount;
                 switch (dynParcel.orientation.ordinal() / 2) {
                     case 0: rotationAmount = 0;
