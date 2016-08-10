@@ -29,11 +29,11 @@ public class EconomySetupSystem extends BaseComponentSystem {
     private StorageHandlerLibrary storageHandlerLibrary;
 
     @In
-    private ChestStorageHandler chestStorageHandler;
+    private MultiInvStorageHandler multiInvStorageHandler;
     @Override
     public void postBegin() {
 
         storageHandlerLibrary.registerHandler(new PopulationStorageHandler());
-        storageHandlerLibrary.registerHandler(chestStorageHandler);
+        storageHandlerLibrary.registerHandler(multiInvStorageHandler);
     }
 }

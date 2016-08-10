@@ -13,16 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.buildings.components;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.entity.EntityRef;
+package org.terasology.dynamicCities.playerTracking;
 
-import java.util.List;
+import org.terasology.rendering.nui.Color;
 
 /**
- * This stores references to chests for a building entity. They are distinguished into chests to draw resources from and chests to store into.
+ * TODO Type description
  */
-public class ChestStorageComponent implements Component {
-    public List<EntityRef> chests;
+public final class CitiesColors {
+
+    /**
+     * Color for player names (TODO: replace with real player color)
+     */
+    public static final Color PLAYER = new Color(224, 64, 64);
+    
+    /**
+     * Color for area names
+     */
+    public static final Color AREA = new Color(64, 64, 224);
+
+    private CitiesColors() {
+        // private
+    }
+    
 }

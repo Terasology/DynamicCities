@@ -254,9 +254,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.setAlwaysRelevant(true);
 
         //Remove trees in city area and add region entities
-        Vector2i regionCenter = new Vector2i(locationComponent.getLocalPosition().x(),
-                locationComponent.getLocalPosition().z());
-        getSurroundingRegions(regionCenter, settlementEntity);
+        getSurroundingRegions(settlementEntity);
         for (EntityRef settlementRegion : regionEntitiesComponent.regionEntities.values()) {
             treeRemovalSystem.removeTreesInRegion(settlementRegion);
         }
@@ -265,14 +263,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     /**
-     *
-     * @param pos
-     * @return
+     * Adds the region entities within city reach to the RegionEntitiesComponent of a settlement
      */
-    private void getSurroundingRegions(Vector2i pos, EntityRef settlement) {
+    private void getSurroundingRegions(EntityRef settlement) {
         RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
-        float radius = parcelList.minBuildRadius;
+        LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
+        Vector2i pos = new Vector2i(locationComponent.getLocalPosition().x(),
+                locationComponent.getLocalPosition().z());
+        float radius = parcelList.cityRadius;
         int size = (Math.round(radius / 32) >= 1) ? Math.round(radius / 32) : 1;
         Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-size, -size, size, size);
         Circle settlementCircle = new Circle(pos.toVector2f(), radius);
@@ -283,9 +282,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
             if (settlementCircle.contains(regionWorldPos)) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
-                if (region == null) {
-                    //throw new NullPointerException();
-                }
                 if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
                     LocationComponent location = region.getComponent(LocationComponent.class);
                     Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
@@ -297,6 +293,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.saveComponent(regionEntitiesComponent);
     }
 
+    /**
+     * Currently only checks whether the area has enough flat spots.
+     */
     private boolean checkBuildArea(EntityRef siteRegion) {
         LocationComponent siteLocation = siteRegion.getComponent(LocationComponent.class);
         Vector2i pos = new Vector2i(siteLocation.getLocalPosition().x(), siteLocation.getLocalPosition().z());
@@ -310,7 +309,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             if (settlementCircle.contains(regionWorldPos)) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(RoughnessFacetComponent.class)) {
-                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > 99) {
+                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > 0.2) {
                         unusableRegionsCount++;
                     }
                 }
@@ -394,6 +393,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         for (String zone : zones) {
+            //Checks if the demand for a building of that zone is enough
             while (culture.getBuildingNeedsForZone(zone) * population.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
                     && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
                 int iter = 0;
@@ -413,8 +413,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 do {
                     iter++;
                     float angle = rng.nextFloat(0, 360);
-                    //Subtract the maximum tree radius 13 from the parcel radius
-                    radius = rng.nextFloat(0, parcels.minBuildRadius - 13);
+                    //Subtract the maximum tree radius (13) from the parcel radius -> Some bigger buildings still could cause issues
+                    radius = rng.nextFloat(0, parcels.cityRadius - 13);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
@@ -422,13 +422,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                         || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)))
                         && iter != maxIterations);
                 //Grow settlement radius if no valid area was found
-                //TODO Only grow when it is the last zone
-                if (iter == maxIterations && parcels.minBuildRadius < SettlementConstants.SETTLEMENT_RADIUS) {
-                    parcels.minBuildRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
+                if (iter == maxIterations && parcels.cityRadius < SettlementConstants.SETTLEMENT_RADIUS) {
+                    parcels.cityRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
                     //Remove trees in city area and add region entities
                     Vector2i regionCenter = new Vector2i(locationComponent.getLocalPosition().x(),
                             locationComponent.getLocalPosition().z());
-                    getSurroundingRegions(regionCenter, settlement);
+                    getSurroundingRegions(settlement);
                     for (EntityRef region : regionEntitiesComponent.regionEntities.values()) {
                         treeRemovalSystem.removeTreesInRegion(region);
                     }
@@ -437,8 +436,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 } else if (iter == maxIterations) {
                     break;
                 }
-                if (radius > parcels.maxBuildRadius) {
-                    parcels.maxBuildRadius = radius;
+                if (radius > parcels.builtUpRadius) {
+                    parcels.builtUpRadius = radius;
                 }
 
                 DynParcel newParcel = new DynParcel(shape, orientation, zone, Math.round(locationComponent.getLocalPosition().y()));

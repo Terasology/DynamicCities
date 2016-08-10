@@ -83,9 +83,9 @@ public class DistrictOverlay implements MinimapOverlay {
                 return;
             }
             Vector2f pos = new Vector2f(locationComponent.getLocalPosition().x(), locationComponent.getLocalPosition().z());
-            Circle cityRadius = new Circle(pos.x, pos.y, parcelList.maxBuildRadius);
+            Circle cityRadius = new Circle(pos.x, pos.y, parcelList.builtUpRadius);
             Rect2f worldRectExpanded = worldRect.expand(districtFacet.getGridSize(), districtFacet.getGridSize());
-            if (Vector2f.distance(worldRect.min(), pos) <= settlement.getComponent(ParcelList.class).maxBuildRadius + worldRect.size().length()) {
+            if (Vector2f.distance(worldRect.min(), pos) <= settlement.getComponent(ParcelList.class).builtUpRadius + worldRect.size().length()) {
                 for (BaseVector2i point : districtFacet.getGridWorldRegion().contents()) {
                     Vector2i worldPoint = districtFacet.getWorldPoint(point.x(), point.y());
 

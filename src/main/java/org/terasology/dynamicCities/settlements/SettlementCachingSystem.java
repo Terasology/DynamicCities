@@ -18,7 +18,7 @@ package org.terasology.dynamicCities.settlements;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.dynamicCities.events.OnEnterSettlementEvent;
+import org.terasology.dynamicCities.playerTracking.OnEnterSettlementEvent;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.events.AddDistrictOverlayEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;

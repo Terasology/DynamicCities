@@ -179,8 +179,6 @@ public class DistrictFacetComponent implements Component {
                 districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), nextDistrict);
             }
         }
-        return;
-
     }
 
     public DistrictType getDistrict(Vector2i worldPoint) {

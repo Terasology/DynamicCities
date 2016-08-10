@@ -93,9 +93,7 @@ public class Toolbox {
     public static int[][] arrayToMatrix(int[] array, int rows, int columns) {
         int[][] matrix = new int[rows][columns];
         for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                matrix[i][j] = array[j + i * columns];
-            }
+            System.arraycopy(array, 0 + i * columns, matrix[i], 0, columns);
         }
         return matrix;
     }

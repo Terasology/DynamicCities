@@ -71,9 +71,7 @@ public class Kmeans {
         //Initializing with random means
         for (int i = 0; i < clusters; i++) {
             int randy = (int) Math.round(Math.random() * (points - 1));
-            for (int j = 0; j < variables; j++) {
-                means[i][j] = map[randy][j];
-            }
+            System.arraycopy(map[randy], 0, means[i], 0, variables);
         }
         int iter = 0;
         while (change && iter < 1000) {

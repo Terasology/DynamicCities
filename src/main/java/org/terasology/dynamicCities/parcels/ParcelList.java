@@ -30,17 +30,18 @@ import java.util.Map;
 public class ParcelList implements Component {
 
     public Map<String, Integer> areaPerZone;
-
-    public float minBuildRadius;
+    //The area in which buildings can currently be placed
+    public float cityRadius;
+    //The distance of the currently farthest away building (from city center)
     @Replicate
-    public float maxBuildRadius;
+    public float builtUpRadius;
 
     public List<DynParcel> parcels;
 
     public ParcelList() { }
     public ParcelList(int i) {
-        maxBuildRadius = 0;
-        minBuildRadius = 60;
+        builtUpRadius = 0;
+        cityRadius = 60;
         parcels = new ArrayList<>();
         areaPerZone = new HashMap<>();
     }

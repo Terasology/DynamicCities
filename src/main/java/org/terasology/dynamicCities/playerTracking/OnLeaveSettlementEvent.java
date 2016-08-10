@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.events;
+package org.terasology.dynamicCities.playerTracking;
 
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.Event;
 
-public class OnEnterSettlementEvent implements Event {
+public class OnLeaveSettlementEvent implements Event {
     private final EntityRef settlement;
 
     /**
-     * @param settlement the settlement that was entered
+     * @param settlement the settlement that was left
      */
-    public OnEnterSettlementEvent(EntityRef settlement) {
+    public OnLeaveSettlementEvent(EntityRef settlement) {
         this.settlement = settlement;
     }
 
     /**
-     * @return the area that was entered
+     * @return the area that was left
      */
     public EntityRef getSettlement() {
         return settlement;

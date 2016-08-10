@@ -137,10 +137,11 @@ public class BuildingManager extends BaseComponentSystem {
         for(String zone : getZones()) {
             minMaxSizePerZone.put(zone, getMinMaxForZone(zone));
         }
-        commercialBuildingGenerator = new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
-        rectHouseGenerator = new RectHouseGenerator();
-        simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
-        townHallGenerator = new TownHallGenerator();
+
+        CommercialBuildingGenerator commercialBuildingGenerator = new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
+        RectHouseGenerator rectHouseGenerator = new RectHouseGenerator();
+        SimpleChurchGenerator simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
+        TownHallGenerator townHallGenerator = new TownHallGenerator();
 
         generators.add(commercialBuildingGenerator);
         generators.add(rectHouseGenerator);
@@ -327,21 +328,11 @@ public class BuildingManager extends BaseComponentSystem {
         Rect2i shape = parcel.shape;
         Orientation orientation = parcel.orientation;
         if (orientation == Orientation.NORTH || orientation == Orientation.SOUTH) {
-            if (building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
-                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY()) {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return !(building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
+                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY());
         } else {
-            if (building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
-                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY()) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            return building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
+                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY();
         }
     }
 }

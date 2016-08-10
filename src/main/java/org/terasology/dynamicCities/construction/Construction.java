@@ -34,14 +34,14 @@ import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.buildings.components.ChestPositionsComponent;
-import org.terasology.dynamicCities.buildings.components.ChestStorageComponent;
+import org.terasology.dynamicCities.buildings.components.MultiInvStorageComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
-import org.terasology.dynamicCities.events.PlayerTracker;
 import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.dynamicCities.playerTracking.PlayerTracker;
 import org.terasology.dynamicCities.population.Culture;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
@@ -88,7 +88,6 @@ import org.terasology.structureTemplates.events.SpawnStructureEvent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
 import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
 import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
 import org.terasology.world.BlockEntityRegistry;
@@ -450,10 +449,9 @@ public class Construction extends BaseComponentSystem {
                 transformationList.addTransformation(new HorizontalBlockRegionRotation(rotationAmount));
                 transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
                         dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
-                BlockRegionTransform spawnTransformation = transformationList;
-                template.send(new SpawnStructureEvent(spawnTransformation));
+                template.send(new SpawnStructureEvent(transformationList));
                 if (building.isEntity) {
-                    template.send(new OnSpawnDynamicStructureEvent(spawnTransformation, dynParcel.buildingEntity));
+                    template.send(new OnSpawnDynamicStructureEvent(transformationList, dynParcel.buildingEntity));
                 }
             }
         }
@@ -482,28 +480,28 @@ public class Construction extends BaseComponentSystem {
             return;
         }
 
-        ChestStorageComponent chestStorageComponent = new ChestStorageComponent();
+        MultiInvStorageComponent multiInvStorageComponent = new MultiInvStorageComponent();
         if (entityRef.hasComponent(ChestPositionsComponent.class)) {
             ChestPositionsComponent chestPositionsComponent = entityRef.getComponent(ChestPositionsComponent.class);
-            chestStorageComponent.chests = new ArrayList<>();
+            multiInvStorageComponent.chests = new ArrayList<>();
             for (Vector3i pos : chestPositionsComponent.positions) {
                 Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
-                chestStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
+                multiInvStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
             }
         }
         if (entityRef.hasComponent(ProductionChestComponent.class)) {
-            if (chestStorageComponent.chests == null) {
-                chestStorageComponent.chests = new ArrayList<>();
+            if (multiInvStorageComponent.chests == null) {
+                multiInvStorageComponent.chests = new ArrayList<>();
             }
             ProductionChestComponent productionChestComponent = entityRef.getComponent(ProductionChestComponent.class);
 
             for (Vector3i pos : productionChestComponent.positions) {
                 pos = event.getTransformation().transformVector3i(pos);
-                chestStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(pos));
+                multiInvStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(pos));
             }
         }
 
-        event.getBuildingEntity().addComponent(chestStorageComponent);
+        event.getBuildingEntity().addComponent(multiInvStorageComponent);
     }
 
 }

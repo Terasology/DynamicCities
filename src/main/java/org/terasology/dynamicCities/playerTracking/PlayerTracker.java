@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.terasology.dynamicCities.events;
+package org.terasology.dynamicCities.playerTracking;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,6 @@ public class PlayerTracker extends BaseComponentSystem {
     @In
     private SettlementCachingSystem settlementCachingSystem;
 
-    private SettlementsCacheComponent knownSettlements;
     private final Map<EntityRef, EntityRef> prevLoc = new HashMap<>();
 
     /**
@@ -80,7 +79,7 @@ public class PlayerTracker extends BaseComponentSystem {
         LocationComponent loc = entity.getComponent(LocationComponent.class);
         Vector3f worldPos3d = loc.getWorldPosition();
         Vector2f worldPos = new Vector2f(worldPos3d.x, worldPos3d.z);
-        knownSettlements = settlementCachingSystem.getSettlementEntitiesComponent();
+        SettlementsCacheComponent knownSettlements = settlementCachingSystem.getSettlementEntitiesComponent();
         Client client = networkSystem.getOwner(entity);
 
         // TODO: entity can be AI-controlled, too. These don't have an owner
@@ -95,7 +94,7 @@ public class PlayerTracker extends BaseComponentSystem {
         for (EntityRef settlement : knownSettlements.settlementEntities.values()) {
             float radius = 0;
             if (settlement.hasComponent(ParcelList.class)) {
-                radius = settlement.getComponent(ParcelList.class).maxBuildRadius;
+                radius = settlement.getComponent(ParcelList.class).builtUpRadius;
             } else {
                 return;
             }

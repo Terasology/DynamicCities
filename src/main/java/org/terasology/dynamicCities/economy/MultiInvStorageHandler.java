@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.assets.management.AssetManager;
-import org.terasology.dynamicCities.buildings.components.ChestStorageComponent;
+import org.terasology.dynamicCities.buildings.components.MultiInvStorageComponent;
 import org.terasology.economy.StorageComponentHandler;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -48,9 +48,9 @@ import java.util.Set;
  * This handles entities with multiple storage entities, mainly building-entities with chests
  * TODO: Delete consumption/production chest differentiation
  */
-@Share(ChestStorageHandler.class)
+@Share(MultiInvStorageHandler.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class ChestStorageHandler extends BaseComponentSystem implements StorageComponentHandler<ChestStorageComponent> {
+public class MultiInvStorageHandler extends BaseComponentSystem implements StorageComponentHandler<MultiInvStorageComponent> {
 
     @In
     private AssetManager assetManager;
@@ -68,7 +68,7 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
     private InventoryManager inventoryManager;
 
     private BlockItemFactory blockItemFactory;
-    private Logger logger = LoggerFactory.getLogger(ChestStorageHandler.class);
+    private Logger logger = LoggerFactory.getLogger(MultiInvStorageHandler.class);
 
     @Override
     public void initialise() {
@@ -76,7 +76,7 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
     }
 
     @Override
-    public int store(ChestStorageComponent chestStorageComponent, String resource, int amount) {
+    public int store(MultiInvStorageComponent multiInvStorageComponent, String resource, int amount) {
         EntityRef item = getItemEntity(resource);
         byte byteAmount;
         if (item == EntityRef.NULL) {
@@ -86,7 +86,7 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
 
 
 
-        for (EntityRef entityRef : chestStorageComponent.chests) {
+        for (EntityRef entityRef : multiInvStorageComponent.chests) {
             int amountForChest = getItemCapacityForChest(entityRef, item);
             amountForChest = (amountForChest > amount) ? amount : amountForChest;
             if (amountForChest >= Byte.MAX_VALUE) {
@@ -103,22 +103,16 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
             if (amount == 0) {
                 return 0;
             }
-            /*
-            GiveItemEvent giveItemEvent = new GiveItemEvent(item);
-            entityRef.send(giveItemEvent);
-            if (giveItemEvent.isHandled()) {
-                return 0;
-            }*/
         }
         return amount;
 
     }
 
     @Override
-    public int draw(ChestStorageComponent chestStorageComponent, String resource, int amount) {
+    public int draw(MultiInvStorageComponent multiInvStorageComponent, String resource, int amount) {
         EntityRef item = getItemEntity(resource);
 
-        for (EntityRef entityRef : chestStorageComponent.chests) {
+        for (EntityRef entityRef : multiInvStorageComponent.chests) {
             int amountForChest = getItemCountForChest(entityRef, item);
             while (amountForChest != 0) {
                 int slot = getSlotWithItem(entityRef, item);
@@ -136,21 +130,21 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
     }
 
     @Override
-    public int availableResourceAmount(ChestStorageComponent chestStorageComponent, String resource) {
+    public int availableResourceAmount(MultiInvStorageComponent multiInvStorageComponent, String resource) {
         int amount = 0;
         EntityRef item = getItemEntity(resource);
-        for (EntityRef entityRef : chestStorageComponent.chests) {
+        for (EntityRef entityRef : multiInvStorageComponent.chests) {
             amount += getItemCountForChest(entityRef, item);
         }
         return amount;
     }
 
     @Override
-    public int availableResourceCapacity(ChestStorageComponent chestStorageComponent, String resource) {
+    public int availableResourceCapacity(MultiInvStorageComponent multiInvStorageComponent, String resource) {
 
         int capacity = 0;
         EntityRef item = getItemEntity(resource);
-        for (EntityRef entityRef : chestStorageComponent.chests) {
+        for (EntityRef entityRef : multiInvStorageComponent.chests) {
             capacity += getItemCapacityForChest(entityRef, item);
         }
         return capacity;
@@ -158,18 +152,18 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
 
     @Override
     public Class getStorageComponentClass() {
-        return ChestStorageComponent.class;
+        return MultiInvStorageComponent.class;
     }
 
     @Override
     public Component getTestComponent() {
-        ChestStorageComponent chestStorageComponent = new ChestStorageComponent();
-        chestStorageComponent.chests = new ArrayList<>();
+        MultiInvStorageComponent multiInvStorageComponent = new MultiInvStorageComponent();
+        multiInvStorageComponent.chests = new ArrayList<>();
         ResourceUrn resourceUrn = assetManager.resolve("Core:chest", Prefab.class).iterator().next();
         Prefab chestPrefab = assetManager.getAsset(resourceUrn, Prefab.class).get();
         EntityRef chest = entityManager.create(chestPrefab);
-        chestStorageComponent.chests.add(chest);
-        return chestStorageComponent;
+        multiInvStorageComponent.chests.add(chest);
+        return multiInvStorageComponent;
     }
     @Override
     public String getTestResource() {
@@ -185,8 +179,7 @@ public class ChestStorageHandler extends BaseComponentSystem implements StorageC
             case 1:
                 Prefab prefab = assetManager.getAsset(matches.iterator().next(), Prefab.class).orElse(null);
                 if (prefab != null && prefab.getComponent(ItemComponent.class) != null) {
-                    EntityRef item = entityManager.create(prefab);
-                    return item;
+                    return entityManager.create(prefab);
                 } else {
                     BlockFamily blockFamily = blockManager.getBlockFamily(resource);
                     EntityRef item = blockItemFactory.newInstance(blockFamily, 1);

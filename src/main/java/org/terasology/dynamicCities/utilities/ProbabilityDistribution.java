@@ -33,19 +33,17 @@ public class ProbabilityDistribution<T> {
 
     private Logger logger = LoggerFactory.getLogger(ProbabilityDistribution.class);
     private Map<Range, T> ranges;
-    private long seed;
     private MersenneRandom rng;
 
 
     public ProbabilityDistribution (long seed) {
-        this.seed = seed;
         rng = new MersenneRandom(seed);
     }
 
     public void initialise (Map<T, Float> probabilites) {
         ranges = new HashMap<>();
         //check if sum of probabilites is 1
-        Float sum = new Float(0);
+        Float sum = 0f;
         for (Float probability : probabilites.values()) {
             sum += probability;
         }

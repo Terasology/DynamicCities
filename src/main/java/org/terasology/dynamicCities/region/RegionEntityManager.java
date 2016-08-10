@@ -263,6 +263,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         clearCell(Toolbox.stringToVector2i(posString));
     }
 
+    /* Unused and buggy
     public List<EntityRef> getRegionsInArea(Rect2i area) {
         List<EntityRef> result = new ArrayList<>();
         for (BaseVector2i pos : area.contents()) {
@@ -285,13 +286,11 @@ public class RegionEntityManager extends BaseComponentSystem {
             regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
 
             EntityRef region = getNearest(regionWorldPos);
-            if (region == null) {
-                //throw new NullPointerException();
-            }
             if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
                 result.add(region);
             }
         }
         return result;
     }
+    */
 }
