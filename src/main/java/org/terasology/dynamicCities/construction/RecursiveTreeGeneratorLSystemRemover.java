@@ -150,8 +150,8 @@ public class RecursiveTreeGeneratorLSystemRemover {
         maxDepth = treeGeneratorContainer.maxDepth;
         angle = treeGeneratorContainer.angle;
         ruleSet = new HashMap<>();
-        for (Map.Entry<String, LSystemRule> entry : treeGeneratorContainer.ruleSet.entrySet()) {
-            ruleSet.put(entry.getKey().charAt(0), entry.getValue());
+        for (Map.Entry<String, LSystemRuleContainer> entry : treeGeneratorContainer.ruleSet.entrySet()) {
+            ruleSet.put(entry.getKey().charAt(0), new LSystemRule(entry.getValue().axiom, entry.getValue().probability));
         }
     }
 

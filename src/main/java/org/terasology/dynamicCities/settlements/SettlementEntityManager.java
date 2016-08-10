@@ -253,6 +253,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.send(new SubscriberRegistrationEvent());
         settlementEntity.setAlwaysRelevant(true);
 
+        //Remove trees in city area and add region entities
+        Vector2i regionCenter = new Vector2i(locationComponent.getLocalPosition().x(),
+                locationComponent.getLocalPosition().z());
+        getSurroundingRegions(regionCenter, settlementEntity);
+        for (EntityRef settlementRegion : regionEntitiesComponent.regionEntities.values()) {
+            treeRemovalSystem.removeTreesInRegion(settlementRegion);
+        }
 
         return settlementEntity;
     }
@@ -350,7 +357,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
         Random rng = new FastRandom(locationComponent.getLocalPosition().hashCode() ^ 0x1496327 ^ time);
-
         int maxIterations = 100;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
@@ -407,17 +413,16 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 do {
                     iter++;
                     float angle = rng.nextFloat(0, 360);
-                    radius = rng.nextFloat(0, parcels.minBuildRadius);
+                    //Subtract the maximum tree radius 13 from the parcel radius
+                    radius = rng.nextFloat(0, parcels.minBuildRadius - 13);
                     rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                             (int) Math.round(radius * Math.cos((double) angle)) + center.z());
                     shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
-                    if (radius > parcels.minBuildRadius) {
-                        logger.error("WTF IS GOING ON?");
-                    }
                 } while ((!parcels.isNotIntersecting(shape) || !buildingQueue.isNotIntersecting(shape)
                         || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)))
                         && iter != maxIterations);
                 //Grow settlement radius if no valid area was found
+                //TODO Only grow when it is the last zone
                 if (iter == maxIterations && parcels.minBuildRadius < SettlementConstants.SETTLEMENT_RADIUS) {
                     parcels.minBuildRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
                     //Remove trees in city area and add region entities

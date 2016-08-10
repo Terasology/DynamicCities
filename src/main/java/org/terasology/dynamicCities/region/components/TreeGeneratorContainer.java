@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.region.components;
 
 
+import org.terasology.dynamicCities.construction.LSystemRuleContainer;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.math.LSystemRule;
 import org.terasology.reflection.MappedContainer;
@@ -35,7 +36,7 @@ public final class TreeGeneratorContainer {
     //RecursiveTreeGeneratorLSystem settings
     public int maxDepth;
     public float angle;
-    public Map<String, LSystemRule> ruleSet;
+    public Map<String, LSystemRuleContainer> ruleSet;
 
     //For standard trees
     public TreeGeneratorContainer(String leafType, String barkType, String initialAxiom, String className, int maxDepth, float angle, Map<Character, LSystemRule> ruleSet) {
@@ -47,7 +48,7 @@ public final class TreeGeneratorContainer {
         this.angle = angle;
         this.ruleSet = new HashMap<>();
         for (Map.Entry<Character, LSystemRule> entry : ruleSet.entrySet()) {
-            this.ruleSet.put(entry.getKey().toString(), entry.getValue());
+            this.ruleSet.put(entry.getKey().toString(), new LSystemRuleContainer(entry.getValue()));
         }
     }
     //For cacti

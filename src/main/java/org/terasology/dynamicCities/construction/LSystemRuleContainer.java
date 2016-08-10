@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.resource;
+package org.terasology.dynamicCities.construction;
 
+
+import org.terasology.math.LSystemRule;
 import org.terasology.reflection.MappedContainer;
 
 @MappedContainer
-public class Resource {
+public final class LSystemRuleContainer {
+    public String axiom;
+    public float probability;
 
-    public int amount;
-    private ResourceType type;
-
-    public Resource(ResourceType type, int amount) {
-        this.type = type;
-        this.amount = amount;
+    public LSystemRuleContainer(String axiom, float probability) {
+        this.axiom = axiom;
+        this.probability = probability;
     }
 
-    public Resource(ResourceType type) {
-        this.type = type;
-        this.amount = 1;
-    }
-    public Resource() {}
-    public ResourceType getType() {
-        return type;
+    public LSystemRuleContainer(LSystemRule lSystemRule) {
+        this.axiom = lSystemRule.getAxiom();
+        this.probability = lSystemRule.getProbability();
     }
 
-
+    public LSystemRuleContainer() {}
 }
-

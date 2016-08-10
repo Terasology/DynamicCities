@@ -22,6 +22,6 @@ public abstract class SettlementConstants {
     public static final int MIN_POPULATIONSIZE = 200;
     public static final int MAX_POPULATIONSIZE = 900;
     public static final int MAX_BUILDINGSPAWN = 10;
-    public static final int MAX_DISTRICTS = 100;
+    public static final int MAX_DISTRICTS = 200;
     public static final int BUILD_RADIUS_INTERVALL = 50;
 }
