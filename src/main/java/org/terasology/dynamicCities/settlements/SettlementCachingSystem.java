@@ -18,9 +18,10 @@ package org.terasology.dynamicCities.settlements;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.minimap.events.AddDistrictOverlayEvent;
+import org.terasology.dynamicCities.minimap.events.RemoveDistrictOverlayEvent;
 import org.terasology.dynamicCities.playerTracking.OnEnterSettlementEvent;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
-import org.terasology.dynamicCities.settlements.events.AddDistrictOverlayEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -28,8 +29,10 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.network.ClientComponent;
 import org.terasology.network.NetworkComponent;
 import org.terasology.network.NetworkSystem;
+import org.terasology.network.events.DisconnectedEvent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 
@@ -82,7 +85,11 @@ public class SettlementCachingSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void addOverlayToClient(OnEnterSettlementEvent event, EntityRef player) {
         player.send(new AddDistrictOverlayEvent());
+    }
 
+    @ReceiveEvent
+    public void removeOverlayOfClient(DisconnectedEvent event, EntityRef client) {
+        client.getComponent(ClientComponent.class).character.send(new RemoveDistrictOverlayEvent());
     }
     public SettlementsCacheComponent getSettlementEntitiesComponent() {
         if (settlementEntities.hasComponent(SettlementsCacheComponent.class)) {

@@ -16,27 +16,7 @@
 package org.terasology.dynamicCities.settlements.events;
 
 
-import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.Event;
-import org.terasology.network.BroadcastEvent;
-import org.terasology.network.Replicate;
 
-
-@BroadcastEvent
-public class AddDistrictOverlayEvent implements Event {
-    @Replicate
-    public EntityRef settlementCacheEntity;
-    @Replicate
-    public long id;
-    public AddDistrictOverlayEvent(EntityRef settlementCacheEntity) {
-        this.settlementCacheEntity = settlementCacheEntity;
-        id = settlementCacheEntity.getId();
-    }
-
-    public AddDistrictOverlayEvent() {
-    }
-
-    public EntityRef getSettlementCacheEntity() {
-        return settlementCacheEntity;
-    }
+public class SettlementGrowthEvent implements Event{
 }

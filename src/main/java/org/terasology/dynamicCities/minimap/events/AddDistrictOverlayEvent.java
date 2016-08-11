@@ -13,33 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.population;
+package org.terasology.dynamicCities.minimap.events;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.event.Event;
+import org.terasology.network.BroadcastEvent;
 
-public class Population implements Component {
 
+@BroadcastEvent
+public class AddDistrictOverlayEvent implements Event {
 
-    public float populationSize;
-    public float health;
-    public int capacity;
-    public String popResourceType = "popUnit";
-    public Population(int size) {
-        populationSize = size;
+    public AddDistrictOverlayEvent() {
     }
-
-    public Population() { }
-
-    public Population(String arg) {
-        if (arg.equals("test")) {
-            capacity = 999;
-        }
-    }
-
-    public void grow(float growthRate) {
-        populationSize += growthRate /* * populationSize*/;
-    }
-
 
 }

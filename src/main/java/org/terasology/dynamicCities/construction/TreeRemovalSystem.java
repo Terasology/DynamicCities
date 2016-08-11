@@ -18,6 +18,8 @@ package org.terasology.dynamicCities.construction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.RegionEntityManager;
+import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
+import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeGeneratorContainer;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
@@ -26,9 +28,12 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
+import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
@@ -80,6 +85,38 @@ public class TreeRemovalSystem extends BaseComponentSystem {
                 trees.relData.remove(trees.worldToRelative(tree.getKey().x(), tree.getKey().y(), tree.getKey().z()).toString());
 
         }
+    }
+    public boolean removeTreesInRegion(EntityRef region, Rect2i area) {
+        TreeFacetComponent trees = region.getComponent(TreeFacetComponent.class);
+        LocationComponent loc = region.getComponent(LocationComponent.class);
+        Rect2i relevantArea = area.expand(13, 13);
+        Region3i treeRegion = Region3i.createFromMinAndSize(new Vector3i(relevantArea.minX(), loc.getLocalPosition().y(), relevantArea.minY()),
+                new Vector3i(relevantArea.sizeX(), 32, relevantArea.sizeY()));
+        if (trees.getWorldEntries().isEmpty() || !worldProvider.isRegionRelevant(treeRegion)) {
+            return false;
+        }
+
+        for (Map.Entry<BaseVector3i, TreeGeneratorContainer> tree : trees.getWorldEntries().entrySet()) {
+            if (area.contains(tree.getKey().x(), tree.getKey().z())) {
+                removeTree(tree.getKey(), tree.getValue());
+                trees.relData.remove(trees.worldToRelative(tree.getKey().x(), tree.getKey().y(), tree.getKey().z()).toString());
+            }
+        }
+        return true;
+    }
+
+    public boolean removeTreesInRegions(RegionEntitiesComponent regions, Rect2i area) {
+        for (EntityRef region : regions.regionEntities.values()) {
+            if (!region.hasComponent(RoughnessFacetComponent.class)) {
+                return false;
+            }
+            if (region.getComponent(RoughnessFacetComponent.class).worldRegion.overlaps(area)) {
+                if (!removeTreesInRegion(region, area)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void removeTree(BaseVector3i pos, TreeGeneratorContainer tree) {

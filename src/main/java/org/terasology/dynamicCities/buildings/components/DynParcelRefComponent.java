@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements;
+package org.terasology.dynamicCities.buildings.components;
 
 
-public abstract class SettlementConstants {
-    public static final int SETTLEMENT_RADIUS = 900;
-    public static final int DISTRICT_GRIDSIZE = 8;
-    public static final int MIN_POPULATIONSIZE = 200;
-    public static final int MAX_POPULATIONSIZE = 900;
-    public static final int MAX_BUILDINGSPAWN = 1;
-    public static final int MAX_DISTRICTS = 200;
-    public static final int BUILD_RADIUS_INTERVALL = 50;
+import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.entitySystem.Component;
+
+public final class DynParcelRefComponent implements Component {
+
+    public DynParcel dynParcel;
+
+    public DynParcelRefComponent(DynParcel dynParcel) {
+        this.dynParcel = dynParcel;
+    }
+    public DynParcelRefComponent() {
+
+    }
 }

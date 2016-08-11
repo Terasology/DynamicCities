@@ -16,22 +16,22 @@
 package org.terasology.dynamicCities.economy;
 
 
-import org.terasology.dynamicCities.population.Population;
+import org.terasology.dynamicCities.population.PopulationComponent;
 import org.terasology.economy.StorageComponentHandler;
 import org.terasology.entitySystem.Component;
 
 
-public class PopulationStorageHandler implements StorageComponentHandler<Population> {
+public class PopulationStorageHandler implements StorageComponentHandler<PopulationComponent> {
 
     @Override
-    public int store(Population population, String resource, int amount) {
-        if (resource.equals(population.popResourceType)) {
-            if (population.populationSize + amount <= population.capacity) {
-                population.populationSize += amount;
+    public int store(PopulationComponent populationComponent, String resource, int amount) {
+        if (resource.equals(populationComponent.popResourceType)) {
+            if (populationComponent.populationSize + amount <= populationComponent.capacity) {
+                populationComponent.populationSize += amount;
                 return 0;
             } else {
-                population.populationSize = population.capacity;
-                return Math.round(amount - population.capacity - population.populationSize);
+                populationComponent.populationSize = populationComponent.capacity;
+                return Math.round(amount - populationComponent.capacity - populationComponent.populationSize);
             }
         } else {
             return amount;
@@ -39,14 +39,14 @@ public class PopulationStorageHandler implements StorageComponentHandler<Populat
     }
 
     @Override
-    public int draw(Population population, String resource, int amount) {
-        if (resource.equals(population.popResourceType)) {
-            if (population.populationSize >= amount) {
-                population.populationSize -= amount;
+    public int draw(PopulationComponent populationComponent, String resource, int amount) {
+        if (resource.equals(populationComponent.popResourceType)) {
+            if (populationComponent.populationSize >= amount) {
+                populationComponent.populationSize -= amount;
                 return 0;
             } else {
-                int amountLeft = Math.round(amount - population.populationSize);
-                population.populationSize = 0;
+                int amountLeft = Math.round(amount - populationComponent.populationSize);
+                populationComponent.populationSize = 0;
                 return amountLeft;
             }
         } else {
@@ -55,26 +55,26 @@ public class PopulationStorageHandler implements StorageComponentHandler<Populat
     }
 
     @Override
-    public int availableResourceAmount(Population population, String resource) {
-        return Math.round(population.populationSize);
+    public int availableResourceAmount(PopulationComponent populationComponent, String resource) {
+        return Math.round(populationComponent.populationSize);
     }
 
     @Override
-    public int availableResourceCapacity(Population population, String resource) {
-        return Math.round(population.capacity - population.populationSize);
+    public int availableResourceCapacity(PopulationComponent populationComponent, String resource) {
+        return Math.round(populationComponent.capacity - populationComponent.populationSize);
     }
 
     @Override
     public Class getStorageComponentClass() {
-        return Population.class;
+        return PopulationComponent.class;
     }
 
     @Override
     public Component getTestComponent() {
-        return new Population("test");
+        return new PopulationComponent("test");
     }
     @Override
     public String getTestResource() {
-        return new Population().popResourceType;
+        return new PopulationComponent().popResourceType;
     }
 }

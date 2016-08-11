@@ -18,8 +18,9 @@ package org.terasology.dynamicCities.minimap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.minimap.events.AddDistrictOverlayEvent;
+import org.terasology.dynamicCities.minimap.events.RemoveDistrictOverlayEvent;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
-import org.terasology.dynamicCities.settlements.events.AddDistrictOverlayEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -38,7 +39,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 @RegisterSystem(RegisterMode.CLIENT)
-public class DistrictFacetOverlaySystem extends BaseComponentSystem {
+public class DistrictOverlaySystem extends BaseComponentSystem {
 
 
     @In
@@ -53,7 +54,7 @@ public class DistrictFacetOverlaySystem extends BaseComponentSystem {
     @In
     private NetworkSystem networkSystem;
 
-    private Logger logger = LoggerFactory.getLogger(DistrictFacetOverlaySystem.class);
+    private Logger logger = LoggerFactory.getLogger(DistrictOverlaySystem.class);
 
     private EntityRef clientEntity;
 
@@ -99,6 +100,17 @@ public class DistrictFacetOverlaySystem extends BaseComponentSystem {
                     minimapSystem.addOverlay(new DistrictOverlay((entityRefs.next())));
                 } else {
                     logger.error("No SettlementCache found! Unable to create district overlay");
+                }
+            }
+        }
+    }
+
+    @ReceiveEvent
+    public void onRemoveDistrictOverlayEvent(RemoveDistrictOverlayEvent event, EntityRef entityRef) {
+        if (networkSystem.getMode() == NetworkMode.CLIENT) {
+            if (clientEntity.getComponent(ClientComponent.class).character.equals(entityRef.getId())) {
+                if (isOverlayAdded.containsKey(entityRef)) {
+                    isOverlayAdded.replace(entityRef, false);
                 }
             }
         }

@@ -29,7 +29,7 @@ import org.terasology.commonworld.Orientation;
 import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
 import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.dynamicCities.population.Culture;
+import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -186,7 +186,7 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.empty();
     }
 
-    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, Culture culture) {
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, CultureComponent cultureComponent) {
         if (buildings.containsKey(zone)) {
             int max = buildings.get(zone).size();
             GenericBuildingComponent building;
@@ -195,7 +195,7 @@ public class BuildingManager extends BaseComponentSystem {
                 int index = rng.nextInt(max);
                 building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
                 iter++;
-            } while ((!isFitting(shape, building) || !culture.availableBuildings.contains(building.name)) && iter < 100);
+            } while ((!isFitting(shape, building) || !cultureComponent.availableBuildings.contains(building.name)) && iter < 100);
             if (iter >= 55) {
                 building = entityManager.getComponentLibrary().copy(findBiggestFittingBuilding(shape, zone));
                 building.isScaledDown = true;

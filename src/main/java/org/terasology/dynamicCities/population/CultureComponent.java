@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class Culture implements Component {
+public class CultureComponent implements Component {
 
     //Defines how much blocks^2 a population unit needs
     public String name;

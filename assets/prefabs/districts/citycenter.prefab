@@ -1,7 +1,0 @@
-{
-    "DistrictType" : {
-        "name" : "city center",
-        "color" : 64354233,
-        "zones" : ["GOVERNMENTAL", "CLERICAL"]
-    }
-}

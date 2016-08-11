@@ -1,9 +1,0 @@
-{
-    "Culture" : {
-        "name" : "develop clan",
-        "buildingNeedPerZone" : {"GOVERNMENTAL" : 2, "CLERICAL" : 2, "RESIDENTIAL" : 8, "COMMERCIAL" : 4},
-        "growthRate" : 500,
-        "availableBuildings" : ["Marketplace", "House", "SimpleChurch", "Testbuilding", "Townhall"],
-        "residentialZones" : ["RESIDENTIAL"]
-    }
-}

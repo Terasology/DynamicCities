@@ -36,13 +36,15 @@ import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.buildings.components.ChestPositionsComponent;
 import org.terasology.dynamicCities.buildings.components.MultiInvStorageComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
+import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
+import org.terasology.dynamicCities.construction.events.BuildingEntitySpawnedEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.playerTracking.PlayerTracker;
-import org.terasology.dynamicCities.population.Culture;
+import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.WorldRasterTarget;
 import org.terasology.dynamicCities.rasterizer.doors.DoorRasterizer;
@@ -62,8 +64,6 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
-import org.terasology.economy.components.MarketSubscriberComponent;
-import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -297,7 +297,7 @@ public class Construction extends BaseComponentSystem {
     }
 
     //the standard strategy used in Cities and StaticCities module
-    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, Culture culture) {
+    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, CultureComponent cultureComponent) {
         Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
         if (!worldProvider.isRegionRelevant(region)) {
@@ -308,7 +308,7 @@ public class Construction extends BaseComponentSystem {
          */
         Optional<GenericBuildingComponent> buildingOptional;
         GenericBuildingComponent building;
-        buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), culture);
+        buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), cultureComponent);
 
         if (!buildingOptional.isPresent()) {
             return false;
@@ -350,16 +350,16 @@ public class Construction extends BaseComponentSystem {
         }
 
         /**
-         * Generate the building entity if there is one.
+         * Generate the building entity if there is one and send an event.
          */
         if (building.isEntity) {
             Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
             if (entityPrefab.isPresent()) {
                 dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
-                //Remove the GenericBuildingComponent as it is already saved by its building name in the DynParcel.class
-                dynParcel.buildingEntity.removeComponent(GenericBuildingComponent.class);
+                dynParcel.buildingEntity.addComponent(new SettlementRefComponent(settlement));
+                dynParcel.buildingEntity.send(new BuildingEntitySpawnedEvent());
 
-
+                /*Move to different module
                 if (dynParcel.buildingEntity.hasComponent(MarketSubscriberComponent.class)) {
                     dynParcel.buildingEntity.setAlwaysRelevant(true);
                     MarketSubscriberComponent marketSubscriberComponent = dynParcel.buildingEntity.getComponent(MarketSubscriberComponent.class);
@@ -369,6 +369,7 @@ public class Construction extends BaseComponentSystem {
 
                     dynParcel.buildingEntity.send(new SubscriberRegistrationEvent());
                 }
+                */
             }
         }
 
