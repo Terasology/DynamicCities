@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements.components;
+package org.terasology.dynamicCities.construction.components;
 
 
+import org.terasology.dynamicCities.construction.BufferedBlock;
 import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.entity.EntityRef;
 
-public class MarketComponent implements Component {
+import java.util.List;
 
-    public EntityRef market;
 
-    public MarketComponent() {
-    }
-    public MarketComponent(EntityRef market) {
-        this.market = market;
-    }
+public class BlockBufferComponent implements Component {
+    public List<BufferedBlock> blockBuffer;
 }

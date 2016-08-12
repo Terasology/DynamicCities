@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.settlements.components;
+package org.terasology.dynamicCities.construction;
 
+import org.terasology.math.geom.Vector3i;
+import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.Block;
 
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.entity.EntityRef;
+@MappedContainer
+public final class BufferedBlock {
+    public Vector3i pos;
+    public Block blockType;
 
-public class MarketComponent implements Component {
-
-    public EntityRef market;
-
-    public MarketComponent() {
-    }
-    public MarketComponent(EntityRef market) {
-        this.market = market;
+    public BufferedBlock(Vector3i pos, Block blockType) {
+        this.pos = pos;
+        this.blockType = blockType;
     }
 }

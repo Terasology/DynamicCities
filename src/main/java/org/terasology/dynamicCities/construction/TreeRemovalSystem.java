@@ -62,6 +62,8 @@ public class TreeRemovalSystem extends BaseComponentSystem {
     @In
     private RegionEntityManager regionEntityManager;
 
+    @In
+    private BlockBufferSystem blockBufferSystem;
 
 
     private Block air;
@@ -71,7 +73,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
     public void initialise() {
         blockManager = CoreRegistry.get(BlockManager.class);
         air = blockManager.getBlock("engine:air");
-        recursiveTreeRemover = new RecursiveTreeGeneratorLSystemRemover(99, 99, null, worldProvider);
+        recursiveTreeRemover = new RecursiveTreeGeneratorLSystemRemover(99, 99, null, blockBufferSystem);
     }
 
     //TODO Get it work with different seeds
@@ -92,7 +94,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         Rect2i relevantArea = area.expand(13, 13);
         Region3i treeRegion = Region3i.createFromMinAndSize(new Vector3i(relevantArea.minX(), loc.getLocalPosition().y(), relevantArea.minY()),
                 new Vector3i(relevantArea.sizeX(), 32, relevantArea.sizeY()));
-        if (trees.getWorldEntries().isEmpty() || !worldProvider.isRegionRelevant(treeRegion)) {
+        if (!worldProvider.isRegionRelevant(treeRegion)) {
             return false;
         }
 

@@ -34,6 +34,7 @@ import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.buildings.components.ChestPositionsComponent;
+import org.terasology.dynamicCities.buildings.components.DynParcelRefComponent;
 import org.terasology.dynamicCities.buildings.components.MultiInvStorageComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
@@ -357,6 +358,7 @@ public class Construction extends BaseComponentSystem {
             if (entityPrefab.isPresent()) {
                 dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
                 dynParcel.buildingEntity.addComponent(new SettlementRefComponent(settlement));
+                dynParcel.buildingEntity.addComponent(new DynParcelRefComponent(dynParcel));
                 dynParcel.buildingEntity.send(new BuildingEntitySpawnedEvent());
 
                 /*Move to different module

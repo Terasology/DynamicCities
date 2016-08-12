@@ -25,7 +25,6 @@ import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.collection.CharSequenceIterator;
 import org.terasology.utilities.random.Random;
-import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 
 import java.util.HashMap;
@@ -40,13 +39,13 @@ public class RecursiveTreeGeneratorLSystemRemover {
     public int maxDepth;
     public float angle;
     public Map<Character, LSystemRule> ruleSet;
-    private WorldProvider worldProvider;
+    private BlockBufferSystem blockBufferSystem;
 
-    public RecursiveTreeGeneratorLSystemRemover(int maxDepth, float angle, Map<Character, LSystemRule> ruleSet, WorldProvider worldProvider) {
+    public RecursiveTreeGeneratorLSystemRemover(int maxDepth, float angle, Map<Character, LSystemRule> ruleSet, BlockBufferSystem blockBufferSystem) {
         this.angle = angle;
         this.maxDepth = maxDepth;
         this.ruleSet = ruleSet;
-        this.worldProvider = worldProvider;
+        this.blockBufferSystem = blockBufferSystem;
     }
 
     public void recurse(Random rand, int posX, int posY, int posZ, float angleOffset,
@@ -63,10 +62,10 @@ public class RecursiveTreeGeneratorLSystemRemover {
                     Vector3i pos2 = new Vector3i(posX + (int) position.x - 1, posY + (int) position.y, posZ + (int) position.z);
                     Vector3i pos3 = new Vector3i(posX + (int) position.x, posY + (int) position.y, posZ + (int) position.z + 1);
                     Vector3i pos4 = new Vector3i(posX + (int) position.x, posY + (int) position.y, posZ + (int) position.z - 1);
-                    worldProvider.setBlock(pos1, air);
-                    worldProvider.setBlock(pos2, air);
-                    worldProvider.setBlock(pos3, air);
-                    worldProvider.setBlock(pos4, air);
+                    blockBufferSystem.saveBlock(pos1, air);
+                    blockBufferSystem.saveBlock(pos2, air);
+                    blockBufferSystem.saveBlock(pos3, air);
+                    blockBufferSystem.saveBlock(pos4, air);
 
                     // Generate leaves
                     if (depth > 1) {
@@ -82,10 +81,10 @@ public class RecursiveTreeGeneratorLSystemRemover {
                                     pos2 = new Vector3i(posX + (int) position.x + x - 1, posY + (int) position.y + y, posZ + z + (int) position.z);
                                     pos3 = new Vector3i(posX + (int) position.x + x, posY + (int) position.y + y, posZ + z + (int) position.z + 1);
                                     pos4 = new Vector3i(posX + (int) position.x + x, posY + (int) position.y + y, posZ + z + (int) position.z - 1);
-                                    worldProvider.setBlock(pos1, air);
-                                    worldProvider.setBlock(pos2, air);
-                                    worldProvider.setBlock(pos3, air);
-                                    worldProvider.setBlock(pos4, air);
+                                    blockBufferSystem.saveBlock(pos1, air);
+                                    blockBufferSystem.saveBlock(pos2, air);
+                                    blockBufferSystem.saveBlock(pos3, air);
+                                    blockBufferSystem.saveBlock(pos4, air);
                                 }
                             }
                         }

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
+import org.terasology.dynamicCities.construction.BlockBufferSystem;
 import org.terasology.dynamicCities.construction.Construction;
 import org.terasology.dynamicCities.construction.TreeRemovalSystem;
 import org.terasology.dynamicCities.districts.DistrictManager;
@@ -107,6 +108,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     @In
     private TreeRemovalSystem treeRemovalSystem;
+
+    @In
+    private BlockBufferSystem blockBufferSystem;
 
     private int minDistance = 1000;
     private int settlementMaxRadius = 256;
@@ -312,9 +316,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         for (DynParcel dynParcel : parcelsInQueue) {
-            if (!treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, dynParcel.shape.expand(13, 13))) {
-                continue;
-            }
+            treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, dynParcel.shape.expand(13, 13));
+
 
             if (constructer.buildParcel(dynParcel, settlement, cultureComponent)) {
                 removedParcels.add(dynParcel);
@@ -340,7 +343,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
-        int maxIterations = 100;
+        int maxIterations = 300;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
@@ -436,7 +439,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             iter++;
             float angle = rng.nextFloat(0, 360);
             //Subtract the maximum tree radius (13) from the parcel radius -> Some bigger buildings still could cause issues
-            radius = rng.nextFloat(0, parcels.cityRadius - 13);
+            radius = rng.nextFloat(0, parcels.cityRadius - 32);
             rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                     (int) Math.round(radius * Math.cos((double) angle)) + center.z());
             shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
