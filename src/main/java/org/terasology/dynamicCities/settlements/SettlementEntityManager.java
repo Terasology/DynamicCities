@@ -316,8 +316,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         for (DynParcel dynParcel : parcelsInQueue) {
-            treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, dynParcel.shape.expand(13, 13));
-
+            Rect2i expandedParcel = dynParcel.shape.expand(13, 13);
+            if(!treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, expandedParcel)){
+                continue;
+            }
+            blockBufferSystem.setBlocks();
+            Region3i parcelRegion = Region3i.createFromMinMax(new Vector3i(expandedParcel.minX(), dynParcel.height, expandedParcel.minY()), new Vector3i(expandedParcel.maxX(), dynParcel.height + 50, expandedParcel.maxY()));
 
             if (constructer.buildParcel(dynParcel, settlement, cultureComponent)) {
                 removedParcels.add(dynParcel);

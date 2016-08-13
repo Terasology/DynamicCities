@@ -33,6 +33,7 @@ import org.terasology.world.chunks.event.PurgeWorldEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 @Share(BlockBufferSystem.class)
 @RegisterSystem
@@ -76,13 +77,15 @@ public class BlockBufferSystem extends BaseComponentSystem implements Runnable {
     }
 
     public void setBlocks() {
+        List<BufferedBlock> removedBlocks = new ArrayList<>();
         if (!blockBufferComponent.blockBuffer.isEmpty()) {
             for (BufferedBlock block : blockBufferComponent.blockBuffer) {
                 if (worldProvider.isBlockRelevant(block.pos)) {
                     worldProvider.setBlock(block.pos, block.blockType);
-                    blockBufferComponent.blockBuffer.remove(block);
+                    removedBlocks.add(block);
                 }
             }
+            blockBufferComponent.blockBuffer.removeAll(removedBlocks);
         }
     }
 
