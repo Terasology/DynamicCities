@@ -72,9 +72,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Current tasks: Rewrite site to settlement conversion: Check sides and remove sitecomponent if all 
- */
 
 @Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -134,6 +131,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
+        for (int i = 0; i < 500; i++) {
+            blockBufferSystem.setBlock();
+        }
+
         counter--;
         timer++;
         if (counter != 0) {
@@ -320,7 +321,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             if(!treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, expandedParcel)){
                 continue;
             }
-            blockBufferSystem.setBlocks();
+            //blockBufferSystem.setBlocks();
             Region3i parcelRegion = Region3i.createFromMinMax(new Vector3i(expandedParcel.minX(), dynParcel.height, expandedParcel.minY()), new Vector3i(expandedParcel.maxX(), dynParcel.height + 50, expandedParcel.maxY()));
 
             if (constructer.buildParcel(dynParcel, settlement, cultureComponent)) {

@@ -17,7 +17,6 @@ package org.terasology.dynamicCities.construction;
 
 
 import org.terasology.dynamicCities.construction.components.BlockBufferComponent;
-import org.terasology.engine.GameThread;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -37,7 +36,7 @@ import java.util.List;
 
 @Share(BlockBufferSystem.class)
 @RegisterSystem
-public class BlockBufferSystem extends BaseComponentSystem implements Runnable {
+public class BlockBufferSystem extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
@@ -57,15 +56,13 @@ public class BlockBufferSystem extends BaseComponentSystem implements Runnable {
             blockBufferComponent.blockBuffer = new ArrayList<>();
             blockBufferEntity = entityManager.create(blockBufferComponent);
         }
-        GameThread.asynch(this);
     }
 
     public void saveBlock(Vector3i pos, Block block) {
         blockBufferComponent.blockBuffer.add(new BufferedBlock(pos, block));
     }
 
-    @Override
-    public void run() {
+    public void setBlock() {
         if (!blockBufferComponent.blockBuffer.isEmpty()){
             Iterator<BufferedBlock> iterator = blockBufferComponent.blockBuffer.iterator();
             BufferedBlock block = iterator.next();
