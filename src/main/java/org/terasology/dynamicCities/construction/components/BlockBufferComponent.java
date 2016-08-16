@@ -22,6 +22,6 @@ import org.terasology.entitySystem.Component;
 import java.util.List;
 
 
-public class BlockBufferComponent implements Component {
+public final class BlockBufferComponent implements Component {
     public List<BufferedBlock> blockBuffer;
 }

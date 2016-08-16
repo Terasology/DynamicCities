@@ -28,4 +28,7 @@ public final class BufferedBlock {
         this.pos = pos;
         this.blockType = blockType;
     }
+    public BufferedBlock() {
+
+    }
 }

@@ -131,7 +131,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 200; i++) {
             blockBufferSystem.setBlock();
         }
 
@@ -338,6 +338,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     public void growSettlement(EntityRef settlement, int time) {
+        if (blockBufferSystem.getBlockBufferSize() > 15000) {
+            return;
+        }
         DistrictFacetComponent districtFacetComponent = settlement.getComponent(DistrictFacetComponent.class);
         PopulationComponent populationComponent = settlement.getComponent(PopulationComponent.class);
         ParcelList parcels = settlement.getComponent(ParcelList.class);
@@ -381,7 +384,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             logger.error("No DistrictFacetComponent found or was uninitialised!");
             return;
         }
-
 
 
         for (String zone : zones) {

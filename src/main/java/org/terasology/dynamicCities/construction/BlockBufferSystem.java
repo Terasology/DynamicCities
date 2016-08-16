@@ -17,8 +17,10 @@ package org.terasology.dynamicCities.construction;
 
 
 import org.terasology.dynamicCities.construction.components.BlockBufferComponent;
+import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -28,7 +30,6 @@ import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
-import org.terasology.world.chunks.event.PurgeWorldEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,11 +56,14 @@ public class BlockBufferSystem extends BaseComponentSystem {
             blockBufferComponent = new BlockBufferComponent();
             blockBufferComponent.blockBuffer = new ArrayList<>();
             blockBufferEntity = entityManager.create(blockBufferComponent);
+            blockBufferEntity.setAlwaysRelevant(true);
         }
+        blockBufferComponent = blockBufferEntity.getComponent(BlockBufferComponent.class);
     }
 
     public void saveBlock(Vector3i pos, Block block) {
         blockBufferComponent.blockBuffer.add(new BufferedBlock(pos, block));
+        blockBufferEntity.saveComponent(blockBufferComponent);
     }
 
     public void setBlock() {
@@ -97,8 +101,16 @@ public class BlockBufferSystem extends BaseComponentSystem {
         return true;
     }
 
+    public int getBlockBufferSize() {
+        return blockBufferComponent.blockBuffer.size();
+    }
+
     @ReceiveEvent
-    public void onWorldPurge(PurgeWorldEvent event, EntityRef entityRef) {
+    public void onWorldPurge(SettlementGrowthEvent event, EntityRef entityRef) {
+        blockBufferEntity.saveComponent(blockBufferComponent);
+    }
+    @ReceiveEvent(components = BlockBufferComponent.class)
+    public void onWorldPurge(BeforeDeactivateComponent event, EntityRef entityRef) {
         blockBufferEntity.saveComponent(blockBufferComponent);
     }
 

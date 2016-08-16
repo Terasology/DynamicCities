@@ -17,8 +17,11 @@ package org.terasology.dynamicCities.economy;
 
 
 import org.terasology.dynamicCities.population.PopulationComponent;
-import org.terasology.economy.StorageComponentHandler;
+import org.terasology.economy.handler.StorageComponentHandler;
 import org.terasology.entitySystem.Component;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class PopulationStorageHandler implements StorageComponentHandler<PopulationComponent> {
@@ -62,6 +65,13 @@ public class PopulationStorageHandler implements StorageComponentHandler<Populat
     @Override
     public int availableResourceCapacity(PopulationComponent populationComponent, String resource) {
         return Math.round(populationComponent.capacity - populationComponent.populationSize);
+    }
+
+    @Override
+    public Set<String> availableResourceTypes(PopulationComponent populationComponent) {
+        Set<String> result = new HashSet<>();
+        result.add(populationComponent.popResourceType);
+        return result;
     }
 
     @Override
