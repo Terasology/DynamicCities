@@ -63,7 +63,6 @@ public class BlockBufferSystem extends BaseComponentSystem {
 
     public void saveBlock(Vector3i pos, Block block) {
         blockBufferComponent.blockBuffer.add(new BufferedBlock(pos, block));
-        blockBufferEntity.saveComponent(blockBufferComponent);
     }
 
     public void setBlock() {
