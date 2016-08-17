@@ -22,6 +22,7 @@ import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeGeneratorContainer;
+import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorLSystem;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -91,7 +92,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
     public boolean removeTreesInRegion(EntityRef region, Rect2i area) {
         TreeFacetComponent trees = region.getComponent(TreeFacetComponent.class);
         LocationComponent loc = region.getComponent(LocationComponent.class);
-        Rect2i relevantArea = area.expand(13, 13);
+        Rect2i relevantArea = area.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
         Region3i treeRegion = Region3i.createFromMinAndSize(new Vector3i(relevantArea.minX(), loc.getLocalPosition().y(), relevantArea.minY()),
                 new Vector3i(relevantArea.sizeX(), 32, relevantArea.sizeY()));
         if (!worldProvider.isRegionRelevant(treeRegion)) {

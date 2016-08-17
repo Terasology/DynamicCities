@@ -131,7 +131,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < SettlementConstants.BLOCKS_SET_PER_TICK; i++) {
             blockBufferSystem.setBlock();
         }
 
@@ -155,7 +155,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
         Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
         for (EntityRef settlement : activeSettlements) {
-            growSettlement(settlement, timer);
+            growSettlement(settlement);
             build(settlement);
         }
         counter = 500;
@@ -317,12 +317,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         for (DynParcel dynParcel : parcelsInQueue) {
-            Rect2i expandedParcel = dynParcel.shape.expand(13, 13);
-            if(!treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, expandedParcel)){
+            Rect2i expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+            if (!treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, expandedParcel)) {
                 continue;
             }
-            //blockBufferSystem.setBlocks();
-            Region3i parcelRegion = Region3i.createFromMinMax(new Vector3i(expandedParcel.minX(), dynParcel.height, expandedParcel.minY()), new Vector3i(expandedParcel.maxX(), dynParcel.height + 50, expandedParcel.maxY()));
 
             if (constructer.buildParcel(dynParcel, settlement, cultureComponent)) {
                 removedParcels.add(dynParcel);
@@ -337,7 +335,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.saveComponent(parcelList);
     }
 
-    public void growSettlement(EntityRef settlement, int time) {
+    public void growSettlement(EntityRef settlement) {
         if (blockBufferSystem.getBlockBufferSize() > 15000) {
             return;
         }
@@ -348,7 +346,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
         NameTagComponent nameTagComponent = settlement.getComponent(NameTagComponent.class);
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
-        RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
         int maxIterations = 300;
@@ -394,9 +391,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 //Grow settlement radius if no valid area was found
                 if (!parcelOptional.isPresent() && parcels.cityRadius < SettlementConstants.SETTLEMENT_RADIUS) {
                     parcels.cityRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
-                    //Remove trees in city area and add region entities
-                    Vector2i regionCenter = new Vector2i(locationComponent.getLocalPosition().x(),
-                            locationComponent.getLocalPosition().z());
+                    //Add region entities of the now bigger zone
                     getSurroundingRegions(settlement);
                     break;
                 } else if (!parcelOptional.isPresent()) {
