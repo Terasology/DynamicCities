@@ -39,7 +39,7 @@ import org.terasology.dynamicCities.settlements.components.ActiveSettlementCompo
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
-import org.terasology.dynamicCities.sites.Site;
+import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -140,7 +140,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         if (counter != 0) {
             return;
         }
-        Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(Site.class);
+        Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
         for (EntityRef siteRegion : uncheckedSiteRegions) {
             boolean checkDistance = checkMinDistance(siteRegion);
             boolean checkBuildArea = checkBuildArea(siteRegion);
@@ -148,9 +148,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                     && checkBuildArea) {
                 EntityRef newSettlement = createSettlement(siteRegion);
                 newSettlement.send(new SettlementRegisterEvent());
-                siteRegion.removeComponent(Site.class);
+                siteRegion.removeComponent(SiteComponent.class);
             } else if (!checkDistance || !checkBuildArea) {
-                siteRegion.removeComponent(Site.class);
+                siteRegion.removeComponent(SiteComponent.class);
             }
         }
         Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
@@ -197,9 +197,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private EntityRef createSettlement(EntityRef siteRegion) {
         EntityRef settlementEntity = entityManager.create();
 
-        Site site = siteRegion.getComponent(Site.class);
+        SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
-        PopulationComponent populationComponent = new PopulationComponent(site.getPopulation());
+        PopulationComponent populationComponent = new PopulationComponent(siteComponent.getPopulation());
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
 
         //add surrounding regions to settlement
@@ -208,7 +208,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         //Create the district facet and DistrictTypeMap
         Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
         Border3D border = new Border3D(0, 0, 0);
-        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, site.hashCode(), districtManager, cultureComponent);
+        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, siteComponent.hashCode(), districtManager, cultureComponent);
         if (districtGrid.districtMap.size() < 1) {
             logger.error("DistrictFacetComponent.districtMap not initialised!");
         }

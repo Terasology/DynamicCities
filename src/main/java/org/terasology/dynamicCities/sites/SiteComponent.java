@@ -26,7 +26,7 @@ import java.util.Objects;
  * Provides information on a settlement site.
   */
 @MappedContainer
-public class Site implements Component {
+public class SiteComponent implements Component {
 
     public Vector2i coords = new Vector2i();
     public float radius;
@@ -37,12 +37,12 @@ public class Site implements Component {
      * @param bx the x world coord (in blocks)
      * @param bz the z world coord (in blocks)
      */
-    public Site(int bx, int bz, int population) {
+    public SiteComponent(int bx, int bz, int population) {
         this.coords = new Vector2i(bx, bz);
         this.population = population;
     }
 
-    public Site() {
+    public SiteComponent() {
     }
 
     /**
@@ -66,8 +66,8 @@ public class Site implements Component {
 
     @Override
     public boolean equals(Object obj) {
-        if (Site.class == obj.getClass()) {
-            Site other = (Site) obj;
+        if (SiteComponent.class == obj.getClass()) {
+            SiteComponent other = (SiteComponent) obj;
             return Objects.equals(coords, other.coords)
                 && Objects.equals(radius, other.radius);
         }
@@ -76,6 +76,6 @@ public class Site implements Component {
 
     @Override
     public String toString() {
-        return "Site [" + coords + " (" + radius + ") (" + population + ")]";
+        return "SiteComponent [" + coords + " (" + radius + ") (" + population + ")]";
     }
 }

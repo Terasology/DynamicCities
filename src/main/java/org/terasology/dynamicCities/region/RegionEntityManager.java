@@ -20,12 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.components.ActiveRegionComponent;
 import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
+import org.terasology.dynamicCities.region.components.RegionMainStoreComponent;
 import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.components.UnregisteredRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
+import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -34,8 +36,11 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.console.commandSystem.annotations.Command;
+import org.terasology.logic.console.commandSystem.annotations.Sender;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
+import org.terasology.logic.permission.PermissionManager;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
@@ -45,6 +50,7 @@ import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -59,32 +65,41 @@ public class RegionEntityManager extends BaseComponentSystem {
     private SettlementEntityManager settlementEntities;
 
     private RegionEntitiesComponent regionEntitiesComponent;
+    private EntityRef regionStoreEntity;
 
 
     private final int gridSize = 96;
     private Logger logger = LoggerFactory.getLogger(RegionEntityManager.class);
+    private boolean toggledNameTags = false;
+
     @Override
-    public void initialise() {
+    public void postBegin() {
+        Iterator<EntityRef> regionEntitiesIterator = entityManager.getEntitiesWith(RegionEntitiesComponent.class).iterator();
+        while (regionEntitiesIterator.hasNext()) {
+            EntityRef regionStore = regionEntitiesIterator.next();
+            if (regionStore.hasComponent(RegionMainStoreComponent.class)) {
+                regionStoreEntity = regionStore;
+                regionEntitiesComponent = regionStore.getComponent(RegionEntitiesComponent.class);
+                return;
+            }
+        }
         regionEntitiesComponent = new RegionEntitiesComponent(gridSize);
+        regionStoreEntity = entityManager.create(regionEntitiesComponent, new RegionMainStoreComponent());
+        regionStoreEntity.setAlwaysRelevant(true);
     }
 
-    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class, ResourceFacetComponent.class, NameTagComponent.class})
+    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class, ResourceFacetComponent.class})
     public void registerRegion(OnActivatedComponent event, EntityRef region) {
         add(region);
         region.removeComponent(UnregisteredRegionComponent.class);
         region.addComponent(new UnassignedRegionComponent());
-        NameTagComponent nT = region.getComponent(NameTagComponent.class);
-        nT.textColor = Color.GREEN;
-        region.saveComponent(nT);
+
     }
 
     @ReceiveEvent(components = {UnassignedRegionComponent.class})
     public void assignRegion(AssignRegionEvent event, EntityRef region) {
         region.addComponent(new ActiveRegionComponent());
         region.removeComponent(UnassignedRegionComponent.class);
-        NameTagComponent nT = region.getComponent(NameTagComponent.class);
-        nT.textColor = Color.YELLOW;
-        region.saveComponent(nT);
     }
 
     
@@ -99,6 +114,7 @@ public class RegionEntityManager extends BaseComponentSystem {
             Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
             addCell(position);
             regionEntities.put(position.toString(), region);
+            regionStoreEntity.saveComponent(regionEntitiesComponent);
         }
     }
 
@@ -261,6 +277,51 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public void clearCell(String posString) {
         clearCell(Toolbox.stringToVector2i(posString));
+    }
+
+    public void setNameTagForRegion(EntityRef region) {
+        NameTagComponent nT = new NameTagComponent();
+        RoughnessFacetComponent roughnessFacetComponent = region.getComponent(RoughnessFacetComponent.class);
+        ResourceFacetComponent resourceFacetComponent = region.getComponent(ResourceFacetComponent.class);
+        LocationComponent locationComponent = region.getComponent(LocationComponent.class);
+        SiteComponent siteComponent = region.getComponent(SiteComponent.class);
+        nT.text = "Roughness: "
+                + roughnessFacetComponent.meanDeviation + " Grass: " + resourceFacetComponent.getResourceSum("Grass")
+                + locationComponent.getWorldPosition().toString();
+        nT.yOffset = 10;
+        nT.scale = 10;
+
+        if (region.hasComponent(UnassignedRegionComponent.class)) {
+            nT.textColor = Color.GREEN;
+        } else if (region.hasComponent(UnregisteredRegionComponent.class)) {
+            nT.textColor = Color.WHITE;
+        } else if (region.hasComponent(ActiveRegionComponent.class)) {
+            nT.textColor = Color.YELLOW;
+        }
+
+        if (siteComponent != null) {
+            nT.text += " SiteComponent";
+        }
+        region.addComponent(nT);
+    }
+
+    @Command(shortDescription = "Toggles the view of nametags for region entities", runOnServer = true,
+            requiredPermission = PermissionManager.DEBUG_PERMISSION)
+    public String toggleRegionTags(
+            @Sender EntityRef client) {
+        if (toggledNameTags) {
+            for (EntityRef region : regionEntitiesComponent.regionEntities.values()) {
+                region.removeComponent(NameTagComponent.class);
+            }
+            toggledNameTags = false;
+            return "Region tags disabled";
+        } else {
+            for (EntityRef region : regionEntitiesComponent.regionEntities.values()) {
+                setNameTagForRegion(region);
+            }
+            toggledNameTags = true;
+            return "Region tags enabled";
+        }
     }
 
     /* Unused and buggy

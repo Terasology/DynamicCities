@@ -26,12 +26,10 @@ import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
-import org.terasology.rendering.nui.Color;
 import org.terasology.world.generation.EntityBuffer;
 import org.terasology.world.generation.EntityProvider;
 import org.terasology.world.generation.Region;
@@ -72,19 +70,10 @@ public class RegionEntityProvider implements EntityProvider {
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
             entityStore.addComponent(locationComponent);
 
-            NameTagComponent nameTagComponent = new NameTagComponent();
-            nameTagComponent.text = "Roughness: "
-                    + roughnessFacetComponent.meanDeviation + " Grass: " + resourceFacetComponent.getResourceSum("Grass")
-                    + locationComponent.getWorldPosition().toString();
-            nameTagComponent.textColor = Color.WHITE;
-            nameTagComponent.yOffset = 10;
-            nameTagComponent.scale = 10;
 
-            if (siteFacet.getSite() != null) {
-                entityStore.addComponent(siteFacet.getSite());
-                nameTagComponent.text += " Site";
+            if (siteFacet.getSiteComponent() != null) {
+                entityStore.addComponent(siteFacet.getSiteComponent());
             }
-            entityStore.addComponent(nameTagComponent);
 
             //Region component is used as identifier for a region entity
             entityStore.addComponent(new UnregisteredRegionComponent());

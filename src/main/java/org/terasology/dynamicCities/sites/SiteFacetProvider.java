@@ -82,8 +82,8 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
 
             int population = TeraMath.fastAbs(Math.round(sizeNoiseGen.noise(minPos.getX(), minPos.getY())
                     * (SettlementConstants.MAX_POPULATIONSIZE - SettlementConstants.MIN_POPULATIONSIZE))) + SettlementConstants.MIN_POPULATIONSIZE;
-            Site site = new Site(minPos.getX(), minPos.getY(), population);
-            siteFacet.setSite(site);
+            SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY(), population);
+            siteFacet.setSiteComponent(siteComponent);
         }
 
 

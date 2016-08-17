@@ -25,18 +25,18 @@ import org.terasology.world.generation.facets.base.BaseFacet2D;
  */
 public class SiteFacet extends BaseFacet2D {
 
-    private Site site = null;
+    private SiteComponent siteComponent = null;
 
     public SiteFacet(Region3i targetRegion, Border3D border) {
         super(targetRegion, border);
     }
 
-    public void setSite(Site site) {
-        this.site = site;
+    public void setSiteComponent(SiteComponent siteComponent) {
+        this.siteComponent = siteComponent;
     }
 
-    public Site getSite() {
-        return site;
+    public SiteComponent getSiteComponent() {
+        return siteComponent;
     }
 
 }
