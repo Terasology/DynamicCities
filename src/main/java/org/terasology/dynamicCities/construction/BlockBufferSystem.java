@@ -17,6 +17,7 @@ package org.terasology.dynamicCities.construction;
 
 
 import org.terasology.dynamicCities.construction.components.BlockBufferComponent;
+import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -59,6 +60,9 @@ public class BlockBufferSystem extends BaseComponentSystem {
             blockBufferEntity.setAlwaysRelevant(true);
         }
         blockBufferComponent = blockBufferEntity.getComponent(BlockBufferComponent.class);
+        if (blockBufferComponent.blockBuffer == null) {
+            blockBufferComponent.blockBuffer = new ArrayList<>(SettlementConstants.BLOCKBUFFER_SIZE);
+        }
     }
 
     public void saveBlock(Vector3i pos, Block block) {

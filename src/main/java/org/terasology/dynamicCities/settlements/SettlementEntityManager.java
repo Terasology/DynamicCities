@@ -336,7 +336,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     public void growSettlement(EntityRef settlement) {
-        if (blockBufferSystem.getBlockBufferSize() > 15000) {
+        if (blockBufferSystem.getBlockBufferSize() > SettlementConstants.BLOCKBUFFER_SIZE) {
             return;
         }
         DistrictFacetComponent districtFacetComponent = settlement.getComponent(DistrictFacetComponent.class);

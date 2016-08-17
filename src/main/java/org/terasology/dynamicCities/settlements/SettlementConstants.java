@@ -25,5 +25,6 @@ public abstract class SettlementConstants {
     public static final int MAX_DISTRICTS = 200;
     public static final int BUILD_RADIUS_INTERVALL = 50;
     public static final int BLOCKS_SET_PER_TICK = 50;
+    public static final int BLOCKBUFFER_SIZE = 15000;
     public static final int MAX_TREE_RADIUS = 13;
 }

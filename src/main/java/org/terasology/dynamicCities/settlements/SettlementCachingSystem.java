@@ -69,6 +69,14 @@ public class SettlementCachingSystem extends BaseComponentSystem {
             settlementsCacheComponent.networkCache = new ArrayList<>();
             settlementEntities = entityManager.create(settlementsCacheComponent, networkComponent);
             settlementEntities.setAlwaysRelevant(true);
+        } else {
+            SettlementsCacheComponent settlementsCacheComponent = settlementEntities.getComponent(SettlementsCacheComponent.class);
+            if (settlementsCacheComponent.networkCache == null) {
+                settlementsCacheComponent.networkCache = new ArrayList<>();
+            }
+            if (settlementsCacheComponent.settlementEntities == null) {
+                settlementsCacheComponent.settlementEntities = new HashMap<>();
+            }
         }
         isInitialised = true;
 
