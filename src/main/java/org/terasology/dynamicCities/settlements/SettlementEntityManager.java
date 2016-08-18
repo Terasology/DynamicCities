@@ -37,6 +37,7 @@ import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
+import org.terasology.dynamicCities.settlements.events.CheckBuildingSpawnPreconditionsEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.dynamicCities.sites.SiteComponent;
@@ -385,8 +386,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         for (String zone : zones) {
             //Checks if the demand for a building of that zone is enough
+            CheckBuildingSpawnPreconditionsEvent preconditionsEvent = new CheckBuildingSpawnPreconditionsEvent(zone);
+            settlement.send(preconditionsEvent);
+            if (!preconditionsEvent.isHandled) {
+                preconditionsEvent.check = true;
+            }
             while (cultureComponent.getBuildingNeedsForZone(zone) * populationComponent.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
-                    && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
+                    && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN && preconditionsEvent.check) {
                 Optional<DynParcel> parcelOptional = placeParcel(center, zone, parcels, buildingQueue, districtFacetComponent, maxIterations);
                 //Grow settlement radius if no valid area was found
                 if (!parcelOptional.isPresent() && parcels.cityRadius < SettlementConstants.SETTLEMENT_RADIUS) {

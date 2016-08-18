@@ -17,7 +17,6 @@ package org.terasology.dynamicCities.buildings;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -53,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This is used to keep track of possible buildings, their construction plans and attributes
@@ -71,7 +71,7 @@ public class BuildingManager extends BaseComponentSystem {
 
     private List<BuildingGenerator> generators = new ArrayList<>();
     private Map<String, List<Vector2i>> minMaxSizePerZone = new HashMap<>();
-
+    private final int maxIterationsForBuildingSelection = 100;
     @In
     private Context context;
 
@@ -200,7 +200,7 @@ public class BuildingManager extends BaseComponentSystem {
                     numberOfBuildingsForZone--;
                 }
                 iter++;
-            } while (!availableBuildings.isEmpty() && selectedBuilding == null && iter < 100);
+            } while (!availableBuildings.isEmpty() && selectedBuilding == null && iter < maxIterationsForBuildingSelection);
 
             if (selectedBuilding == null) { // no building was found - try to find alternative
                 GenericBuildingComponent biggestFittingBuilding = findBiggestFittingBuilding(shape, zone);
@@ -211,7 +211,7 @@ public class BuildingManager extends BaseComponentSystem {
             }
 
             if (selectedBuilding != null) {
-                logger.info("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.width(), shape.height());
+                logger.debug("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.width(), shape.height());
                 return Optional.of(entityManager.getComponentLibrary().copy(selectedBuilding));
             }
         }
