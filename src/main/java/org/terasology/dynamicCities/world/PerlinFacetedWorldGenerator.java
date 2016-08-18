@@ -18,7 +18,10 @@ package org.terasology.dynamicCities.world;
 import org.terasology.core.world.generator.facetProviders.BiomeProvider;
 import org.terasology.core.world.generator.facetProviders.DefaultFloraProvider;
 import org.terasology.core.world.generator.facetProviders.PerlinBaseSurfaceProvider;
+import org.terasology.core.world.generator.facetProviders.PerlinHillsAndMountainsProvider;
 import org.terasology.core.world.generator.facetProviders.PerlinHumidityProvider;
+import org.terasology.core.world.generator.facetProviders.PerlinOceanProvider;
+import org.terasology.core.world.generator.facetProviders.PerlinRiverProvider;
 import org.terasology.core.world.generator.facetProviders.PerlinSurfaceTemperatureProvider;
 import org.terasology.core.world.generator.facetProviders.SeaLevelProvider;
 import org.terasology.core.world.generator.facetProviders.SurfaceToDensityProvider;
@@ -69,9 +72,9 @@ public class PerlinFacetedWorldGenerator extends BaseFacetedWorldGenerator {
                 .addProvider(new PerlinHumidityProvider())
                 .addProvider(new PerlinSurfaceTemperatureProvider())
                 .addProvider(new PerlinBaseSurfaceProvider())
-                //.addProvider(new PerlinRiverProvider())
-                //.addProvider(new PerlinOceanProvider())
-                //.addProvider(new PerlinHillsAndMountainsProvider())
+                .addProvider(new PerlinRiverProvider())
+                .addProvider(new PerlinOceanProvider())
+                .addProvider(new PerlinHillsAndMountainsProvider())
                 .addProvider(new BiomeProvider())
                 .addProvider(new SurfaceToDensityProvider())
                 .addProvider(new RoughnessProvider())

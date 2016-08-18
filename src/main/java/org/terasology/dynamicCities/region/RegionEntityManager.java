@@ -280,6 +280,10 @@ public class RegionEntityManager extends BaseComponentSystem {
     }
 
     public void setNameTagForRegion(EntityRef region) {
+        if (!region.iterateComponents().iterator().hasNext()) {
+            logger.error("Region with no components found!");
+            return;
+        }
         NameTagComponent nT = new NameTagComponent();
         RoughnessFacetComponent roughnessFacetComponent = region.getComponent(RoughnessFacetComponent.class);
         ResourceFacetComponent resourceFacetComponent = region.getComponent(ResourceFacetComponent.class);
@@ -324,20 +328,34 @@ public class RegionEntityManager extends BaseComponentSystem {
         }
     }
 
-    /* Unused and buggy
     public List<EntityRef> getRegionsInArea(Rect2i area) {
         List<EntityRef> result = new ArrayList<>();
         for (BaseVector2i pos : area.contents()) {
             EntityRef region = getNearest(new Vector2i(pos.x(), pos.y()));
             if (region == null) {
-                logger.error("Failed to get nearest region for " + pos.toString());
-            }
-            if (!result.contains(region)) {
+                logger.debug("Failed to get nearest region for " + pos.toString());
+            } else if (!result.contains(region)) {
                 result.add(region);
             }
         }
         return result;
     }
+ /*
+    public List<EntityRef> getRegionsInArea(Rect2i area) {
+        List<EntityRef> result = new ArrayList<>();
+        Vector2i regionWorldPos = new Vector2i();
+        for (BaseVector2i regionPos : area.contents()) {
+            regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
+
+            EntityRef region = getNearest(regionWorldPos);
+            if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
+                result.add(region);
+            }
+        }
+        return result;
+    }*/
+    /* Unused and buggy
+
 
     public List<EntityRef> getSurroundingRegions(Vector2i pos, int size) {
         Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-size, -size, size, size);

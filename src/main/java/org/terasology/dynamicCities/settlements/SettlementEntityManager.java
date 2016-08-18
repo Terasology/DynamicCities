@@ -32,9 +32,11 @@ import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.PopulationComponent;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
+import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
+import org.terasology.dynamicCities.resource.ResourceType;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.settlements.events.CheckBuildingSpawnPreconditionsEvent;
@@ -296,14 +298,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             if (settlementCircle.contains(regionWorldPos)) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(RoughnessFacetComponent.class)) {
-                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > 0.2) {
+                    if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > SettlementConstants.MAX_BUILDABLE_ROUGHNESS) {
                         unusableRegionsCount++;
                     }
                 }
             }
         }
 
-        return unusableRegionsCount < 15;
+        return unusableRegionsCount < SettlementConstants.NEEDED_USABLE_REGIONS_FOR_CITY_SPAWN;
     }
 
 
@@ -452,7 +454,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                     (int) Math.round(radius * Math.cos((double) angle)) + center.z());
             shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
         } while ((!parcels.isNotIntersecting(shape) || !buildingQueue.isNotIntersecting(shape)
-                || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)))
+                || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)) || !checkIfTerrainIsBuildable(shape))
                 && iter != maxIterations);
         //Keep track of the most distant building to the center
         if (radius > parcels.builtUpRadius) {
@@ -463,6 +465,28 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         } else {
             return Optional.of(new DynParcel(shape, orientation, zone, Math.round(center.y())));
         }
+    }
+
+    private boolean checkIfTerrainIsBuildable(Rect2i area) {
+        List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
+        if (regions.isEmpty()) {
+            logger.error("No regions found in area " + area.toString());
+        }
+        for (EntityRef region : regions) {
+            RoughnessFacetComponent roughnessFacetComponent = region.getComponent(RoughnessFacetComponent.class);
+            ResourceFacetComponent resourceFacetComponent = region.getComponent(ResourceFacetComponent.class);
+            if (roughnessFacetComponent == null) {
+                logger.error("No RoughnessFacetComponent found for region");
+                return false;
+            }
+            if (roughnessFacetComponent.meanDeviation > SettlementConstants.MAX_BUILDABLE_ROUGHNESS) {
+                return false;
+            }
+            if (resourceFacetComponent.getResourceSum(ResourceType.WATER.toString()) != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
