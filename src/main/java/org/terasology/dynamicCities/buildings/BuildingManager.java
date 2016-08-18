@@ -17,6 +17,7 @@ package org.terasology.dynamicCities.buildings;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -68,11 +69,6 @@ public class BuildingManager extends BaseComponentSystem {
     private MersenneRandom rng;
     private Map<String, EntityRef> templates = new HashMap<>();
 
-    private CommercialBuildingGenerator commercialBuildingGenerator;
-    private RectHouseGenerator rectHouseGenerator;
-    private SimpleChurchGenerator simpleChurchGenerator;
-    private TownHallGenerator townHallGenerator;
-
     private List<BuildingGenerator> generators = new ArrayList<>();
     private Map<String, List<Vector2i>> minMaxSizePerZone = new HashMap<>();
 
@@ -96,7 +92,7 @@ public class BuildingManager extends BaseComponentSystem {
             //Get building data
             if (prefab.hasComponent(GenericBuildingComponent.class)) {
                 GenericBuildingComponent building = prefab.getComponent(GenericBuildingComponent.class);
-                if(building.zone == null) {
+                if (building.zone == null) {
                     logger.warn("Invalid zone type found for prefab " + prefab.getName() + ". Skipping building");
                     continue;
                 }
@@ -131,10 +127,8 @@ public class BuildingManager extends BaseComponentSystem {
         logger.info("Finished loading buildings. Number of building types: " + buildings.values().size() + " | Strings found: " + buildings.keySet().toString());
 
 
-        /**
-         * Initialising minMaxSizes
-         */
-        for(String zone : getZones()) {
+        // Initialising minMaxSizes
+        for (String zone : getZones()) {
             minMaxSizePerZone.put(zone, getMinMaxForZone(zone));
         }
 
@@ -188,28 +182,47 @@ public class BuildingManager extends BaseComponentSystem {
 
     public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, CultureComponent cultureComponent) {
         if (buildings.containsKey(zone)) {
-            int max = buildings.get(zone).size();
-            GenericBuildingComponent building;
+            // TODO: needs to be adapted if buildings have a specific spawn chance
+            List<GenericBuildingComponent> availableBuildings =
+                    buildings.get(zone).stream().filter(b -> cultureComponent.availableBuildings.contains(b.name)).collect(Collectors.toList());
+            int numberOfBuildingsForZone = availableBuildings.size();
+
+            GenericBuildingComponent selectedBuilding = null;
             int iter = 0;
-            do {
-                int index = rng.nextInt(max);
-                building = (GenericBuildingComponent) buildings.get(zone).toArray()[index];
+            int index;
+            do { // improve iteration by removing non-fitting buildings from the list
+                index = rng.nextInt(numberOfBuildingsForZone);
+                GenericBuildingComponent candidateBuilding = availableBuildings.get(index);
+                if (isFitting(shape, candidateBuilding)) {
+                    selectedBuilding = candidateBuilding;
+                } else {
+                    availableBuildings.remove(candidateBuilding);
+                    numberOfBuildingsForZone--;
+                }
                 iter++;
-            } while ((!isFitting(shape, building) || !cultureComponent.availableBuildings.contains(building.name)) && iter < 100);
-            if (iter >= 55) {
-                building = entityManager.getComponentLibrary().copy(findBiggestFittingBuilding(shape, zone));
-                building.isScaledDown = true;
+            } while (!availableBuildings.isEmpty() && selectedBuilding == null && iter < 100);
+
+            if (selectedBuilding == null) { // no building was found - try to find alternative
+                GenericBuildingComponent biggestFittingBuilding = findBiggestFittingBuilding(shape, zone);
+                if (biggestFittingBuilding != null) {
+                    selectedBuilding = entityManager.getComponentLibrary().copy(biggestFittingBuilding);
+                    selectedBuilding.isScaledDown = true;
+                }
             }
-            return Optional.of(entityManager.getComponentLibrary().copy(building));
+
+            if (selectedBuilding != null) {
+                logger.info("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.width(), shape.height());
+                return Optional.of(entityManager.getComponentLibrary().copy(selectedBuilding));
+            }
         }
-        logger.warn("No building types found for " + zone);
+        logger.warn("No building types found for zone \"{}\" with size ({}, {})", zone, shape.width(), shape.height());
         return Optional.empty();
     }
 
 
-    public Optional<BuildingGenerator> getGenerator(String generatorName) {
+    private Optional<BuildingGenerator> getGenerator(String generatorName) {
         Class generatorClass = GeneratorRegistry.GENERATORS.get(generatorName);
-        for(BuildingGenerator generator : generators) {
+        for (BuildingGenerator generator : generators) {
             if (generator.getClass() == generatorClass) {
                 return Optional.of(generator);
             }
@@ -218,7 +231,7 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.empty();
     }
 
-    public Optional<EntityRef> getTemplate(String templateName) {
+    private Optional<EntityRef> getTemplate(String templateName) {
         if (templates.containsKey(templateName)) {
             return Optional.of(templates.get(templateName));
         } else {
@@ -295,7 +308,7 @@ public class BuildingManager extends BaseComponentSystem {
         return buildings.keySet();
     }
 
-    private GenericBuildingComponent findBiggestFittingBuilding (Rect2i shape, String zone) {
+    private GenericBuildingComponent findBiggestFittingBuilding(Rect2i shape, String zone) {
         int maxX = 0;
         int maxY = 0;
         GenericBuildingComponent fittingBuilding = null;
