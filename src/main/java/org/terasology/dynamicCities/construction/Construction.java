@@ -35,7 +35,6 @@ import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.buildings.components.ChestPositionsComponent;
 import org.terasology.dynamicCities.buildings.components.DynParcelRefComponent;
-import org.terasology.dynamicCities.buildings.components.MultiInvStorageComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
@@ -66,6 +65,7 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.economy.components.MultiInvStorageComponent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -520,9 +520,14 @@ public class Construction extends BaseComponentSystem {
             Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
-
-            for (Vector3i pos : region) {
-                blockBufferSystem.saveBlock(pos, block);
+            if (block.getBlockFamily() == blockManager.getBlockFamily("core:chest")) {
+                for (Vector3i pos : region) {
+                    worldProvider.setBlock(pos, block);
+                }
+            } else {
+                for (Vector3i pos : region) {
+                    blockBufferSystem.saveBlock(pos, block);
+                }
             }
         }
     }

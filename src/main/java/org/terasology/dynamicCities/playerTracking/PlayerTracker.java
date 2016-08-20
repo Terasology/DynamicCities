@@ -170,7 +170,7 @@ public class PlayerTracker extends BaseComponentSystem {
         prevLoc.clear();
     }
 
-    public Map getPlayerCityMap() {
+    public Map<EntityRef, EntityRef> getPlayerCityMap() {
         return prevLoc;
     }
 

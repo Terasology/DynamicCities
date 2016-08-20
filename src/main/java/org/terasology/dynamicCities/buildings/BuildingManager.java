@@ -333,7 +333,7 @@ public class BuildingManager extends BaseComponentSystem {
                 && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY();
         boolean checkEastWest = building.minSize.x < shape.sizeY() && building.minSize.y < shape.sizeX()
                 && building.maxSize.x > shape.sizeY() && building.maxSize.y > shape.sizeX();
-        return checkEastWest && checkNorthSouth;
+        return checkEastWest || checkNorthSouth;
     }
 
     //Checks whether the building needs to be rotated in order to fit on the parcel

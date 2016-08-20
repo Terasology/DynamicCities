@@ -18,7 +18,6 @@ package org.terasology.dynamicCities.construction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.RegionEntityManager;
-import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeGeneratorContainer;
@@ -47,6 +46,7 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -108,8 +108,9 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         return true;
     }
 
-    public boolean removeTreesInRegions(RegionEntitiesComponent regions, Rect2i area) {
-        for (EntityRef region : regions.regionEntities.values()) {
+    public boolean removeTreesInRegions(Rect2i area) {
+        List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
+        for (EntityRef region : regions) {
             if (!region.hasComponent(RoughnessFacetComponent.class)) {
                 return false;
             }

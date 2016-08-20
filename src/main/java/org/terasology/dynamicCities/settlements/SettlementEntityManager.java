@@ -44,6 +44,8 @@ import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
+import org.terasology.economy.components.MarketSubscriberComponent;
+import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
@@ -161,7 +163,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             growSettlement(settlement);
             build(settlement);
         }
-        counter = 500;
+        counter = 250;
     }
 
 
@@ -229,6 +231,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementName.yOffset = 20;
         settlementName.scale = 20;
 
+        //population growth
+        MarketSubscriberComponent populationSubscriberComponent = new MarketSubscriberComponent(1);
+        populationSubscriberComponent.productStorage = settlementEntity;
+        populationSubscriberComponent.consumptionStorage = settlementEntity;
+        populationSubscriberComponent.productionInterval = 500;
+        populationSubscriberComponent.production.put(populationComponent.popResourceType, Math.round(cultureComponent.growthRate));
 
         NetworkComponent networkComponent = new NetworkComponent();
         networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
@@ -242,11 +250,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.addComponent(buildingQueue);
         settlementEntity.addComponent(new ActiveSettlementComponent());
         settlementEntity.addComponent(networkComponent);
+        settlementEntity.addComponent(populationSubscriberComponent);
         settlementEntity.setAlwaysRelevant(true);
 
         //add region entities
         getSurroundingRegions(settlementEntity);
 
+        //Hook into the economy module's MarketUpdaterSystem
+        settlementEntity.send(new SubscriberRegistrationEvent());
 
         return settlementEntity;
     }
@@ -314,14 +325,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
-        RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
         Set<DynParcel> removedParcels = new HashSet<>();
         Set<DynParcel> parcelsInQueue = buildingQueue.buildingQueue;
 
 
         for (DynParcel dynParcel : parcelsInQueue) {
             Rect2i expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
-            if (!treeRemovalSystem.removeTreesInRegions(regionEntitiesComponent, expandedParcel)) {
+            if (!treeRemovalSystem.removeTreesInRegions(expandedParcel)) {
                 continue;
             }
 
@@ -351,7 +361,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
-        int maxIterations = 300;
+        int maxIterations = 500;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
