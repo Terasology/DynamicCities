@@ -480,7 +480,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private boolean checkIfTerrainIsBuildable(Rect2i area) {
         List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
         if (regions.isEmpty()) {
-            logger.error("No regions found in area " + area.toString());
+            //logger.debug("No regions found in area " + area.toString());
+            return false;
         }
         for (EntityRef region : regions) {
             RoughnessFacetComponent roughnessFacetComponent = region.getComponent(RoughnessFacetComponent.class);

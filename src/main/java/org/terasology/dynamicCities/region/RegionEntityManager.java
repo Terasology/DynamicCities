@@ -332,7 +332,8 @@ public class RegionEntityManager extends BaseComponentSystem {
         List<EntityRef> result = new ArrayList<>();
         for (BaseVector2i pos : area.contents()) {
             EntityRef region = getNearest(new Vector2i(pos.x(), pos.y()));
-            if (region == null) {
+
+            if (region == null || !region.isActive() || !region.exists()) {
                 logger.debug("Failed to get nearest region for " + pos.toString());
             } else if (!result.contains(region)) {
                 result.add(region);
