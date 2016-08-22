@@ -8,4 +8,3 @@ This [techdemo](https://www.youtube.com/watch?v=feEMmo1pRSY&feature=youtu.be) pr
 
 ![sc1](/images/niceCity1.jpg)
 ![sc2](/images/niceCity5.jpg)
-![sc3](/DistrictOverlay.png)
