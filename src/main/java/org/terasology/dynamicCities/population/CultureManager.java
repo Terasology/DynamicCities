@@ -35,8 +35,8 @@ import java.util.Set;
 @Share(CultureManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class CultureManager extends BaseComponentSystem {
-    private Logger logger = LoggerFactory.getLogger(Culture.class);
-    private Set<Culture> cultures = new HashSet<>();
+    private Logger logger = LoggerFactory.getLogger(CultureComponent.class);
+    private Set<CultureComponent> cultureComponents = new HashSet<>();
     private MersenneRandom rng;
     @In
     private AssetManager assetManager;
@@ -47,28 +47,28 @@ public class CultureManager extends BaseComponentSystem {
         Set<Prefab> prefabs = assetManager.getLoadedAssets(Prefab.class);
         for (Prefab prefab : prefabs) {
             //Get building data
-            if (prefab.hasComponent(Culture.class)) {
-                Culture culture = prefab.getComponent(Culture.class);
-                if (!culture.buildingNeedPerZone.isEmpty()) {
-                    cultures.add(culture);
-                    culture.buildingNeedPerZone = Toolbox.stringsToLowerCase(culture.buildingNeedPerZone);
+            if (prefab.hasComponent(CultureComponent.class)) {
+                CultureComponent cultureComponent = prefab.getComponent(CultureComponent.class);
+                if (!cultureComponent.buildingNeedPerZone.isEmpty()) {
+                    cultureComponents.add(cultureComponent);
+                    cultureComponent.buildingNeedPerZone = Toolbox.stringsToLowerCase(cultureComponent.buildingNeedPerZone);
                 } else {
                     logger.warn("Found culture prefab with empty buildingNeedPerZone list");
                 }
-                if (culture.availableBuildings != null) {
-                    Toolbox.stringsToLowerCase(culture.availableBuildings);
+                if (cultureComponent.availableBuildings != null) {
+                    Toolbox.stringsToLowerCase(cultureComponent.availableBuildings);
                 } else {
-                    logger.warn("No available Buildings defined for culture " + culture.name);
+                    logger.warn("No available Buildings defined for culture " + cultureComponent.name);
                 }
-                if (culture.residentialZones != null) {
-                    Toolbox.stringsToLowerCase(culture.residentialZones);
+                if (cultureComponent.residentialZones != null) {
+                    Toolbox.stringsToLowerCase(cultureComponent.residentialZones);
                 } else {
-                    logger.warn("No residential zones defined for culture " + culture.name);
+                    logger.warn("No residential zones defined for culture " + cultureComponent.name);
                 }
             }
         }
         String cultureNames = "[";
-        Iterator<Culture> iter = cultures.iterator();
+        Iterator<CultureComponent> iter = cultureComponents.iterator();
         while (iter.hasNext()) {
             cultureNames += iter.next().name;
             if (iter.hasNext()) {
@@ -76,15 +76,15 @@ public class CultureManager extends BaseComponentSystem {
             }
         }
         cultureNames += "]";
-        logger.info("Finished loading cultures: " + cultures.size() + " culture types found: " + cultureNames);
+        logger.info("Finished loading cultures: " + cultureComponents.size() + " culture types found: " + cultureNames);
         rng = new MersenneRandom(assetManager.hashCode() * 5 + this.hashCode());
     }
 
-    public Culture getRandomCulture ( ) {
-        if (!cultures.isEmpty()) {
-            int max = cultures.size();
+    public CultureComponent getRandomCulture ( ) {
+        if (!cultureComponents.isEmpty()) {
+            int max = cultureComponents.size();
             int index = rng.nextInt(max);
-            return (Culture) cultures.toArray()[index];
+            return (CultureComponent) cultureComponents.toArray()[index];
         }
         logger.error("No culture found...barbarians..." );
         return null;

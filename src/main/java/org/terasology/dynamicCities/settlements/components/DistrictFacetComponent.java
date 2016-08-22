@@ -19,7 +19,7 @@ package org.terasology.dynamicCities.settlements.components;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
-import org.terasology.dynamicCities.population.Culture;
+import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
 import org.terasology.entitySystem.Component;
@@ -70,7 +70,7 @@ public class DistrictFacetComponent implements Component {
 
     public DistrictFacetComponent() { }
 
-    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, Culture culture) {
+    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, CultureComponent cultureComponent) {
         worldRegion = border.expandTo2D(targetRegion);
         relativeRegion = border.expandTo2D(targetRegion.size());
         this.gridSize = gridSize;
@@ -114,14 +114,14 @@ public class DistrictFacetComponent implements Component {
         }
         districtSize = new ArrayList<>();
         districtSize = IntStream.of(tempSize).boxed().collect(Collectors.toList());
-        mapDistrictTypes(districtManager, culture);
+        mapDistrictTypes(districtManager, cultureComponent);
     }
 
 
-    private void mapDistrictTypes(DistrictManager districtManager, Culture culture) {
+    private void mapDistrictTypes(DistrictManager districtManager, CultureComponent cultureComponent) {
         Map<String, Float> zoneArea = new HashMap<>();
         ProbabilityDistribution<DistrictType> probabilityDistribution = new ProbabilityDistribution<>(districtManager.hashCode() | 413357);
-        Map<String, Float> culturalNeedsPercentage = culture.getProcentualsForZone();
+        Map<String, Float> culturalNeedsPercentage = cultureComponent.getProcentualsForZone();
         int totalAssignedArea = 0;
 
         for (int i = 0; i < districtCount; i++) {
@@ -179,8 +179,6 @@ public class DistrictFacetComponent implements Component {
                 districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), nextDistrict);
             }
         }
-        return;
-
     }
 
     public DistrictType getDistrict(Vector2i worldPoint) {

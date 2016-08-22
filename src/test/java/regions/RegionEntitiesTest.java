@@ -16,23 +16,8 @@
 
 package regions;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3f;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-
-
 public class RegionEntitiesTest {
-
+/*
     private RegionEntitiesComponent regionEntitiesComponent;
     private EntityRef[] test;
 
@@ -83,12 +68,12 @@ public class RegionEntitiesTest {
     }
 
     @Test
-    public void testGetRegionsInCell() {
+    public void testGetRegionssInCell() {
         List<EntityRef> testList = new ArrayList<>();
         for (EntityRef region : test) {
             testList.add(region);
         }
         assertEquals(testList, regionEntitiesComponent.getRegionsInCell(new Vector2i(0, 0)));
     }
-
+*/
 }

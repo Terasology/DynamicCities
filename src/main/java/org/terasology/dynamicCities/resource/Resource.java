@@ -15,6 +15,13 @@
  */
 package org.terasology.dynamicCities.resource;
 
+import org.terasology.reflection.MappedContainer;
+
+/**
+ * This is not to be confused with the economy resource definition, although they can possibly converted into such later or replaced by them.
+ * This is to keep track of a region's resources as per actual blocks.
+ */
+@MappedContainer
 public class Resource {
 
     public int amount;
@@ -29,7 +36,7 @@ public class Resource {
         this.type = type;
         this.amount = 1;
     }
-
+    public Resource() {}
     public ResourceType getType() {
         return type;
     }

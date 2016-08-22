@@ -34,6 +34,7 @@ import java.util.Map;
  */
 
 public class RecursiveTreeGeneratorLSystem {
+
     private int maxDepth;
     private float angle;
     private Map<Character, LSystemRule> ruleSet;
@@ -134,4 +135,16 @@ public class RecursiveTreeGeneratorLSystem {
             }
         }
     }
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
+    public Map<Character, LSystemRule> getRuleSet() {
+        return ruleSet;
+    }
+
 }

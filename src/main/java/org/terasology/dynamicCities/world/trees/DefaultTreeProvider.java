@@ -103,7 +103,7 @@ public class DefaultTreeProvider extends SurfaceObjectProvider<Biome, TreeGenera
         Border3D borderForTreeFacet = region.getBorderForFacet(TreeFacet.class);
         TreeFacet facet = new TreeFacet(region.getRegion(), borderForTreeFacet.extendBy(0, maxHeight, maxRad));
 
-        //populateFacet(facet, surface, biome, filters);
+        populateFacet(facet, surface, biome, filters);
 
         region.setRegionFacet(TreeFacet.class, facet);
     }

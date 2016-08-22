@@ -16,7 +16,7 @@
 
 package org.terasology.dynamicCities.settlements;
 
-import org.terasology.dynamicCities.sites.Site;
+import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.reflection.MappedContainer;
@@ -36,10 +36,10 @@ public class Settlement implements Component {
     public Settlement() {
 
     }
-    public Settlement(Site site, String name) {
-        this.coords = new Vector2i(site.getPos());
+    public Settlement(SiteComponent siteComponent, String name) {
+        this.coords = new Vector2i(siteComponent.getPos());
         this.name = name;
-        this.population = site.getPopulation();
+        this.population = siteComponent.getPopulation();
     }
 
     /**

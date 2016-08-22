@@ -21,7 +21,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 
 public class MarketComponent implements Component {
 
-    EntityRef market;
+    public EntityRef market;
 
     public MarketComponent() {
     }

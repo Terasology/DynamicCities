@@ -62,7 +62,6 @@ public class RoughnessProvider implements FacetProvider {
             } else {
                 facet.setWorld(pos, -1000);
             }
-            //facet.setWorld(new Vector2i(pos.x(), pos.y()), 2);
         }
 
         region.setRegionFacet(RoughnessFacet.class, facet);

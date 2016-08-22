@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.utilities;
 
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
+import org.terasology.math.geom.Vector3i;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +36,18 @@ public class Toolbox {
             float y = Float.parseFloat(numbers[2]);
             float z = Float.parseFloat(numbers[3]);
             return new Vector3f(x, y, z);
+        } else {
+            throw new NullPointerException();
+        }
+    }
+
+    public static Vector3i stringToVector3i(String string) {
+        if (string.matches("\\(-?\\d+,\\s-?\\d+,\\s-?\\d+\\)")) {
+            String[] numbers = string.split("[,()\\s]");
+            int x = Integer.parseInt(numbers[1]);
+            int y = Integer.parseInt(numbers[3]);
+            int z = Integer.parseInt(numbers[5]);
+            return new Vector3i(x, y, z);
         } else {
             throw new NullPointerException();
         }
@@ -80,9 +93,7 @@ public class Toolbox {
     public static int[][] arrayToMatrix(int[] array, int rows, int columns) {
         int[][] matrix = new int[rows][columns];
         for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                matrix[i][j] = array[j + i * columns];
-            }
+            System.arraycopy(array, 0 + i * columns, matrix[i], 0, columns);
         }
         return matrix;
     }
