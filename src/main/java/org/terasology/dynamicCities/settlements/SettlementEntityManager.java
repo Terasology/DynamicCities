@@ -16,6 +16,12 @@
 package org.terasology.dynamicCities.settlements;
 
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -70,13 +76,6 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 
 @Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -120,8 +119,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int timer = 0;
     private Random rng;
 
-    private float elapsed = 0;
-
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @Override
     public void postBegin() {
@@ -133,17 +130,10 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     @Override
     public void update(float delta) {
-        elapsed += delta;
-
         if (!settlementCachingSystem.isInitialised()) {
             return;
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
-        }
-
-        if (elapsed > 1) {
-            elapsed -= 1;
-            blockBufferSystem.setBlocks(SettlementConstants.BLOCKS_SET_PER_TICK);
         }
 
         counter--;
@@ -366,7 +356,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         NameTagComponent nameTagComponent = settlement.getComponent(NameTagComponent.class);
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
 
-        Vector3i center = new Vector3i(locationComponent.getLocalPosition());
         int maxIterations = 500;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
@@ -401,6 +390,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             return;
         }
 
+        Vector3i center = new Vector3i(locationComponent.getLocalPosition());
 
         for (String zone : zones) {
             //Checks if the demand for a building of that zone is enough
@@ -479,7 +469,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         if (iter == maxIterations) {
             return Optional.empty();
         } else {
-            return Optional.of(new DynParcel(shape, orientation, zone, Math.round(center.y())));
+            return Optional.of(new DynParcel(shape, orientation, zone, center.y()));
         }
     }
 
