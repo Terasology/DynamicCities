@@ -24,8 +24,8 @@ public abstract class SettlementConstants {
     public static final int MAX_BUILDINGSPAWN = 2;
     public static final int MAX_DISTRICTS = 300;
     public static final int BUILD_RADIUS_INTERVALL = 50;
-    public static final int BLOCKS_SET_PER_TICK = 300;
-    public static final int BLOCKBUFFER_SIZE = 50000;
+    public static final int BLOCKS_SET_PER_TICK = 5_000 ;
+    public static final int BLOCKBUFFER_SIZE = 50_000;
     public static final int MAX_TREE_RADIUS = 13;
     public static final float MAX_BUILDABLE_ROUGHNESS = 0.3f;
     public static final int NEEDED_USABLE_REGIONS_FOR_CITY_SPAWN = 15;

@@ -16,8 +16,13 @@
 package org.terasology.dynamicCities.construction;
 
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.construction.components.BlockBufferComponent;
-import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -32,13 +37,11 @@ import org.terasology.registry.Share;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 @Share(BlockBufferSystem.class)
 @RegisterSystem
 public class BlockBufferSystem extends BaseComponentSystem {
+
+    private static final Logger logger = LoggerFactory.getLogger(BlockBufferSystem.class);
 
     @In
     private EntityManager entityManager;
@@ -55,13 +58,13 @@ public class BlockBufferSystem extends BaseComponentSystem {
         blockBufferEntity = blockBufferIterator.hasNext() ? blockBufferIterator.next() : null;
         if (blockBufferEntity == null) {
             blockBufferComponent = new BlockBufferComponent();
-            blockBufferComponent.blockBuffer = new ArrayList<>();
+            blockBufferComponent.blockBuffer = new LinkedList<>();
             blockBufferEntity = entityManager.create(blockBufferComponent);
             blockBufferEntity.setAlwaysRelevant(true);
         }
         blockBufferComponent = blockBufferEntity.getComponent(BlockBufferComponent.class);
         if (blockBufferComponent.blockBuffer == null) {
-            blockBufferComponent.blockBuffer = new ArrayList<>(SettlementConstants.BLOCKBUFFER_SIZE);
+            blockBufferComponent.blockBuffer = new LinkedList<>();
         }
     }
 
@@ -70,7 +73,7 @@ public class BlockBufferSystem extends BaseComponentSystem {
     }
 
     public void setBlock() {
-        if (!blockBufferComponent.blockBuffer.isEmpty()){
+        if (!blockBufferComponent.blockBuffer.isEmpty()) {
             Iterator<BufferedBlock> iterator = blockBufferComponent.blockBuffer.iterator();
             BufferedBlock block = iterator.next();
             if (worldProvider.isBlockRelevant(block.pos)) {
@@ -80,16 +83,25 @@ public class BlockBufferSystem extends BaseComponentSystem {
         }
     }
 
-    public void setBlocks() {
-        List<BufferedBlock> removedBlocks = new ArrayList<>();
-        if (!blockBufferComponent.blockBuffer.isEmpty()) {
-            for (BufferedBlock block : blockBufferComponent.blockBuffer) {
-                if (worldProvider.isBlockRelevant(block.pos)) {
-                    worldProvider.setBlock(block.pos, block.blockType);
-                    removedBlocks.add(block);
-                }
+    public void setBlocks(int maxBlocksToSet) {
+        Map<Vector3i, Block> blocksToPlace = new HashMap<>();
+        int removed = 0;
+        int oldBufferSize = getBlockBufferSize();
+
+        Iterator<BufferedBlock> iter = blockBufferComponent.blockBuffer.iterator();
+        while (iter.hasNext() && blocksToPlace.size() < maxBlocksToSet) {
+            BufferedBlock block = iter.next();
+            if (worldProvider.isBlockRelevant(block.pos)) {
+                blocksToPlace.put(block.pos, block.blockType);
+                iter.remove();
+                removed++;
             }
-            blockBufferComponent.blockBuffer.removeAll(removedBlocks);
+        }
+
+        if (!blocksToPlace.isEmpty()) {
+            logger.info("BlockBuffer size befor: {}, Placed: {}, Removed: {}, BlockBuffer size after: {}", oldBufferSize, blocksToPlace.size(), removed, getBlockBufferSize());
+            //worldProvider.setBlocks(blocksToPlace);
+            blocksToPlace.forEach((pos, block) -> worldProvider.setBlock(pos, block));
         }
     }
 
@@ -112,9 +124,9 @@ public class BlockBufferSystem extends BaseComponentSystem {
     public void onWorldPurge(SettlementGrowthEvent event, EntityRef entityRef) {
         blockBufferEntity.saveComponent(blockBufferComponent);
     }
+
     @ReceiveEvent(components = BlockBufferComponent.class)
     public void onWorldPurge(BeforeDeactivateComponent event, EntityRef entityRef) {
         blockBufferEntity.saveComponent(blockBufferComponent);
     }
-
 }

@@ -120,6 +120,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int timer = 0;
     private Random rng;
 
+    private float elapsed = 0;
+
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @Override
     public void postBegin() {
@@ -131,13 +133,17 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     @Override
     public void update(float delta) {
+        elapsed += delta;
+
         if (!settlementCachingSystem.isInitialised()) {
             return;
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
-        for (int i = 0; i < SettlementConstants.BLOCKS_SET_PER_TICK; i++) {
-            blockBufferSystem.setBlock();
+
+        if (elapsed > 1) {
+            elapsed -= 1;
+            blockBufferSystem.setBlocks(SettlementConstants.BLOCKS_SET_PER_TICK);
         }
 
         counter--;
