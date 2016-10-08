@@ -3,8 +3,9 @@
     "version" : "0.2.0-SNAPSHOT",
     "author" : "Cpt Crunchy",
     "displayName" : "Dynamic Cities",
-    "description" : "Simulates complex city development over progressing game time based on the worlds resources",
-    "dependencies" : [{
+    "description" : "Simulates complex city development over progressing game time based on the worlds resources. Needs a city culture to actually create cities.",
+    "dependencies" : [
+        {
             "id" : "Core",
             "minVersion" : "1.0.0"
         },
@@ -32,8 +33,8 @@
             "id" : "StructuralResources",
             "minVersion" : "0.2.1-SNAPSHOT"
         }
-     ],
-    "isGameplay" : "true",
+    ],
+    "isGameplay" : "false",
     "serverSideOnly" : false,
     "defaultWorldGenerator" : "DynamicCities:DynamicCitiesPerlin"
 }
