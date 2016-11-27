@@ -15,7 +15,6 @@
  */
 package org.terasology.dynamicCities.construction;
 
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -31,6 +30,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.BeforeDeactivateComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
@@ -42,7 +42,7 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 
 @Share(BlockBufferSystem.class)
-@RegisterSystem
+@RegisterSystem(RegisterMode.AUTHORITY)
 public class BlockBufferSystem extends BaseComponentSystem {
 
     public static final String PLACE_BLOCKS_ACTION_ID = "BlockBufferSystem:placeBlocksAction";
@@ -78,6 +78,7 @@ public class BlockBufferSystem extends BaseComponentSystem {
             blockBufferComponent.blockBuffer.forEach(b -> buffer.put(b.pos, b.blockType));
         }
 
+        // This results in a null delayManager if the system is not marked as Authority (non-host client timing issue?)
         delayManager.addPeriodicAction(blockBufferEntity, PLACE_BLOCKS_ACTION_ID, 1000, 1000);
     }
 
