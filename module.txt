@@ -27,7 +27,7 @@
         },
         {
             "id" : "StructureTemplates",
-            "minVersion" : "0.1.0-SNAPSHOT"
+            "minVersion" : "0.2.0-SNAPSHOT"
         },
         {
             "id" : "StructuralResources",
