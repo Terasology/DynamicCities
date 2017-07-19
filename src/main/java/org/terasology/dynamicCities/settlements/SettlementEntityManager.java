@@ -16,12 +16,6 @@
 package org.terasology.dynamicCities.settlements;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -54,6 +48,9 @@ import org.terasology.economy.components.MarketSubscriberComponent;
 import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.sectors.LoadedSectorUpdateEvent;
+import org.terasology.entitySystem.sectors.SectorSimulationEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -75,6 +72,13 @@ import org.terasology.rendering.nui.Color;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 @Share(value = SettlementEntityManager.class)
@@ -135,31 +139,31 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
+    }
 
-        counter--;
-        timer++;
-        if (counter != 0) {
-            return;
+    @ReceiveEvent(components = SiteComponent.class)
+    public void createSettlements(SectorSimulationEvent event, EntityRef siteRegion) {
+        boolean checkDistance = checkMinDistance(siteRegion);
+        boolean checkBuildArea = checkBuildArea(siteRegion);
+        if (checkDistance && regionEntityManager.checkSidesLoadedNear(siteRegion)
+                && checkBuildArea) {
+            EntityRef newSettlement = createSettlement(siteRegion);
+            newSettlement.send(new SettlementRegisterEvent());
+            siteRegion.removeComponent(SiteComponent.class);
+        } else if (!checkDistance || !checkBuildArea) {
+            siteRegion.removeComponent(SiteComponent.class);
         }
-        Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
-        for (EntityRef siteRegion : uncheckedSiteRegions) {
-            boolean checkDistance = checkMinDistance(siteRegion);
-            boolean checkBuildArea = checkBuildArea(siteRegion);
-            if (checkDistance && regionEntityManager.checkSidesLoadedNear(siteRegion)
-                    && checkBuildArea) {
-                EntityRef newSettlement = createSettlement(siteRegion);
-                newSettlement.send(new SettlementRegisterEvent());
-                siteRegion.removeComponent(SiteComponent.class);
-            } else if (!checkDistance || !checkBuildArea) {
-                siteRegion.removeComponent(SiteComponent.class);
-            }
-        }
-        Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
-        for (EntityRef settlement : activeSettlements) {
-            growSettlement(settlement);
-            build(settlement);
-        }
-        counter = 250;
+    }
+
+    @ReceiveEvent(components = BuildingQueue.class)
+    public void simulateSettlement(SectorSimulationEvent event, EntityRef settlement) {
+        //Temp, need to use delta
+        growSettlement(settlement);
+    }
+
+    @ReceiveEvent(components = BuildingQueue.class)
+    public void buildSettlement(LoadedSectorUpdateEvent event, EntityRef settlement) {
+        build(settlement);
     }
 
 
@@ -196,7 +200,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     private EntityRef createSettlement(EntityRef siteRegion) {
-        EntityRef settlementEntity = entityManager.create();
+        EntityRef settlementEntity = entityManager.createSectorEntity(1);
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
