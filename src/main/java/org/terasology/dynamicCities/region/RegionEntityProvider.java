@@ -24,7 +24,8 @@ import org.terasology.dynamicCities.region.components.TreeFacetComponent;
 import org.terasology.dynamicCities.region.components.UnregisteredRegionComponent;
 import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
-import org.terasology.entitySystem.entity.EntityStore;
+import org.terasology.entitySystem.entity.EntityBuilder;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector2i;
@@ -36,6 +37,8 @@ import org.terasology.world.generation.Region;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
+import static org.terasology.entitySystem.entity.internal.EntityScope.SECTOR;
+
 /**
  * Add an entity for each region to serve as storage for relevant data
  * At worldgen create for each region one
@@ -45,6 +48,11 @@ import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
 public class RegionEntityProvider implements EntityProvider {
 
+    private EntityManager entityManager;
+
+    public RegionEntityProvider(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
     public void process(Region region, EntityBuffer buffer) {
@@ -58,27 +66,28 @@ public class RegionEntityProvider implements EntityProvider {
             TreeFacet treeFacet = region.getFacet(TreeFacet.class);
             SiteFacet siteFacet = region.getFacet(SiteFacet.class);
 
-            EntityStore entityStore = new EntityStore();
+            EntityBuilder builder = entityManager.newBuilder();
+            builder.setScope(SECTOR);
 
             RoughnessFacetComponent roughnessFacetComponent = new RoughnessFacetComponent(roughnessFacet);
             ResourceFacetComponent resourceFacetComponent = new ResourceFacetComponent(resourceFacet);
             TreeFacetComponent treeFacetComponent = new TreeFacetComponent(treeFacet);
-            entityStore.addComponent(roughnessFacetComponent);
-            entityStore.addComponent(resourceFacetComponent);
-            entityStore.addComponent(treeFacetComponent);
+            builder.addComponent(roughnessFacetComponent);
+            builder.addComponent(resourceFacetComponent);
+            builder.addComponent(treeFacetComponent);
 
             LocationComponent locationComponent = new LocationComponent(worldRegion.center());
-            entityStore.addComponent(locationComponent);
+            builder.addComponent(locationComponent);
 
 
             if (siteFacet.getSiteComponent() != null) {
-                entityStore.addComponent(siteFacet.getSiteComponent());
+                builder.addComponent(siteFacet.getSiteComponent());
             }
 
             //Region component is used as identifier for a region entity
-            entityStore.addComponent(new UnregisteredRegionComponent());
-            entityStore.addComponent(new NetworkComponent());
-            buffer.enqueue(entityStore);
+            builder.addComponent(new UnregisteredRegionComponent());
+            builder.addComponent(new NetworkComponent());
+            buffer.enqueue(builder);
 
         }
    }
