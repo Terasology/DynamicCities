@@ -16,12 +16,6 @@
 package org.terasology.dynamicCities.settlements;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -57,13 +51,14 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.sectors.LoadedSectorUpdateEvent;
 import org.terasology.entitySystem.sectors.SectorSimulationEvent;
+import org.terasology.entitySystem.sectors.SectorUtil;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
+import org.terasology.math.ChunkMath;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
@@ -79,10 +74,18 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.terasology.world.chunks.ChunkConstants.CHUNK_SIZE;
 
 @Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class SettlementEntityManager extends BaseComponentSystem implements UpdateSubscriberSystem {
+public class SettlementEntityManager extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
@@ -131,14 +134,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     }
 
-    @Override
-    public void update(float delta) {
-        if (!settlementCachingSystem.isInitialised()) {
-            return;
-        } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
-            settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
-        }
-    }
 
     @ReceiveEvent(components = SettlementsCacheComponent.class)
     public void createSettlements(SectorSimulationEvent event, EntityRef settlementCacheEntity) {
@@ -247,9 +242,33 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         //add region entities
         getSurroundingRegions(settlementEntity);
+        settlementEntity.saveComponent(regionEntitiesComponent);
 
         //Hook into the economy module's MarketUpdaterSystem
         settlementEntity.send(new SubscriberRegistrationEvent());
+
+
+        /* Add the watched chunks to the settlement */
+
+        //Convert the settlement radius into chunks
+        int settlementRadius = SettlementConstants.SETTLEMENT_RADIUS;
+        int chunkWidth = CHUNK_SIZE.x;
+        int settlementChunkRadius = settlementRadius / chunkWidth + (settlementRadius % chunkWidth == 0 ? 0 : 1);
+
+        //Work out the settlement chunk bounds
+        Vector3i centerChunk = ChunkMath.calcChunkPos(locationComponent.getWorldPosition());
+        Region3i settlementChunkBounds = Region3i.createFromMinMax(
+                new Vector3i(centerChunk).sub(settlementChunkRadius, 0, settlementChunkRadius),
+                new Vector3i(centerChunk).add(settlementChunkRadius, 0, settlementChunkRadius));
+
+        Set<Vector3i> watchedChunks = new HashSet<>();
+        for (Vector3i potentialChunk : settlementChunkBounds) {
+            if (potentialChunk.distance(centerChunk) <= settlementChunkRadius) {
+                watchedChunks.add(potentialChunk);
+            }
+        }
+        SectorUtil.addChunksToRegionComponent(settlementEntity, watchedChunks);
+
 
         return settlementEntity;
     }
