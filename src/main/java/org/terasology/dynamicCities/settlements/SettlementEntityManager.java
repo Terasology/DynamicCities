@@ -54,6 +54,9 @@ import org.terasology.economy.components.MarketSubscriberComponent;
 import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
+import org.terasology.entitySystem.sectors.LoadedSectorUpdateEvent;
+import org.terasology.entitySystem.sectors.SectorSimulationEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -135,14 +138,11 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
+    }
 
-        counter--;
-        timer++;
-        if (counter != 0) {
-            return;
-        }
-        Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
-        for (EntityRef siteRegion : uncheckedSiteRegions) {
+    @ReceiveEvent(components = SettlementsCacheComponent.class)
+    public void createSettlements(SectorSimulationEvent event, EntityRef settlementCacheEntity) {
+        for (EntityRef siteRegion : entityManager.getEntitiesWith(SiteComponent.class)) {
             boolean checkDistance = checkMinDistance(siteRegion);
             boolean checkBuildArea = checkBuildArea(siteRegion);
             if (checkDistance && regionEntityManager.checkSidesLoadedNear(siteRegion)
@@ -154,18 +154,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 siteRegion.removeComponent(SiteComponent.class);
             }
         }
-        Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
-        for (EntityRef settlement : activeSettlements) {
-            growSettlement(settlement);
-            build(settlement);
-        }
-        counter = 250;
     }
-
 
     public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
+        if (settlementEntities == null) {
+            settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
+        }
         SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
         for (String vector2iString : container.settlementEntities.keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
@@ -196,7 +192,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     private EntityRef createSettlement(EntityRef siteRegion) {
-        EntityRef settlementEntity = entityManager.create();
+        EntityRef settlementEntity = entityManager.createSectorEntity(1);
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
@@ -315,9 +311,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         return unusableRegionsCount < SettlementConstants.NEEDED_USABLE_REGIONS_FOR_CITY_SPAWN;
     }
 
-
-
-    public void build(EntityRef settlement) {
+    @ReceiveEvent(components = BuildingQueue.class)
+    public void build(LoadedSectorUpdateEvent event, EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
@@ -344,7 +339,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.saveComponent(parcelList);
     }
 
-    public void growSettlement(EntityRef settlement) {
+    @ReceiveEvent(components = BuildingQueue.class)
+    public void growSettlement(SectorSimulationEvent event, EntityRef settlement) {
         if (blockBufferSystem.getBlockBufferSize() > SettlementConstants.BLOCKBUFFER_SIZE) {
             return;
         }
@@ -392,6 +388,11 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         Vector3i center = new Vector3i(locationComponent.getLocalPosition());
 
+        /* Calculate the number of buildings to spawn by taking the floor of the raw result (delta * buildings per
+         * second), and adding an extra building with probability equal to the fractional component of the result */
+        float buildingsRaw = event.getDelta() * SettlementConstants.MAX_BUILDINGS_PER_SECOND;
+        int buildingsToSpawn = (int) Math.floor(buildingsRaw) + ((rng.nextDouble() < buildingsRaw % 1) ? 1 : 0);
+
         for (String zone : zones) {
             //Checks if the demand for a building of that zone is enough
             CheckBuildingSpawnPreconditionsEvent preconditionsEvent = new CheckBuildingSpawnPreconditionsEvent(zone);
@@ -399,8 +400,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             if (!preconditionsEvent.isHandled) {
                 preconditionsEvent.check = true;
             }
+
             while (cultureComponent.getBuildingNeedsForZone(zone) * populationComponent.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
-                    && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN && preconditionsEvent.check) {
+                    && buildingSpawned < buildingsToSpawn && preconditionsEvent.check) {
                 Optional<DynParcel> parcelOptional = placeParcel(center, zone, parcels, buildingQueue, districtFacetComponent, maxIterations);
                 //Grow settlement radius if no valid area was found
                 if (!parcelOptional.isPresent() && parcels.cityRadius < SettlementConstants.SETTLEMENT_RADIUS) {
