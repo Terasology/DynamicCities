@@ -45,15 +45,14 @@ import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.resource.ResourceType;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
-import org.terasology.dynamicCities.settlements.events.CheckBuildingSpawnPreconditionsEvent;
-import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
-import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
+import org.terasology.dynamicCities.settlements.events.*;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.economy.components.MarketSubscriberComponent;
 import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -143,14 +142,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
         for (EntityRef siteRegion : uncheckedSiteRegions) {
-            boolean checkDistance = checkMinDistance(siteRegion);
-            boolean checkBuildArea = checkBuildArea(siteRegion);
-            if (checkDistance && regionEntityManager.checkSidesLoadedNear(siteRegion)
-                    && checkBuildArea) {
+            CheckSiteSuitabilityEvent checkSiteSuitabilityEvent = new CheckSiteSuitabilityEvent();
+            siteRegion.send(checkSiteSuitabilityEvent);
+            if (checkSiteSuitabilityEvent.getResult() == SettlementFilterResult.SUITABLE) {
                 EntityRef newSettlement = createSettlement(siteRegion);
                 newSettlement.send(new SettlementRegisterEvent());
                 siteRegion.removeComponent(SiteComponent.class);
-            } else if (!checkDistance || !checkBuildArea) {
+            } else if (checkSiteSuitabilityEvent.getResult() == SettlementFilterResult.UNSUITABLE) {
                 siteRegion.removeComponent(SiteComponent.class);
             }
         }
@@ -162,6 +160,51 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         counter = 250;
     }
 
+    /**
+     * Checks the provided region entity for suitability as a settlement in response to a CheckSiteSuitabilityEvent
+     *
+     * The default behavior will needed that the region satisfies default distance and build area thresholds, and also
+     * ensures that the region's "sides" have been loaded. This can be extended by registering a new event handler
+     * with the same signature and annotation, but a lower priority. It can also be disabled completely by using a
+     * higher priority and consuming the event in your handler.
+     *
+     * @param event
+     * @param siteRegion
+     */
+    @ReceiveEvent(components = {SiteComponent.class})
+    public void filterSettlement(CheckSiteSuitabilityEvent event, EntityRef siteRegion) {
+        boolean checkDistance = checkMinDistance(siteRegion);
+        boolean checkBuildArea = checkBuildArea(siteRegion);
+        if (checkDistance && regionEntityManager.checkSidesLoadedNear(siteRegion) && checkBuildArea) {
+            event.setResult(SettlementFilterResult.SUITABLE);
+        } else if (!checkDistance || !checkBuildArea) {
+            event.setResult(SettlementFilterResult.UNSUITABLE);
+        }
+    }
+
+    /**
+     * Checks whether the settlement needs the given zone
+     *
+     * The default behavior needed's the culture need for the zone, multiplies that by the population, then subtracts
+     * the areaPerZone for the given zone according to the ParcelList. If that "allowed zone area" is greater than
+     * the minimum area of all buildings for that zone, the needed passes.
+     *
+     * @param event
+     * @param settlement
+     * @param culture
+     * @param population
+     * @param parcels
+     */
+    @ReceiveEvent
+    public void checkZoneNeeded(CheckZoneNeededEvent event, EntityRef settlement, CultureComponent culture,
+                                PopulationComponent population,
+                                ParcelList parcels) {
+        Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
+        double minimumZoneArea = minMaxSizes.get(event.zone).get(0).x * minMaxSizes.get(event.zone).get(0).y;
+        double need = culture.getBuildingNeedsForZone(event.zone);
+        double allowedZoneArea = need * population.populationSize - parcels.areaPerZone.getOrDefault(event.zone, 0);
+        event.needed = allowedZoneArea > minimumZoneArea;
+    }
 
     public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
@@ -319,11 +362,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     public void build(EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
-        CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
         Set<DynParcel> removedParcels = new HashSet<>();
         Set<DynParcel> parcelsInQueue = buildingQueue.buildingQueue;
-
 
         for (DynParcel dynParcel : parcelsInQueue) {
             Rect2i expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
@@ -331,7 +372,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 continue;
             }
 
-            if (constructer.buildParcel(dynParcel, settlement, cultureComponent)) {
+            if (constructer.buildParcel(dynParcel, settlement)) {
                 removedParcels.add(dynParcel);
             }
         }
@@ -344,6 +385,19 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.saveComponent(parcelList);
     }
 
+    /**
+     * Attempts to place new parcels for the settlement as needed
+     *
+     * For each zone type, this settlement sends a {@link CheckZoneNeededEvent}. If the event's
+     * `needed` field is true, a parcel is placed for that zone if possible. This method will then continue to place
+     * parcels for that zone as needed, sending a new event each time until one finally returns false or until the
+     * SettlementEntityManager is unable to place a needed parcel. In that case, the city's radius is increased and
+     * process for that particular zone type stops.
+     *
+     * Also inflates the population capacity based on the area of each residential zone in the settlement
+     *
+     * @param settlement
+     */
     public void growSettlement(EntityRef settlement) {
         if (blockBufferSystem.getBlockBufferSize() > SettlementConstants.BLOCKBUFFER_SIZE) {
             return;
@@ -359,7 +413,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         int maxIterations = 500;
         int buildingSpawned = 0;
         List<String> zones = new ArrayList<>(buildingManager.getZones());
-        Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
 
         if (populationComponent == null) {
             logger.error("No population found or was uninitialised!");
@@ -394,13 +447,13 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         for (String zone : zones) {
             //Checks if the demand for a building of that zone is enough
-            CheckBuildingSpawnPreconditionsEvent preconditionsEvent = new CheckBuildingSpawnPreconditionsEvent(zone);
-            settlement.send(preconditionsEvent);
-            if (!preconditionsEvent.isHandled) {
-                preconditionsEvent.check = true;
-            }
-            while (cultureComponent.getBuildingNeedsForZone(zone) * populationComponent.populationSize - parcels.areaPerZone.getOrDefault(zone, 0) > minMaxSizes.get(zone).get(0).x * minMaxSizes.get(zone).get(0).y
-                    && buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN && preconditionsEvent.check) {
+            while (buildingSpawned < SettlementConstants.MAX_BUILDINGSPAWN) {
+                CheckZoneNeededEvent preconditionsEvent = new CheckZoneNeededEvent(zone);
+                settlement.send(preconditionsEvent);
+                if (!preconditionsEvent.needed) {
+                    break;
+                }
+
                 Optional<DynParcel> parcelOptional = placeParcel(center, zone, parcels, buildingQueue, districtFacetComponent, maxIterations);
                 //Grow settlement radius if no valid area was found
                 if (!parcelOptional.isPresent() && parcels.cityRadius < SettlementConstants.SETTLEMENT_RADIUS) {

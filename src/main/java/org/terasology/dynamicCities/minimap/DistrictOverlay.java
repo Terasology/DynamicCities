@@ -52,7 +52,7 @@ public class DistrictOverlay implements MinimapOverlay {
     @Override
     public void render(Canvas canvas, Rect2f worldRect) {
         /**
-         * Iterate through all known cities in the settlement manager and check if the boundaries of the screenRect are within city reach.
+         * Iterate through all known cities in the settlement manager and needed if the boundaries of the screenRect are within city reach.
          * Color rectangles of the district grid in a zone specific color.
          *
          */

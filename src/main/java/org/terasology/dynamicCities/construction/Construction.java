@@ -65,6 +65,7 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.dynamicCities.settlements.events.CheckBuildingForParcelEvent;
 import org.terasology.economy.components.MultiInvStorageComponent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -85,6 +86,7 @@ import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
+import org.terasology.structureTemplates.components.CheckBlockRegionConditionComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
@@ -311,25 +313,36 @@ public class Construction extends BaseComponentSystem {
         return surfaceHeightFacet;
     }
 
+    /**
+     * Gets a random building according to {@link BuildingManager#getRandomBuildingOfZoneForCulture(String, Rect2i, CultureComponent)}
+     *
+     * @param event
+     * @param settlement
+     */
+    @ReceiveEvent
+    public void checkBuildingForParcel(CheckBuildingForParcelEvent event, EntityRef settlement, CultureComponent
+            cultureComponent) {
+        String zone = event.dynParcel.getZone();
+        Rect2i shape = event.dynParcel.getShape();
+        event.building = buildingManager.getRandomBuildingOfZoneForCulture(zone, shape, cultureComponent);
+    }
+
     //the standard strategy used in Cities and StaticCities module
-    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement, CultureComponent cultureComponent) {
+    public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
         Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
         }
-        /**
-         * get the building or shrink parcel size if no fitting building was found.
-         */
-        Optional<GenericBuildingComponent> buildingOptional;
-        GenericBuildingComponent building;
-        buildingOptional = buildingManager.getRandomBuildingOfZoneForCulture(dynParcel.getZone(), dynParcel.getShape(), cultureComponent);
 
-        if (!buildingOptional.isPresent()) {
+        CheckBuildingForParcelEvent event = new CheckBuildingForParcelEvent(dynParcel);
+        settlement.send(event);
+
+        if (null == event.building) {
             return false;
-        } else {
-            building = buildingOptional.get();
         }
+
+        GenericBuildingComponent building = event.building;
         if (building.isScaledDown) {
             Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
             dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));

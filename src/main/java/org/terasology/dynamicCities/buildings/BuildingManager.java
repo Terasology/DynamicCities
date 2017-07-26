@@ -180,7 +180,7 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.empty();
     }
 
-    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, CultureComponent cultureComponent) {
+    public GenericBuildingComponent getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, CultureComponent cultureComponent) {
         if (buildings.containsKey(zone)) {
             // TODO: needs to be adapted if buildings have a specific spawn chance
             List<GenericBuildingComponent> availableBuildings =
@@ -212,11 +212,11 @@ public class BuildingManager extends BaseComponentSystem {
 
             if (selectedBuilding != null) {
                 logger.debug("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.width(), shape.height());
-                return Optional.of(entityManager.getComponentLibrary().copy(selectedBuilding));
+                return entityManager.getComponentLibrary().copy(selectedBuilding);
             }
         }
         logger.warn("No building types found for zone \"{}\" with size ({}, {})", zone, shape.width(), shape.height());
-        return Optional.empty();
+        return null;
     }
 
 
