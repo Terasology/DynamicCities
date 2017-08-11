@@ -266,13 +266,13 @@ public class Construction extends BaseComponentSystem {
             if (y <= meanHeight) {
                 for (int i = y; i <= meanHeight; i++) {
                     setPos.set(pos.x(), i, pos.y());
-                    worldProvider.setBlock(setPos, filler);
+                    worldProvider.getWorldEntity().send(new SetBlockEvent(setPos, filler));
                 }
             }
             if (y >= meanHeight) {
                 for (int i = y; i > meanHeight; i--) {
                     setPos.set(pos.x(), i, pos.y());
-                    worldProvider.setBlock(setPos, air);
+                    worldProvider.getWorldEntity().send(new SetBlockEvent(setPos, air));
                 }
             }
         }
@@ -559,6 +559,6 @@ public class Construction extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onRequestRasterTargetEvent(RequestRasterTargetEvent event, EntityRef entity) {
-        new BufferRasterTarget(blockBufferSystem, event.theme, event.shape);
+        event.rasterTarget = new BufferRasterTarget(blockBufferSystem, event.theme, event.shape);
     }
 }
