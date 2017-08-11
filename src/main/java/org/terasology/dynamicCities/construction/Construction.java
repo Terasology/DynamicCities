@@ -38,10 +38,7 @@ import org.terasology.dynamicCities.buildings.components.DynParcelRefComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
-import org.terasology.dynamicCities.construction.events.BufferBlockEvent;
-import org.terasology.dynamicCities.construction.events.BuildingEntitySpawnedEvent;
-import org.terasology.dynamicCities.construction.events.SetBlockEvent;
-import org.terasology.dynamicCities.construction.events.SpawnStructureBufferedEvent;
+import org.terasology.dynamicCities.construction.events.*;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
@@ -103,6 +100,7 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
+import sun.misc.Request;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -355,7 +353,9 @@ public class Construction extends BaseComponentSystem {
         //Flatten the parcel area
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
 
-        RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, theme, dynParcel.shape);
+        RequestRasterTargetEvent requestRasterTargetEvent = new RequestRasterTargetEvent(theme, dynParcel.shape);
+        settlement.send(requestRasterTargetEvent);
+        RasterTarget rasterTarget = requestRasterTargetEvent.rasterTarget;
         Rect2i shape = dynParcel.shape;
         HeightMap hm = HeightMaps.constant(dynParcel.height);
 
@@ -555,5 +555,10 @@ public class Construction extends BaseComponentSystem {
     @ReceiveEvent
     public void onBufferBlockEvent(BufferBlockEvent event, EntityRef entity) {
         blockBufferSystem.saveBlock(event.pos, event.block);
+    }
+
+    @ReceiveEvent
+    public void onRequestRasterTargetEvent(RequestRasterTargetEvent event, EntityRef entity) {
+        new BufferRasterTarget(blockBufferSystem, event.theme, event.shape);
     }
 }
