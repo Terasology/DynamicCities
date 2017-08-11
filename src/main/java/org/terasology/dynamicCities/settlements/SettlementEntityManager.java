@@ -163,7 +163,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     /**
      * Checks the provided region entity for suitability as a settlement in response to a CheckSiteSuitabilityEvent
      *
-     * The default behavior will needed that the region satisfies default distance and build area thresholds, and also
+     * The default behavior will check that the region satisfies default distance and build area thresholds, and also
      * ensures that the region's "sides" have been loaded. This can be extended by registering a new event handler
      * with the same signature and annotation, but a lower priority. It can also be disabled completely by using a
      * higher priority and consuming the event in your handler.
@@ -185,9 +185,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     /**
      * Checks whether the settlement needs the given zone
      *
-     * The default behavior needed's the culture need for the zone, multiplies that by the population, then subtracts
+     * The default behavior checks the culture need for the zone, multiplies that by the population, then subtracts
      * the areaPerZone for the given zone according to the ParcelList. If that "allowed zone area" is greater than
-     * the minimum area of all buildings for that zone, the needed passes.
+     * the minimum area of all buildings for that zone, the check passes.
      *
      * @param event
      * @param settlement

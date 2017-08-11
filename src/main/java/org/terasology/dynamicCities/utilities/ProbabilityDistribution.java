@@ -42,7 +42,7 @@ public class ProbabilityDistribution<T> {
 
     public void initialise (Map<T, Float> probabilites) {
         ranges = new HashMap<>();
-        //needed if sum of probabilites is 1
+        //check if sum of probabilites is 1
         Float sum = 0f;
         for (Float probability : probabilites.values()) {
             sum += probability;

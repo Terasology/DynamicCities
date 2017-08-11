@@ -51,7 +51,7 @@ public class HollowBuildingPartRasterizer extends AbsDynBuildingRasterizer<Hollo
             return;
         }
 
-//      TODO: needed y overlap
+//      TODO: check y overlap
 
         int baseHeight = part.getBaseHeight();
         int wallHeight = part.getWallHeight();

@@ -38,7 +38,9 @@ import org.terasology.dynamicCities.buildings.components.DynParcelRefComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
+import org.terasology.dynamicCities.construction.events.BufferBlockEvent;
 import org.terasology.dynamicCities.construction.events.BuildingEntitySpawnedEvent;
+import org.terasology.dynamicCities.construction.events.SetBlockEvent;
 import org.terasology.dynamicCities.construction.events.SpawnStructureBufferedEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
@@ -535,15 +537,23 @@ public class Construction extends BaseComponentSystem {
             block = transformation.transformBlock(block);
             if (block.getBlockFamily() == blockManager.getBlockFamily("core:chest")) {
                 for (Vector3i pos : region) {
-                    worldProvider.setBlock(pos, block);
+                    entity.send(new SetBlockEvent(pos, block));
                 }
             } else {
                 for (Vector3i pos : region) {
-                    blockBufferSystem.saveBlock(pos, block);
+                    entity.send(new BufferBlockEvent(pos, block));
                 }
             }
         }
     }
 
+    @ReceiveEvent
+    public void onSetBlockEvent(SetBlockEvent event, EntityRef entity) {
+        worldProvider.setBlock(event.pos, event.block);
+    }
 
+    @ReceiveEvent
+    public void onBufferBlockEvent(BufferBlockEvent event, EntityRef entity) {
+        blockBufferSystem.saveBlock(event.pos, event.block);
+    }
 }
