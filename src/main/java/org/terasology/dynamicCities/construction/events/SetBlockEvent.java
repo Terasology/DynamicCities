@@ -28,7 +28,7 @@ public class SetBlockEvent implements ConsumableEvent {
     public Vector3i pos;
 
     public SetBlockEvent(Vector3i pos, Block block) {
-        this.pos = pos;
+        this.pos = new Vector3i(pos);
         this.block = block;
     }
 

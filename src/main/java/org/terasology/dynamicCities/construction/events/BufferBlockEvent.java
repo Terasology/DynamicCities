@@ -28,7 +28,7 @@ public class BufferBlockEvent implements ConsumableEvent {
     private boolean consumed;
 
     public BufferBlockEvent(Vector3i pos, Block block) {
-        this.pos = pos;
+        this.pos = new Vector3i(pos);
         this.block = block;
     }
 
