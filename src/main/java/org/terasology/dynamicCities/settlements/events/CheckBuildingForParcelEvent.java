@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 public class CheckBuildingForParcelEvent implements ConsumableEvent {
     public DynParcel dynParcel;
-    public GenericBuildingComponent building;
+    public Optional<GenericBuildingComponent> building;
     private boolean consumed = false;
 
     public CheckBuildingForParcelEvent(DynParcel dynParcel) {

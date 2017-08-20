@@ -38,7 +38,11 @@ import org.terasology.dynamicCities.buildings.components.DynParcelRefComponent;
 import org.terasology.dynamicCities.buildings.components.ProductionChestComponent;
 import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.buildings.events.OnSpawnDynamicStructureEvent;
-import org.terasology.dynamicCities.construction.events.*;
+import org.terasology.dynamicCities.construction.events.BufferBlockEvent;
+import org.terasology.dynamicCities.construction.events.BuildingEntitySpawnedEvent;
+import org.terasology.dynamicCities.construction.events.RequestRasterTargetEvent;
+import org.terasology.dynamicCities.construction.events.SetBlockEvent;
+import org.terasology.dynamicCities.construction.events.SpawnStructureBufferedEvent;
 import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
@@ -100,7 +104,6 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
-import sun.misc.Request;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -338,11 +341,11 @@ public class Construction extends BaseComponentSystem {
         CheckBuildingForParcelEvent event = new CheckBuildingForParcelEvent(dynParcel);
         settlement.send(event);
 
-        if (null == event.building) {
+        if (!event.building.isPresent()) {
             return false;
         }
 
-        GenericBuildingComponent building = event.building;
+        GenericBuildingComponent building = event.building.get();
         if (building.isScaledDown) {
             Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
             dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));

@@ -45,7 +45,11 @@ import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.resource.ResourceType;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
-import org.terasology.dynamicCities.settlements.events.*;
+import org.terasology.dynamicCities.settlements.events.CheckSiteSuitabilityEvent;
+import org.terasology.dynamicCities.settlements.events.CheckZoneNeededEvent;
+import org.terasology.dynamicCities.settlements.events.SettlementFilterResult;
+import org.terasology.dynamicCities.settlements.events.SettlementGrowthEvent;
+import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.economy.components.MarketSubscriberComponent;
@@ -144,12 +148,20 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         for (EntityRef siteRegion : uncheckedSiteRegions) {
             CheckSiteSuitabilityEvent checkSiteSuitabilityEvent = new CheckSiteSuitabilityEvent();
             siteRegion.send(checkSiteSuitabilityEvent);
-            if (checkSiteSuitabilityEvent.getResult() == SettlementFilterResult.SUITABLE) {
-                EntityRef newSettlement = createSettlement(siteRegion);
-                newSettlement.send(new SettlementRegisterEvent());
-                siteRegion.removeComponent(SiteComponent.class);
-            } else if (checkSiteSuitabilityEvent.getResult() == SettlementFilterResult.UNSUITABLE) {
-                siteRegion.removeComponent(SiteComponent.class);
+            switch (checkSiteSuitabilityEvent.getResult()) {
+                case SUITABLE:
+                    EntityRef newSettlement = createSettlement(siteRegion);
+                    newSettlement.send(new SettlementRegisterEvent());
+                    siteRegion.removeComponent(SiteComponent.class);
+                    break;
+
+                case UNSUITABLE:
+                    siteRegion.removeComponent(SiteComponent.class);
+                    break;
+
+                case UNKNOWN:
+                    // not enough information, do nothing
+                    break;
             }
         }
         Iterable<EntityRef> activeSettlements = entityManager.getEntitiesWith(BuildingQueue.class);
