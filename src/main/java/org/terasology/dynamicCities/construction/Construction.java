@@ -552,12 +552,12 @@ public class Construction extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onSetBlockEvent(SetBlockEvent event, EntityRef entity) {
-        worldProvider.setBlock(event.pos, event.block);
+        worldProvider.setBlock(event.getPos(), event.block);
     }
 
     @ReceiveEvent
     public void onBufferBlockEvent(BufferBlockEvent event, EntityRef entity) {
-        blockBufferSystem.saveBlock(event.pos, event.block);
+        blockBufferSystem.saveBlock(event.getPos(), event.block);
     }
 
     @ReceiveEvent

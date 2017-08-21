@@ -24,7 +24,7 @@ import org.terasology.world.block.Block;
  */
 public class BufferBlockEvent implements ConsumableEvent {
     public final Block block;
-    public Vector3i pos;
+    private Vector3i pos = Vector3i.zero();
     private boolean consumed;
 
     public BufferBlockEvent(Vector3i pos, Block block) {
@@ -40,5 +40,13 @@ public class BufferBlockEvent implements ConsumableEvent {
     @Override
     public void consume() {
         consumed = true;
+    }
+
+    public Vector3i getPos() {
+        return new Vector3i(pos);
+    }
+
+    public void setPos(Vector3i pos) {
+        this.pos.set(pos);
     }
 }
