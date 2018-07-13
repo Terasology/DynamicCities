@@ -10,7 +10,7 @@
         {"id" : "Cities", "minVersion" : "0.6.0"},
         {"id" : "Minimap", "minVersion" : "1.0.0"},
         {"id" : "Economy", "minVersion" : "0.1.0"},
-        {"id" : "StructureTemplates", "minVersion" : "0.2.0"},
+        {"id" : "StructureTemplates", "minVersion" : "0.3.0"},
         {"id" : "StructuralResources", "minVersion" : "1.0.0"}
     ],
     "isGameplay" : "false",
