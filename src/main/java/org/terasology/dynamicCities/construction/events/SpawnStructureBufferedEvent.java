@@ -17,7 +17,7 @@ package org.terasology.dynamicCities.construction.events;
 
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 public class SpawnStructureBufferedEvent implements Event {
     private BlockRegionTransform transformation;

@@ -76,6 +76,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
+import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
@@ -88,10 +89,7 @@ import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
-import org.terasology.structureTemplates.util.transform.BlockRegionMovement;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransformationList;
-import org.terasology.structureTemplates.util.transform.HorizontalBlockRegionRotation;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -437,27 +435,33 @@ public class Construction extends BaseComponentSystem {
         if (templatesOptional.isPresent()) {
             List<EntityRef> templates = templatesOptional.get();
             for (EntityRef template : templates) {
-                BlockRegionTransformationList transformationList = new BlockRegionTransformationList();
-                transformationList.addTransformation(new BlockRegionMovement(BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))));
                 //Transform Commonworlds rotation to StructureTemplates rotation
-                int rotationAmount;
+                Side startSide = Side.RIGHT;
+                Side endSide;
                 switch (dynParcel.orientation.ordinal() / 2) {
-                    case 0: rotationAmount = 0;
+                    case 0:
+                        endSide = Side.RIGHT;
                         break;
-                    case 1: rotationAmount = 3;
+                    case 1:
+                        endSide = Side.FRONT;
                         break;
-                    case 2: rotationAmount = 2;
+                    case 2:
+                        endSide = Side.LEFT;
                         break;
-                    case 3: rotationAmount = 1;
+                    case 3:
+                        endSide = Side.BACK;
                         break;
-                    default: rotationAmount = 0;
+                    default:
+                        endSide = Side.RIGHT;
                 }
-                transformationList.addTransformation(new HorizontalBlockRegionRotation(rotationAmount));
-                transformationList.addTransformation(new BlockRegionMovement(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f),
-                        dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f))));
-                template.send(new SpawnStructureBufferedEvent(transformationList));
+
+
+                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class)));
+                blockRegionTransform.transformVector3i(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f), dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f)));
+
+                template.send(new SpawnStructureBufferedEvent(blockRegionTransform));
                 if (building.isEntity) {
-                    template.send(new OnSpawnDynamicStructureEvent(transformationList, dynParcel.buildingEntity));
+                    template.send(new OnSpawnDynamicStructureEvent(blockRegionTransform, dynParcel.buildingEntity));
                 }
             }
         }
