@@ -457,7 +457,9 @@ public class Construction extends BaseComponentSystem {
 
 
                 BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class)));
-                blockRegionTransform.transformVector3i(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f), dynParcel.height, shape.minY() + Math.round(shape.sizeY() / 2f)));
+                Vector3i finalLocation = blockRegionTransform.transformVector3i(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f), dynParcel.height,
+                        shape.minY() + Math.round(shape.sizeY() / 2f)));
+                blockRegionTransform = BlockRegionTransform.createMovingThenRotating(finalLocation, startSide, endSide);
 
                 template.send(new SpawnStructureBufferedEvent(blockRegionTransform));
                 if (building.isEntity) {
