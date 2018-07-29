@@ -24,12 +24,12 @@ import org.terasology.persistence.typeHandling.PersistedData;
 import org.terasology.persistence.typeHandling.PersistedDataMap;
 import org.terasology.persistence.typeHandling.RegisterTypeHandler;
 import org.terasology.persistence.typeHandling.SerializationContext;
-import org.terasology.persistence.typeHandling.SimpleTypeHandler;
+import org.terasology.persistence.typeHandling.TypeHandler;
 
 import java.util.Map;
 
 @RegisterTypeHandler
-public class DynParcelTypeHandler extends SimpleTypeHandler<DynParcel> {
+public class DynParcelTypeHandler implements TypeHandler<DynParcel> {
 
     @Override
     public PersistedData serialize(DynParcel parcel, SerializationContext context) {
