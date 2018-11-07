@@ -27,27 +27,24 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegisterTypeHandler
-public class DynParcelTypeHandler extends TypeHandler<DynParcel>
-{
+public class DynParcelTypeHandler extends TypeHandler<DynParcel> {
 
     @Override
-    public PersistedData serialize(DynParcel parcel, PersistedDataSerializer context)
-    {
+    public PersistedData serialize(DynParcel parcel, PersistedDataSerializer serializer) {
         Map<String, PersistedData> data = new ImmutableMap.Builder()
-                .put("height", context.serialize(parcel.getHeight()))
-                .put("posX", context.serialize(parcel.getShape().minX()))
-                .put("posY", context.serialize(parcel.getShape().minY()))
-                .put("sizeX", context.serialize(parcel.getShape().sizeX()))
-                .put("sizeY", context.serialize(parcel.getShape().sizeY()))
-                .put("zone", context.serialize(parcel.getZone()))
-                .put("orientation", context.serialize(parcel.getOrientation().name()))
+                .put("height", serializer.serialize(parcel.getHeight()))
+                .put("posX", serializer.serialize(parcel.getShape().minX()))
+                .put("posY", serializer.serialize(parcel.getShape().minY()))
+                .put("sizeX", serializer.serialize(parcel.getShape().sizeX()))
+                .put("sizeY", serializer.serialize(parcel.getShape().sizeY()))
+                .put("zone", serializer.serialize(parcel.getZone()))
+                .put("orientation", serializer.serialize(parcel.getOrientation().name()))
                 .build();
-        return context.serialize(data);
+        return serializer.serialize(data);
     }
 
     @Override
-    public Optional<DynParcel> deserialize(PersistedData data)
-    {
+    public Optional<DynParcel> deserialize(PersistedData data) {
         PersistedDataMap root = data.getAsValueMap();
         Rect2i shape = Rect2i.createFromMinAndSize(root.getAsInteger("posX"), root.getAsInteger("posY"),
                 root.getAsInteger("sizeX"), root.getAsInteger("sizeY"));
@@ -57,8 +54,7 @@ public class DynParcelTypeHandler extends TypeHandler<DynParcel>
     }
 
     @Override
-    public PersistedData serializeNonNull (DynParcel parcel, PersistedDataSerializer context)
-    {
-        return null;
+    public PersistedData serializeNonNull(DynParcel parcel, PersistedDataSerializer serializer) {
+        return serializer.serializeNull();
     }
 }
