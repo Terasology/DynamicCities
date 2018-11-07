@@ -15,41 +15,50 @@
  */
 package org.terasology.dynamicCities.parcels;
 
-
 import com.google.common.collect.ImmutableMap;
 import org.terasology.commonworld.Orientation;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.persistence.typeHandling.DeserializationContext;
 import org.terasology.persistence.typeHandling.PersistedData;
 import org.terasology.persistence.typeHandling.PersistedDataMap;
 import org.terasology.persistence.typeHandling.RegisterTypeHandler;
-import org.terasology.persistence.typeHandling.SerializationContext;
-import org.terasology.persistence.typeHandling.SimpleTypeHandler;
+import org.terasology.persistence.typeHandling.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RegisterTypeHandler
-public class DynParcelTypeHandler extends SimpleTypeHandler<DynParcel> {
+public class DynParcelTypeHandler extends TypeHandler<DynParcel>
+{
 
     @Override
-    public PersistedData serialize(DynParcel parcel, SerializationContext context) {
+    public PersistedData serialize(DynParcel parcel, PersistedDataSerializer context)
+    {
         Map<String, PersistedData> data = new ImmutableMap.Builder()
-                .put("height", context.create(parcel.getHeight()))
-                .put("posX", context.create(parcel.getShape().minX()))
-                .put("posY", context.create(parcel.getShape().minY()))
-                .put("sizeX", context.create(parcel.getShape().sizeX()))
-                .put("sizeY", context.create(parcel.getShape().sizeY()))
-                .put("zone", context.create(parcel.getZone()))
-                .put("orientation", context.create(parcel.getOrientation().name()))
+                .put("height", context.serialize(parcel.getHeight()))
+                .put("posX", context.serialize(parcel.getShape().minX()))
+                .put("posY", context.serialize(parcel.getShape().minY()))
+                .put("sizeX", context.serialize(parcel.getShape().sizeX()))
+                .put("sizeY", context.serialize(parcel.getShape().sizeY()))
+                .put("zone", context.serialize(parcel.getZone()))
+                .put("orientation", context.serialize(parcel.getOrientation().name()))
                 .build();
-        return context.create(data);
+        return context.serialize(data);
     }
 
     @Override
-    public DynParcel deserialize(PersistedData data, DeserializationContext context) {
+    public Optional<DynParcel> deserialize(PersistedData data)
+    {
         PersistedDataMap root = data.getAsValueMap();
         Rect2i shape = Rect2i.createFromMinAndSize(root.getAsInteger("posX"), root.getAsInteger("posY"),
                 root.getAsInteger("sizeX"), root.getAsInteger("sizeY"));
-        return new DynParcel(shape, Orientation.valueOf(root.getAsString("orientation")), root.getAsString("zone"), root.getAsInteger("height"));
+        return Optional.ofNullable
+                (new DynParcel(shape, Orientation.valueOf(root.getAsString("orientation")),
+                        root.getAsString("zone"), root.getAsInteger("height")));
+    }
+
+    @Override
+    public PersistedData serializeNonNull (DynParcel parcel, PersistedDataSerializer context)
+    {
+        return null;
     }
 }
