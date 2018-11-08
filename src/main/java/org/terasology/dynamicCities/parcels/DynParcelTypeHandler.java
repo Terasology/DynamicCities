@@ -30,7 +30,7 @@ import java.util.Optional;
 public class DynParcelTypeHandler extends TypeHandler<DynParcel> {
 
     @Override
-    public PersistedData serialize(DynParcel parcel, PersistedDataSerializer serializer) {
+    public PersistedData serializeNonNull(DynParcel parcel, PersistedDataSerializer serializer) {
         Map<String, PersistedData> data = new ImmutableMap.Builder()
                 .put("height", serializer.serialize(parcel.getHeight()))
                 .put("posX", serializer.serialize(parcel.getShape().minX()))
@@ -51,10 +51,5 @@ public class DynParcelTypeHandler extends TypeHandler<DynParcel> {
         return Optional.ofNullable
                 (new DynParcel(shape, Orientation.valueOf(root.getAsString("orientation")),
                         root.getAsString("zone"), root.getAsInteger("height")));
-    }
-
-    @Override
-    public PersistedData serializeNonNull(DynParcel parcel, PersistedDataSerializer serializer) {
-        return serializer.serializeNull();
     }
 }
