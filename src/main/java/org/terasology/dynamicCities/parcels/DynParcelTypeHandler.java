@@ -45,10 +45,10 @@ public class DynParcelTypeHandler extends TypeHandler<DynParcel> {
 
     @Override
     public Optional<DynParcel> deserialize(PersistedData data) {
-        PersistedDataMap root = data.getAsValueMap();
         if (!data.isValueMap()) {
             return Optional.empty();
         }
+        PersistedDataMap root = data.getAsValueMap();
         Rect2i shape = Rect2i.createFromMinAndSize(root.getAsInteger("posX"), root.getAsInteger("posY"),
                 root.getAsInteger("sizeX"), root.getAsInteger("sizeY"));
         return Optional.ofNullable
