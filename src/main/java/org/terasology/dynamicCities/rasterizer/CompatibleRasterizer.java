@@ -26,8 +26,6 @@ import org.terasology.world.block.BlockManager;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.WorldRasterizer;
-import org.terasology.world.liquid.LiquidData;
-import org.terasology.world.liquid.LiquidType;
 
 /**
  */
@@ -75,17 +73,6 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
         if (resource.getType() != ResourceType.NULL) {
             resourceFacet.addResource(resource, new Vector2i(pos.x(), pos.y()));
         }
-    }
-
-    public void setLiquid(CoreChunk chunk, LiquidData liquid, BaseVector3i pos, ResourceFacet resourceFacet) {
-        chunk.setLiquid(pos, liquid);
-        if(liquid.getType() == LiquidType.WATER) {
-            Resource resource = new Resource(ResourceType.WATER);
-            if (resource.getType() != ResourceType.NULL) {
-                resourceFacet.addResource(resource, new Vector2i(pos.x(), pos.y()));
-            }
-        }
-
     }
 
     public Resource getResourceType(Block block) {
