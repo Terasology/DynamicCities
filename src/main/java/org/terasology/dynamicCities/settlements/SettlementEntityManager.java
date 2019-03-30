@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -68,13 +69,10 @@ import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.namegenerator.town.DebugTownTheme;
-import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
-import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
@@ -121,16 +119,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int counter = 50;
     private int timer = 0;
     private Random rng;
-    private WhiteNoise nameNoiseGenerator;
 
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
+
     @Override
     public void postBegin() {
 
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         long seed = regionEntityManager.hashCode() & 0x921233;
         rng = new FastRandom(seed);
-        nameNoiseGenerator = new WhiteNoise(seed);
 
     }
 
@@ -138,7 +135,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     public void update(float delta) {
         if (!settlementCachingSystem.isInitialised()) {
             return;
-        } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
+        } else if (settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
 
@@ -226,13 +223,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         //Storage for incomplete parcels
         BuildingQueue buildingQueue = new BuildingQueue();
 
-        //Settlement name
-//        long nameSeed = nameNoiseGenerator.intNoise(siteComponent.coords.x, siteComponent.coords.y);
-//        TownNameProvider ng = new TownNameProvider(nameSeed, new DebugTownTheme());
-////        String settlementName = ng.generateName();
-
+        //Add the name tag
         NameTagComponent nameTagComponent = new NameTagComponent();
-//        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + populationComponent.populationSize;
         nameTagComponent.text = siteComponent.getName();
         nameTagComponent.textColor = Color.CYAN;
         nameTagComponent.yOffset = 20;
@@ -325,7 +317,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         return unusableRegionsCount < SettlementConstants.NEEDED_USABLE_REGIONS_FOR_CITY_SPAWN;
     }
-
 
 
     public void build(EntityRef settlement) {
@@ -430,9 +421,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
             buildingSpawned = 0;
         }
-        /**
-         * grow population
-         */
+
+        //Grow population
         for (String residentialZone : cultureComponent.residentialZones) {
             populationComponent.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
         }
