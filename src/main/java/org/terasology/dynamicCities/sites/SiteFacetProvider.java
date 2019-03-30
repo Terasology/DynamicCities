@@ -49,10 +49,6 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
     private SiteConfiguration config = new SiteConfiguration();
 
     @Override
-    public void setSeed(long seed) {
-    }
-
-    @Override
     public void process(GeneratingRegion region) {
 
         RoughnessFacet roughnessFacet = region.getRegionFacet(RoughnessFacet.class);
@@ -74,7 +70,6 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
             }
 
             SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY());
-
             siteFacet.setSiteComponent(siteComponent);
         }
 
