@@ -68,10 +68,13 @@ import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.namegenerator.town.DebugTownTheme;
+import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
+import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
@@ -118,13 +121,16 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int counter = 50;
     private int timer = 0;
     private Random rng;
+    private WhiteNoise nameNoiseGenerator;
 
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @Override
     public void postBegin() {
 
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
-        rng = new FastRandom(regionEntityManager.hashCode() & 0x921233);
+        long seed = regionEntityManager.hashCode() & 0x921233;
+        rng = new FastRandom(seed);
+        nameNoiseGenerator = new WhiteNoise(seed);
 
     }
 
@@ -222,7 +228,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         //NameTagStuff
         NameTagComponent settlementName = new NameTagComponent();
-        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + populationComponent.populationSize;
+
+        long nameSeed = nameNoiseGenerator.intNoise(siteComponent.coords.x, siteComponent.coords.y);
+        TownNameProvider ng = new TownNameProvider(nameSeed, new DebugTownTheme());
+
+//        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + populationComponent.populationSize;
+        settlementName.text = ng.generateName();
         settlementName.textColor = Color.CYAN;
         settlementName.yOffset = 20;
         settlementName.scale = 20;
@@ -429,7 +440,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
         //This is due to ensuring that changes made while constructing are added
 
-        nameTagComponent.text =  Float.toString(populationComponent.populationSize);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(populationComponent);
         settlement.saveComponent(buildingQueue);
