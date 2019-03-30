@@ -25,8 +25,8 @@ import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.rendering.nui.properties.Range;
-import org.terasology.utilities.procedural.Noise;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.ConfigurableFacetProvider;
@@ -48,11 +48,11 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
 
     private SiteConfiguration config = new SiteConfiguration();
 
+    private WhiteNoise noiseGen;
 
-    private Noise sizeNoiseGen;
     @Override
     public void setSeed(long seed) {
-        this.sizeNoiseGen = new WhiteNoise(seed ^ 0x2347928);
+        this.noiseGen = new WhiteNoise(seed ^ 0x2347928);
     }
 
     @Override
@@ -80,9 +80,15 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
                 }
             }
 
-            int population = TeraMath.fastAbs(Math.round(sizeNoiseGen.noise(minPos.getX(), minPos.getY())
+            int population = TeraMath.fastAbs(Math.round(noiseGen.noise(minPos.getX(), minPos.getY())
                     * (SettlementConstants.MAX_POPULATIONSIZE - SettlementConstants.MIN_POPULATIONSIZE))) + SettlementConstants.MIN_POPULATIONSIZE;
             SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY(), population);
+
+            // Generate a name for the town to be built on this site
+            long nameSeed = noiseGen.intNoise(siteComponent.coords.x, siteComponent.coords.y);
+            TownNameProvider nameProvider = new TownNameProvider(nameSeed);
+            siteComponent.setName(nameProvider.generateName());
+
             siteFacet.setSiteComponent(siteComponent);
         }
 

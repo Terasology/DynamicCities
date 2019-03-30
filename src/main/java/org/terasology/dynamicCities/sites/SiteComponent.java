@@ -32,6 +32,8 @@ public class SiteComponent implements Component {
     public float radius;
     public int population;
 
+    private String name;
+
     /**
      * @param population the city population
      * @param bx the x world coord (in blocks)
@@ -57,6 +59,17 @@ public class SiteComponent implements Component {
      */
     public int getPopulation() {
         return population;
+    }
+
+    /**
+     * @return the name of the site
+     */
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

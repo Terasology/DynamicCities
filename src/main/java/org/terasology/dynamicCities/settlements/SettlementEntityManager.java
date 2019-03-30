@@ -226,17 +226,17 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         //Storage for incomplete parcels
         BuildingQueue buildingQueue = new BuildingQueue();
 
-        //NameTagStuff
-        NameTagComponent settlementName = new NameTagComponent();
+        //Settlement name
+//        long nameSeed = nameNoiseGenerator.intNoise(siteComponent.coords.x, siteComponent.coords.y);
+//        TownNameProvider ng = new TownNameProvider(nameSeed, new DebugTownTheme());
+////        String settlementName = ng.generateName();
 
-        long nameSeed = nameNoiseGenerator.intNoise(siteComponent.coords.x, siteComponent.coords.y);
-        TownNameProvider ng = new TownNameProvider(nameSeed, new DebugTownTheme());
-
+        NameTagComponent nameTagComponent = new NameTagComponent();
 //        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + populationComponent.populationSize;
-        settlementName.text = ng.generateName();
-        settlementName.textColor = Color.CYAN;
-        settlementName.yOffset = 20;
-        settlementName.scale = 20;
+        nameTagComponent.text = siteComponent.getName();
+        nameTagComponent.textColor = Color.CYAN;
+        nameTagComponent.yOffset = 20;
+        nameTagComponent.scale = 20;
 
         //population growth
         MarketSubscriberComponent populationSubscriberComponent = new MarketSubscriberComponent(1);
@@ -251,7 +251,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntity.addComponent(districtGrid);
         settlementEntity.addComponent(cultureComponent);
         settlementEntity.addComponent(populationComponent);
-        settlementEntity.addComponent(settlementName);
+        settlementEntity.addComponent(nameTagComponent);
         settlementEntity.addComponent(regionEntitiesComponent);
         settlementEntity.addComponent(parcels);
         settlementEntity.addComponent(buildingQueue);
