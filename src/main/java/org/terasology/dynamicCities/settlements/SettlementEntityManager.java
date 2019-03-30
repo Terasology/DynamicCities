@@ -72,13 +72,11 @@ import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.namegenerator.town.DebugTownTheme;
 import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
-import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
@@ -136,7 +134,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private int counter = 50;
     private int timer = 0;
     private Random rng;
-    private WhiteNoise nameNoiseGenerator;
 
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
@@ -148,7 +145,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         long seed = regionEntityManager.hashCode() & 0x921233;
         rng = new FastRandom(seed);
-        nameNoiseGenerator = new WhiteNoise(seed);
     }
 
     @Override
@@ -458,7 +454,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         for (String residentialZone : cultureComponent.residentialZones) {
             populationComponent.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
         }
-
 
         /*
           Create roads between settlements
