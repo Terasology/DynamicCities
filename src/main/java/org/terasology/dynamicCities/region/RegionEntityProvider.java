@@ -22,6 +22,7 @@ import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
 import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.TreeFacetComponent;
 import org.terasology.dynamicCities.region.components.UnregisteredRegionComponent;
+import org.terasology.dynamicCities.settlements.SettlementFacet;
 import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
@@ -45,7 +46,6 @@ import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
 public class RegionEntityProvider implements EntityProvider {
 
-
     @Override
     public void process(Region region, EntityBuffer buffer) {
 
@@ -57,6 +57,7 @@ public class RegionEntityProvider implements EntityProvider {
             ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
             TreeFacet treeFacet = region.getFacet(TreeFacet.class);
             SiteFacet siteFacet = region.getFacet(SiteFacet.class);
+            SettlementFacet settlementFacet = region.getFacet(SettlementFacet.class);
 
             EntityStore entityStore = new EntityStore();
 
@@ -73,6 +74,10 @@ public class RegionEntityProvider implements EntityProvider {
 
             if (siteFacet.getSiteComponent() != null) {
                 entityStore.addComponent(siteFacet.getSiteComponent());
+            }
+
+            if (settlementFacet.getSettlement() != null) {
+                entityStore.addComponent(settlementFacet.getSettlement());
             }
 
             //Region component is used as identifier for a region entity

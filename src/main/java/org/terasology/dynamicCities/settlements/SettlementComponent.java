@@ -25,26 +25,32 @@ import org.terasology.reflection.MappedContainer;
  * Provides information on a settlement.
   */
 @MappedContainer
-public class Settlement implements Component {
+public class SettlementComponent implements Component {
 
+    private Vector2i coords = new Vector2i();
+    private int population;
+    private String name;
 
-    public String name;
-    public Vector2i coords = new Vector2i();
-    public int population;
-
-
-    public Settlement() {
-
+    public SettlementComponent() {
     }
-    public Settlement(SiteComponent siteComponent, String name) {
+
+    public SettlementComponent(SiteComponent siteComponent, String name) {
         this.coords = new Vector2i(siteComponent.getPos());
         this.name = name;
-        this.population = siteComponent.getPopulation();
+    }
+
+    public SettlementComponent(SiteComponent siteComponent, String name, int population) {
+        this.coords = new Vector2i(siteComponent.getPos());
+        this.name = name;
+        this.population = population;
     }
 
     /**
      * @return the site of the settlement
      */
+    public Vector2i getCoords() {
+        return coords;
+    }
 
     /**
      * @return the name
@@ -53,10 +59,16 @@ public class Settlement implements Component {
         return name;
     }
 
+    /**
+     *  @return population of the settlement
+     */
+    public int getPopulation() {
+        return population;
+    }
+
     @Override
     public String toString() {
         return name + " (" + coords + ")";
     }
-
 
 }

@@ -28,20 +28,15 @@ import java.util.Objects;
 @MappedContainer
 public class SiteComponent implements Component {
 
-    public Vector2i coords = new Vector2i();
-    public float radius;
-    public int population;
-
-    private String name;
+    private Vector2i coords = new Vector2i();
+    private float radius;
 
     /**
-     * @param population the city population
      * @param bx the x world coord (in blocks)
      * @param bz the z world coord (in blocks)
      */
-    public SiteComponent(int bx, int bz, int population) {
+    public SiteComponent(int bx, int bz) {
         this.coords = new Vector2i(bx, bz);
-        this.population = population;
     }
 
     public SiteComponent() {
@@ -57,19 +52,8 @@ public class SiteComponent implements Component {
     /**
      * @return the radius of the settlements in blocks
      */
-    public int getPopulation() {
-        return population;
-    }
-
-    /**
-     * @return the name of the site
-     */
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public float getRadius() {
+        return radius;
     }
 
     @Override
@@ -89,6 +73,6 @@ public class SiteComponent implements Component {
 
     @Override
     public String toString() {
-        return "SiteComponent [" + coords + " (" + radius + ") (" + population + ")]";
+        return "SiteComponent [" + coords + " (" + radius + ")]";
     }
 }

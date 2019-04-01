@@ -203,7 +203,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
-        PopulationComponent populationComponent = new PopulationComponent(siteComponent.getPopulation());
+        SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
+        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.getPopulation());
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
 
         //add surrounding regions to settlement
@@ -225,7 +226,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         //Add the name tag
         NameTagComponent nameTagComponent = new NameTagComponent();
-        nameTagComponent.text = siteComponent.getName();
+        nameTagComponent.text = settlementComponent.getName();
         nameTagComponent.textColor = Color.CYAN;
         nameTagComponent.yOffset = 20;
         nameTagComponent.scale = 20;
@@ -240,6 +241,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         NetworkComponent networkComponent = new NetworkComponent();
         networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
         settlementEntity.addComponent(locationComponent);
+        settlementEntity.addComponent(settlementComponent);
         settlementEntity.addComponent(districtGrid);
         settlementEntity.addComponent(cultureComponent);
         settlementEntity.addComponent(populationComponent);

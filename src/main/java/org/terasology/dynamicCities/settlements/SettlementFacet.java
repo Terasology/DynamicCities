@@ -29,18 +29,18 @@ import java.util.Set;
  */
 public class SettlementFacet extends BaseFacet2D {
 
-    private Set<Settlement> settlements = new HashSet<>();
+    private SettlementComponent settlementComponent = null;
 
     public SettlementFacet(Region3i targetRegion, Border3D border) {
         super(targetRegion, border);
     }
 
-    public void addSettlement(Settlement settlement) {
-        settlements.add(settlement);
+    public void setSettlement(SettlementComponent settlement) {
+        this.settlementComponent = settlement;
     }
 
-    public Set<Settlement> getSettlements() {
-        return Collections.unmodifiableSet(settlements);
+    public SettlementComponent getSettlement() {
+        return settlementComponent;
     }
 
 }
