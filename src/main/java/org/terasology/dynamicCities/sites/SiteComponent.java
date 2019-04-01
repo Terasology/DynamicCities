@@ -31,8 +31,6 @@ public class SiteComponent implements Component {
     private Vector2i coords = new Vector2i();
     private float radius;
 
-    private String name;
-
     /**
      * @param bx the x world coord (in blocks)
      * @param bz the z world coord (in blocks)
@@ -56,17 +54,6 @@ public class SiteComponent implements Component {
      */
     public float getRadius() {
         return radius;
-    }
-
-    /**
-     * @return the name of the site
-     */
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
