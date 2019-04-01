@@ -69,6 +69,7 @@ import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -203,9 +204,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
-        SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
-        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.getPopulation());
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
+
+        SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
+
+        // Generate name
+        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), cultureComponent.getTownTheme());
+        settlementComponent.setName(nameProvider.generateName());
+
+        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.getPopulation());
 
         //add surrounding regions to settlement
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();

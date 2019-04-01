@@ -39,9 +39,8 @@ public class SettlementComponent implements Component {
         this.name = name;
     }
 
-    public SettlementComponent(SiteComponent siteComponent, String name, int population) {
+    public SettlementComponent(SiteComponent siteComponent, int population) {
         this.coords = new Vector2i(siteComponent.getPos());
-        this.name = name;
         this.population = population;
     }
 
@@ -57,6 +56,13 @@ public class SettlementComponent implements Component {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Sets the name of the settlement
+     */
+    public void setName(String newName) {
+        this.name = newName;
     }
 
     /**

@@ -52,15 +52,11 @@ public class SettlementFacetProvider implements FacetProvider {
         SettlementFacet settlementFacet = new SettlementFacet(region.getRegion(), border);
 
         if (siteComponent != null) {
-            //Generate a name
-            long nameSeed = noiseGen.intNoise(siteComponent.getPos().x, siteComponent.getPos().y);
-            TownNameProvider nameProvider = new TownNameProvider(nameSeed);
-
             float populationNoise = noiseGen.noise(siteComponent.getPos().x, siteComponent.getPos().y);
             float scaleFactor = SettlementConstants.MAX_POPULATIONSIZE - SettlementConstants.MIN_POPULATIONSIZE;
             int population = TeraMath.fastAbs(Math.round(populationNoise * (scaleFactor))) + SettlementConstants.MIN_POPULATIONSIZE;
 
-            SettlementComponent settlementComponent = new SettlementComponent(siteComponent, nameProvider.generateName(), population);
+            SettlementComponent settlementComponent = new SettlementComponent(siteComponent, population);
 
             settlementFacet.setSettlement(settlementComponent);
         }

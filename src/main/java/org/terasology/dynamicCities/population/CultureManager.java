@@ -49,6 +49,11 @@ public class CultureManager extends BaseComponentSystem {
             //Get building data
             if (prefab.hasComponent(CultureComponent.class)) {
                 CultureComponent cultureComponent = prefab.getComponent(CultureComponent.class);
+                if (cultureComponent.theme != null) {
+                    cultureComponent.theme = cultureComponent.theme.toLowerCase();
+                } else {
+                    logger.warn("No theme defined for culture " + cultureComponent.name);
+                }
                 if (!cultureComponent.buildingNeedPerZone.isEmpty()) {
                     cultureComponents.add(cultureComponent);
                     cultureComponent.buildingNeedPerZone = Toolbox.stringsToLowerCase(cultureComponent.buildingNeedPerZone);
@@ -80,7 +85,7 @@ public class CultureManager extends BaseComponentSystem {
         rng = new MersenneRandom(assetManager.hashCode() * 5 + this.hashCode());
     }
 
-    public CultureComponent getRandomCulture ( ) {
+    public CultureComponent getRandomCulture() {
         if (!cultureComponents.isEmpty()) {
             int max = cultureComponents.size();
             int index = rng.nextInt(max);
