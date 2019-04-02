@@ -37,6 +37,7 @@ import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.PopulationComponent;
+import org.terasology.dynamicCities.population.ThemeManager;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
@@ -102,6 +103,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     @In
     private CultureManager cultureManager;
+
+    @In
+    private ThemeManager themeManager;
 
     @In
     private DistrictManager districtManager;
@@ -206,10 +210,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
 
+        logger.info("\n\n\n\n LOCATION: {} \n THEME: {}\n\n\n\n", locationComponent.getWorldPosition(), cultureComponent.theme);
+
         SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
 
         // Generate name
-        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), cultureComponent.getTownTheme());
+        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), themeManager.getTownTheme(cultureComponent.theme));
         settlementComponent.setName(nameProvider.generateName());
 
         PopulationComponent populationComponent = new PopulationComponent(settlementComponent.getPopulation());

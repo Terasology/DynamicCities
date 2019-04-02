@@ -18,9 +18,6 @@ package org.terasology.dynamicCities.population;
 
 
 import org.terasology.entitySystem.Component;
-import org.terasology.namegenerator.town.DebugTownTheme;
-import org.terasology.namegenerator.town.TownAssetTheme;
-import org.terasology.namegenerator.town.TownTheme;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +26,8 @@ import java.util.Map;
 
 public class CultureComponent implements Component {
 
-    //Defines how much blocks^2 a population unit needs
-    public String name;
     public Map<String, Integer> buildingNeedPerZone;
+    public String name;
     public List<String> availableBuildings;
     public List<String> residentialZones;
     public float growthRate;
@@ -62,18 +58,5 @@ public class CultureComponent implements Component {
             procentuals.put(zone, getProcentualOfZone(zone));
         }
         return procentuals;
-    }
-
-    public TownTheme getTownTheme() {
-        if (theme == null) {
-            return new DebugTownTheme();
-        }
-        if (theme.equalsIgnoreCase("english")) {
-            return TownAssetTheme.ENGLISH;
-        } else if (theme.equalsIgnoreCase("fantasy")) {
-            return TownAssetTheme.FANTASY;
-        } else {
-            return new DebugTownTheme();
-        }
     }
 }
