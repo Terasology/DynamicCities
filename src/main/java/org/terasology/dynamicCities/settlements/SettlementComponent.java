@@ -27,49 +27,13 @@ import org.terasology.reflection.MappedContainer;
 @MappedContainer
 public class SettlementComponent implements Component {
 
-    private Vector2i coords = new Vector2i();
-    private int population;
-    private String name;
-
-    public SettlementComponent() {
-    }
-
-    public SettlementComponent(SiteComponent siteComponent, String name) {
-        this.coords = new Vector2i(siteComponent.getPos());
-        this.name = name;
-    }
+    public Vector2i coords;
+    public int population;
+    public String name;
 
     public SettlementComponent(SiteComponent siteComponent, int population) {
         this.coords = new Vector2i(siteComponent.getPos());
         this.population = population;
-    }
-
-    /**
-     * @return the site of the settlement
-     */
-    public Vector2i getCoords() {
-        return coords;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets the name of the settlement
-     */
-    public void setName(String newName) {
-        this.name = newName;
-    }
-
-    /**
-     *  @return population of the settlement
-     */
-    public int getPopulation() {
-        return population;
     }
 
     @Override

@@ -214,9 +214,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         // Generate name
         TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), themeManager.getTownTheme(cultureComponent.theme));
-        settlementComponent.setName(nameProvider.generateName());
+        settlementComponent.name = nameProvider.generateName();
 
-        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.getPopulation());
+        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.population);
 
         //add surrounding regions to settlement
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
@@ -237,7 +237,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         //Add the name tag
         NameTagComponent nameTagComponent = new NameTagComponent();
-        nameTagComponent.text = settlementComponent.getName();
+        nameTagComponent.text = settlementComponent.name;
         nameTagComponent.textColor = Color.CYAN;
         nameTagComponent.yOffset = 20;
         nameTagComponent.scale = 20;
