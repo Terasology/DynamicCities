@@ -210,8 +210,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
 
-        logger.info("\n\n\n\n LOCATION: {} \n THEME: {}\n\n\n\n", locationComponent.getWorldPosition(), cultureComponent.theme);
-
         SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
 
         // Generate name
