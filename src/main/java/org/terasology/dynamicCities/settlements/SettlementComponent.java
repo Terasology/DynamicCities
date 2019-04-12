@@ -27,9 +27,12 @@ import org.terasology.reflection.MappedContainer;
 @MappedContainer
 public class SettlementComponent implements Component {
 
-    public Vector2i coords;
+    public Vector2i coords = new Vector2i();
     public int population;
     public String name;
+
+    public SettlementComponent() {
+    }
 
     public SettlementComponent(SiteComponent siteComponent, int population) {
         this.coords = new Vector2i(siteComponent.getPos());

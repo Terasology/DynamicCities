@@ -20,7 +20,6 @@ package org.terasology.dynamicCities.settlements;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.math.TeraMath;
-import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.Facet;
