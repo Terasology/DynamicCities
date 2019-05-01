@@ -29,8 +29,8 @@ import org.terasology.registry.Share;
 import org.terasology.utilities.random.MersenneRandom;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Share(CultureManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -72,15 +72,13 @@ public class CultureManager extends BaseComponentSystem {
                 }
             }
         }
-        String cultureNames = "[";
-        Iterator<CultureComponent> iter = cultureComponents.iterator();
-        while (iter.hasNext()) {
-            cultureNames += iter.next().name;
-            if (iter.hasNext()) {
-                cultureNames += ", ";
-            }
-        }
-        cultureNames += "]";
+
+        String cultureNames = cultureComponents
+                .stream()
+                .map(c -> c.name)
+                .collect(Collectors.joining(", ", "[", "]"))
+                .toString();
+
         logger.info("Finished loading cultures: " + cultureComponents.size() + " culture types found: " + cultureNames);
         rng = new MersenneRandom(assetManager.hashCode() * 5 + this.hashCode());
     }

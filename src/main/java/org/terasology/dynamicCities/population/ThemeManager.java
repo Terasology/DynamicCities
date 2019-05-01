@@ -31,11 +31,16 @@ import org.terasology.registry.Share;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+
+/**
+ * This class loads a city's theme, which is a naming scheme for the city.
+ * A theme can be defined as a list of possible names in a prefab.
+ */
 @Share(ThemeManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class ThemeManager extends BaseComponentSystem {
@@ -44,7 +49,7 @@ public class ThemeManager extends BaseComponentSystem {
     @In
     AssetManager assetManager;
 
-    private Set<TownNameComponent> themeComponents = new HashSet<>();
+    private Set<TownNameComponent> townNameSchemes = new HashSet<>();
     private Map<String, TownTheme> themes = new HashMap<>();
 
     @Override
@@ -60,10 +65,10 @@ public class ThemeManager extends BaseComponentSystem {
             // Get theme data
             if (prefab.hasComponent(TownNameComponent.class)) {
                 TownNameComponent component = prefab.getComponent(TownNameComponent.class);
-                themeComponents.add(component);
+                townNameSchemes.add(component);
 
-                component.name = component.name.toLowerCase();
-                themes.put(component.name, new TownTheme() {
+                component.themeName = component.themeName.toLowerCase();
+                themes.put(component.themeName, new TownTheme() {
                     @Override
                     public List<String> getNames() {
                         return component.nameList;
@@ -82,16 +87,12 @@ public class ThemeManager extends BaseComponentSystem {
             }
         }
 
-        String themeNames = "[";
-        Iterator<TownNameComponent> iterator = themeComponents.iterator();
-        while (iterator.hasNext()) {
-            themeNames += iterator.next().name;
-            if (iterator.hasNext()) {
-                themeNames += ", ";
-            }
-        }
-        themeNames += "]";
-        logger.info("Finished loading themes: " + themeComponents.size() + " theme types found: " + themeNames);
+        String themeNames = townNameSchemes
+                .stream()
+                .map(c -> c.themeName)
+                .collect(Collectors.joining(", ", "[", "]"));
+
+        logger.info("Finished loading themes: " + townNameSchemes.size() + " theme types found: " + themeNames);
     }
 
     public TownTheme getTownTheme(String key) {

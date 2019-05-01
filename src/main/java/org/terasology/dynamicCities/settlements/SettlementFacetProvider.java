@@ -29,7 +29,7 @@ import org.terasology.world.generation.Produces;
 import org.terasology.world.generation.Requires;
 
 /**
- * Generates the name and initial population for a settlement
+ * Generates the initial population for a settlement
  */
 @Produces(SettlementFacet.class)
 @Requires({@Facet(SiteFacet.class)})

@@ -31,7 +31,7 @@ public class CultureComponent implements Component {
     public List<String> availableBuildings;
     public List<String> residentialZones;
     public float growthRate;
-    public String theme;
+    public String theme = null;
 
 
     public int getBuildingNeedsForZone(String zone) {

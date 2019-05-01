@@ -21,7 +21,7 @@ import org.terasology.entitySystem.Component;
 import java.util.List;
 
 public class TownNameComponent implements Component {
-    public String name;
+    public String themeName;
     public List<String> prefixes;
     public List<String> postfixes;
     public List<String> nameList;
