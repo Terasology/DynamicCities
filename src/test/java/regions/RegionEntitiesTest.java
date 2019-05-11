@@ -16,18 +16,42 @@
 
 package regions;
 
-public class RegionEntitiesTest {
-/*
-    private RegionEntitiesComponent regionEntitiesComponent;
-    private EntityRef[] test;
+import com.google.common.collect.Sets;
+import org.junit.Test;
+import org.terasology.dynamicCities.region.RegionEntityManager;
+import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
+import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.math.geom.Vector3f;
+import org.terasology.moduletestingenvironment.ModuleTestingEnvironment;
 
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+
+public class RegionEntitiesTest extends ModuleTestingEnvironment {
+
+    private RegionEntitiesComponent regionEntitiesComponent;
+    private RegionEntityManager regionEntityManager;
+
+    private EntityRef[] test;
     private Vector3f[] pos = new Vector3f[4];
+
+    @Override
+    public Set<String> getDependencies() {
+        return Sets.newHashSet("engine", "DynamicCities", "ModuleTestingEnvironment");
+    }
+
+    /*
     @Before
     public void setup() {
         pos[0] = new Vector3f(16, 0, 16);
         pos[1] = new Vector3f(16, 0, -16);
         pos[2] = new Vector3f(-16, 0, 16);
         pos[3] = new Vector3f(-16, 0, -16);
+
+//        regionEntityManager = getHostContext().get(RegionEntityManager.class);
+
+//        regionEntityManager = Mockito.mock(RegionEntityManager.class);
 
         regionEntitiesComponent = new RegionEntitiesComponent(64);
         test = new EntityRef[4];
@@ -36,26 +60,36 @@ public class RegionEntitiesTest {
             test[i] = Mockito.mock(EntityRef.class);
             loc[i] = new LocationComponent(pos[i]);
             Mockito.when(test[i].getComponent(LocationComponent.class)).thenReturn(loc[i]);
-            regionEntitiesComponent.add(test[i]);
+//            regionEntitiesComponent.add(test[i]);
+//            regionEntityManager.add(test[i]);
         }
-
-
     }
+    */
 
     @Test
     public void testSimpleGet() {
-        for (int i = 0; i < test.length; i++) {
-            assertEquals(test[i], regionEntitiesComponent.get(new Vector2i(pos[i].x(), pos[i].z())));
-        }
+        assertEquals(200, 200);
+
+//        regionEntityManager = getHostContext().get(RegionEntityManager.class);
+//
+//        for (EntityRef entityRef : test) {
+//            regionEntityManager.add(entityRef);
+//        }
+//
+//        for (int i = 0; i < test.length; i++) {
+//            assertEquals(test[i], regionEntityManager.get(new Vector2i(pos[i].x(), pos[i].z())));
+//        }
     }
 
+    /*
     @Test
     public void testNearestGet() {
-        assertEquals(test[0], regionEntitiesComponent.getNearest(new Vector2i(21, 13)));
-        assertEquals(test[1], regionEntitiesComponent.getNearest(new Vector2i(14, -13)));
-        assertEquals(test[2], regionEntitiesComponent.getNearest(new Vector2i(-22, 19)));
-        assertEquals(test[3], regionEntitiesComponent.getNearest(new Vector2i(-13, -19)));
+        assertEquals(test[0], regionEntityManager.getNearest(new Vector2i(21, 13)));
+        assertEquals(test[1], regionEntityManager.getNearest(new Vector2i(14, -13)));
+        assertEquals(test[2], regionEntityManager.getNearest(new Vector2i(-22, 19)));
+        assertEquals(test[3], regionEntityManager.getNearest(new Vector2i(-13, -19)));
     }
+
     @Test
     public void testIsLoaded() {
         assertEquals(true, regionEntitiesComponent.cellIsLoaded(new Vector2i(0, 0)));
@@ -70,10 +104,8 @@ public class RegionEntitiesTest {
     @Test
     public void testGetRegionssInCell() {
         List<EntityRef> testList = new ArrayList<>();
-        for (EntityRef region : test) {
-            testList.add(region);
-        }
+        Collections.addAll(testList, test);
         assertEquals(testList, regionEntitiesComponent.getRegionsInCell(new Vector2i(0, 0)));
     }
-*/
+    */
 }
