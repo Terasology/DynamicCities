@@ -28,7 +28,6 @@ import org.terasology.world.generation.facets.base.ObjectFacet3D;
 
 /**
  * Tests different implementations of {@link ObjectFacet3D}.
- *
  */
 public class Grid2DObjectFacetTest {
 
@@ -80,6 +79,7 @@ public class Grid2DObjectFacetTest {
         Assert.assertEquals(new Vector2i(42, 62), facet.getWorldPoint(30, 50));
         Assert.assertEquals(new Vector2i(26, 46), facet.getWorldPoint(26, 46));
     }
+
     /**
      * Check unset values
      */
@@ -130,7 +130,6 @@ public class Grid2DObjectFacetTest {
         facet.setWorld(24, 46, 32);
         Assert.assertEquals(Integer.valueOf(32), facet.get(14, 16), 0.0);
     }
-
 
 
 }
