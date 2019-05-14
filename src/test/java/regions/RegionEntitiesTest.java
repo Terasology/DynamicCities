@@ -74,7 +74,6 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
 
     @Test
     public void testSimpleGet() {
-        assertEquals(200, 200);
         for (int i = 0; i < test.length; i++) {
             assertEquals(test[i], regionEntityManager.get(new Vector2i(pos[i].x(), pos[i].z())));
         }
