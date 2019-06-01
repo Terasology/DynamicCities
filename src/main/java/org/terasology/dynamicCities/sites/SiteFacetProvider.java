@@ -68,8 +68,7 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
         Region3i coreReg = region.getRegion();
         SiteFacet siteFacet = new SiteFacet(coreReg, border);
 
-        if (roughnessFacet.getMeanDeviation() < 0.3f && roughnessFacet.getMeanDeviation() > 0
-                && resourceFacet.getResourceSum(ResourceType.GRASS.toString()) > 750) {
+        if (roughnessFacet.getMeanDeviation() < 0.3f && roughnessFacet.getMeanDeviation() > 0) {
             BaseVector2i minPos = new Vector2i();
             float minDev = 10;
             for (BaseVector2i pos : roughnessFacet.getGridWorldRegion().contents()) {
