@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.minimap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.minimap.events.AddCentreOverlayEvent;
 import org.terasology.dynamicCities.minimap.events.AddDistrictOverlayEvent;
 import org.terasology.dynamicCities.minimap.events.RemoveDistrictOverlayEvent;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
@@ -39,7 +40,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 @RegisterSystem(RegisterMode.CLIENT)
-public class DistrictOverlaySystem extends BaseComponentSystem {
+public class MinimapOverlaySystem extends BaseComponentSystem {
 
 
     @In
@@ -54,7 +55,7 @@ public class DistrictOverlaySystem extends BaseComponentSystem {
     @In
     private NetworkSystem networkSystem;
 
-    private Logger logger = LoggerFactory.getLogger(DistrictOverlaySystem.class);
+    private Logger logger = LoggerFactory.getLogger(MinimapOverlaySystem.class);
 
     private EntityRef clientEntity;
 
@@ -69,8 +70,9 @@ public class DistrictOverlaySystem extends BaseComponentSystem {
         }
         isOverlayAdded = new HashMap<>();
     }
+
     @ReceiveEvent
-    public void onAddOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
+    public void onAddDistrictOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.NONE && !isOverlaySinglePlayerAdded) {
             Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
             if (entityRefs.hasNext()) {
@@ -102,6 +104,14 @@ public class DistrictOverlaySystem extends BaseComponentSystem {
                     logger.error("No SettlementCache found! Unable to create district overlay");
                 }
             }
+        }
+    }
+
+    @ReceiveEvent
+    public void onAddCentreOverlayEvent(AddCentreOverlayEvent event, EntityRef entityRef) {
+        Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+        if (entities.hasNext()) {
+            minimapSystem.addOverlay(new CentreOverlay(entities.next()));
         }
     }
 
