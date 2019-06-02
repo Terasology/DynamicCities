@@ -36,16 +36,11 @@ public class CentreOverlay implements MinimapOverlay {
     private EntityRef settlementCachingEntity;
     private Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
 
-    public Vector2f iconSize = new Vector2f(16f, 16f);
+    private Vector2f iconSize = new Vector2f(32f, 32f);
 
 
     public CentreOverlay(EntityRef entityRef) {
         this.settlementCachingEntity = entityRef;
-    }
-
-    public CentreOverlay(EntityRef settlementCachingEntity, Vector2f iconSize) {
-        this.settlementCachingEntity = settlementCachingEntity;
-        this.iconSize = iconSize;
     }
 
     @Override
@@ -73,8 +68,8 @@ public class CentreOverlay implements MinimapOverlay {
             }
 
             Vector2f pos = new Vector2f(locationComponent.getLocalPosition().x(), locationComponent.getLocalPosition().z());// TODO
-            float width = (iconSize.getX() * t.getScaleX());
-            float height = (iconSize.getY() * t.getScaleY());
+            float width = iconSize.getX();
+            float height = iconSize.getY();
             if (worldRect.contains(pos)) {
                 Vector2i worldPoint = new Vector2i((int) pos.x, (int) pos.y);
                 int lx = TeraMath.floorToInt(t.applyX(worldPoint.getX()));
