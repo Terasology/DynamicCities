@@ -109,9 +109,29 @@ public class MinimapOverlaySystem extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onAddCentreOverlayEvent(AddCentreOverlayEvent event, EntityRef entityRef) {
-        Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
-        if (entities.hasNext()) {
-            minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+        if (networkSystem.getMode() == NetworkMode.NONE) {
+            Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+            if (entities.hasNext()) {
+                minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+            }
+        }
+
+        if (networkSystem.getMode() == NetworkMode.CLIENT) {
+            if (clientEntity.getComponent(ClientComponent.class).character.getId() == entityRef.getId() && !isOverlayAdded.getOrDefault(entityRef, false)) {
+                Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+                if (entities.hasNext()) {
+                    minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+                }
+            }
+        }
+
+        if (networkSystem.getMode() == NetworkMode.DEDICATED_SERVER && !isOverlayAdded.getOrDefault(entityRef, false)) {
+            if (localPlayer.getCharacterEntity() == entityRef) {
+                Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+                if (entities.hasNext()) {
+                    minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+                }
+            }
         }
     }
 
