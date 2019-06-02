@@ -11,3 +11,6 @@ This [techdemo](https://www.youtube.com/watch?v=feEMmo1pRSY&feature=youtu.be) pr
 ![sc2](/images/niceCity5.jpg)
 
 This module originates from the GSOC 2016 Project Citysimulation by [CptCrispyCrunchy](https://github.com/CptCrispyCrunchy) with [Skaldarnar](https://github.com/skaldarnar) and [msteiger](https://github.com/msteiger) as mentors.
+
+### Images
+The building icon image was taken from http://www.iconsmind.com (Linkware License)
