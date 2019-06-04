@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Rect2f;
 import org.terasology.math.geom.Rect2fTransformer;
 import org.terasology.math.geom.Rect2i;
@@ -30,6 +29,8 @@ import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.rendering.assets.texture.Texture;
 import org.terasology.rendering.nui.Canvas;
 import org.terasology.utilities.Assets;
+
+import java.util.Optional;
 
 public class CentreOverlay implements MinimapOverlay {
 
@@ -55,7 +56,7 @@ public class CentreOverlay implements MinimapOverlay {
                 new Vector2f(canvas.getRegion().maxX(), canvas.getRegion().maxY())
         );
 
-        Rect2fTransformer t = new Rect2fTransformer(worldRect, screenRect);
+        Rect2fTransformer transformer = new Rect2fTransformer(worldRect, screenRect);
 
         for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
             if (!settlement.isActive()) {
@@ -67,18 +68,48 @@ public class CentreOverlay implements MinimapOverlay {
                 return;
             }
 
-            Vector2f pos = new Vector2f(locationComponent.getLocalPosition().x(), locationComponent.getLocalPosition().z());// TODO
-            float width = iconSize.getX();
-            float height = iconSize.getY();
-            if (worldRect.contains(pos)) {
-                Vector2i worldPoint = new Vector2i((int) pos.x, (int) pos.y);
-                int lx = TeraMath.floorToInt(t.applyX(worldPoint.getX()));
-                int ly = TeraMath.floorToInt(t.applyY(worldPoint.getY()));
-                Rect2i region = Rect2i.createFromMinAndSize(lx, ly, (int) width, (int) height);
-                Texture icon = Assets.getTexture("DynamicCities:city-icon").get();
-                canvas.drawTexture(icon, region);
+            Vector2f location = new Vector2f(locationComponent.getLocalPosition().x(), locationComponent.getLocalPosition().z());
+            Vector2f mapPoint = new Vector2f(
+                    transformer.applyX(location.x),
+                    transformer.applyY(location.y)
+            );
+
+            Vector2i min = clamp(mapPoint, screenRect);
+            Rect2i region = Rect2i.createFromMinAndSize(min.x, min.y, (int) iconSize.x, (int) iconSize.y);
+
+            Optional<Texture> icon = Assets.getTexture("DynamicCities:city-icon");
+            if (icon.isPresent()) {
+                canvas.drawTexture(icon.get(), region);
+            } else {
+                logger.error("No icon found for city");
             }
         }
+    }
+
+    private Vector2i clamp(Vector2f point, Rect2f box) {
+        float x;
+        float y;
+        Rect2f iconRegion = Rect2f.createFromMinAndSize(point, iconSize);
+        if (box.contains(iconRegion)) {
+            return new Vector2i(point.x, point.y);
+        } else {
+            if (iconRegion.maxX() >= box.maxX()) {
+                x = (int) box.maxX() - iconSize.x;
+            } else if (iconRegion.minX() <= box.minX()) {
+                x = (int) box.minX();
+            } else {
+                x = point.x;
+            }
+
+            if (iconRegion.maxY() >= box.maxY()) {
+                y = (int) box.maxY() - iconSize.y;
+            } else if (iconRegion.minY() <= box.minY()) {
+                y = (int) box.minY();
+            } else {
+                y = point.y;
+            }
+        }
+        return new Vector2i(x, y);
     }
 
     @Override
