@@ -33,12 +33,12 @@ import org.terasology.utilities.Assets;
 import java.util.Optional;
 
 public class CentreOverlay implements MinimapOverlay {
+    private static final float ICON_SIZE = 32f;
 
     private EntityRef settlementCachingEntity;
+    private Vector2f iconSize = new Vector2f(ICON_SIZE, ICON_SIZE);
+
     private Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
-
-    private Vector2f iconSize = new Vector2f(32f, 32f);
-
 
     public CentreOverlay(EntityRef entityRef) {
         this.settlementCachingEntity = entityRef;
@@ -86,6 +86,12 @@ public class CentreOverlay implements MinimapOverlay {
         }
     }
 
+    /**
+     * Constrains a point to a specified region. Works like a vector clamp.
+     * @param point: the coordinates of the point to be clamped
+     * @param box: limits
+     * @return new clamped coordinates of point
+     */
     private Vector2i clamp(Vector2f point, Rect2f box) {
         float x;
         float y;

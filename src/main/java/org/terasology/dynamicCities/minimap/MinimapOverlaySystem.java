@@ -71,6 +71,11 @@ public class MinimapOverlaySystem extends BaseComponentSystem {
         isOverlayAdded = new HashMap<>();
     }
 
+    /**
+     * Checks network constraints and adds the DistrictOverlay to all settlement entities
+     * @param event
+     * @param entityRef
+     */
     @ReceiveEvent
     public void onAddDistrictOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.NONE && !isOverlaySinglePlayerAdded) {
@@ -107,6 +112,11 @@ public class MinimapOverlaySystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Checks network constraints and adds the CentreOverlay to all settlement entities
+     * @param event
+     * @param entityRef
+     */
     @ReceiveEvent
     public void onAddCentreOverlayEvent(AddCentreOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.NONE) {
@@ -135,6 +145,11 @@ public class MinimapOverlaySystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Removes DistrictOverlay from the map
+     * @param event
+     * @param entityRef
+     */
     @ReceiveEvent
     public void onRemoveDistrictOverlayEvent(RemoveDistrictOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.CLIENT) {
