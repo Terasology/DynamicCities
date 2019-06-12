@@ -81,6 +81,7 @@ import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
@@ -369,6 +370,9 @@ public class Construction extends BaseComponentSystem {
             Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
             if (entityPrefab.isPresent()) {
                 dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
+                dynParcel.buildingEntity.addComponent(new LocationComponent(new Vector3f(
+                        (dynParcel.getShape().minX() + dynParcel.getShape().maxX()) / 2, dynParcel.height,
+                        (dynParcel.getShape().minY() + dynParcel.getShape().maxY()) / 2))); // midpoint of the parcel shape, and the bottom of the building
                 dynParcel.buildingEntity.addComponent(new SettlementRefComponent(settlement));
                 dynParcel.buildingEntity.addComponent(new DynParcelRefComponent(dynParcel));
                 dynParcel.buildingEntity.send(new BuildingEntitySpawnedEvent());
