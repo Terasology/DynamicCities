@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.parcels;
 
 
+import org.terasology.cities.parcels.Parcel;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.network.Replicate;
@@ -36,7 +37,7 @@ public class ParcelList implements Component {
     @Replicate
     public float builtUpRadius;
 
-    public List<DynParcel> parcels;
+    public List<Parcel> parcels;
 
     public ParcelList() { }
     public ParcelList(int i) {
@@ -46,13 +47,16 @@ public class ParcelList implements Component {
         areaPerZone = new HashMap<>();
     }
 
-    public void addParcel(DynParcel parcel) {
+    public void addParcel(Parcel parcel) {
         parcels.add(parcel);
-        String zone = parcel.getZone();
-        if (areaPerZone.containsKey(zone)) {
-            areaPerZone.put(zone, areaPerZone.get(zone) + parcel.getShape().area());
-        } else {
-            areaPerZone.put(zone, parcel.getShape().area());
+        if (parcel instanceof DynParcel) {
+            DynParcel dynParcel = ((DynParcel) parcel);
+            String zone = dynParcel.getZone();
+            if (areaPerZone.containsKey(zone)) {
+                areaPerZone.put(zone, areaPerZone.get(zone) + dynParcel.getShape().area());
+            } else {
+                areaPerZone.put(zone, dynParcel.getShape().area());
+            }
         }
     }
 
@@ -61,7 +65,7 @@ public class ParcelList implements Component {
     }
 
     public boolean isNotIntersecting(Rect2i rect) {
-        for (DynParcel spawnedParcels : parcels) {
+        for (Parcel spawnedParcels : parcels) {
             if (spawnedParcels.getShape().overlaps(rect)) {
                return false;
             }

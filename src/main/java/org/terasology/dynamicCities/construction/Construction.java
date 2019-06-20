@@ -44,6 +44,7 @@ import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.dynamicCities.parcels.RoadParcel;
 import org.terasology.dynamicCities.playerTracking.PlayerTracker;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
@@ -484,6 +485,12 @@ public class Construction extends BaseComponentSystem {
         }
         settlement.send(new PlaceBlocks(blockPos));
         dynParcel.setBuildingTypeName(building.name);
+        return true;
+    }
+
+    public boolean buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
+        // TODO: This will convert my parcels into actual Road entities.
+        logger.info("Construction of parcel {} from settlement {} started...", parcel, settlement.getId());
         return true;
     }
 
