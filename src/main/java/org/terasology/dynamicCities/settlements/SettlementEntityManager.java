@@ -16,15 +16,8 @@
 package org.terasology.dynamicCities.settlements;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Vector;
-
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -47,7 +40,6 @@ import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.resource.ResourceType;
-import org.terasology.dynamicCities.roads.Road;
 import org.terasology.dynamicCities.roads.RoadQueue;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
@@ -64,27 +56,35 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.logic.location.Location;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
-import org.terasology.math.Direction;
 import org.terasology.math.Region3i;
+import org.terasology.math.geom.BaseVector2f;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
+import org.terasology.math.geom.ImmutableVector2f;
+import org.terasology.math.geom.ImmutableVector2i;
+import org.terasology.math.geom.ImmutableVector3f;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
-import org.terasology.pathfinding.model.Path;
-import org.terasology.protobuf.EntityData;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 @Share(value = SettlementEntityManager.class)
@@ -123,13 +123,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private BlockBufferSystem blockBufferSystem;
 
-    private int minDistance = 200;
-    private int settlementMaxRadius = 100;
+    private int minDistance = 1000;
+    private int settlementMaxRadius = 256;
     private int counter = 50;
     private int timer = 0;
     private Random rng;
+    private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
+
     @Override
     public void postBegin() {
 
@@ -154,7 +156,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
 
         Set<Vector3f> uncheckedLocations = new HashSet<>();
-        for (EntityRef location: uncheckedSiteRegions) {
+        for (EntityRef location : uncheckedSiteRegions) {
             LocationComponent locationComponent = location.getComponent(LocationComponent.class);
             uncheckedLocations.add(locationComponent.getWorldPosition());
         }
@@ -342,7 +344,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
 
-
     public void build(EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
@@ -454,22 +455,27 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         }
 
 
-        // TODO: Add more roads here
-        Vector3f road = locationComponent.getWorldPosition();
-        road = road.add(new Vector3f(settlementMaxRadius, 0, settlementMaxRadius));
-        Rect2i roadRect = Rect2i.createFromMinAndSize(new Vector2i(road.x, road.z), new Vector2i(10, 5));
-        Set<Rect2i> roadSet = new HashSet<>();
-        roadSet.add(roadRect);
-        RoadParcel parcel = new RoadParcel(roadSet);
-        roadQueue.roadQueue.add(parcel);
-        logger.info("Added the empty road parcel {}", parcel);
-
-        roadQueue.roadQueue.addAll(calculateRoadParcels(settlement));
+        /**
+         * Create roads between settlements
+         */
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
+        for (EntityRef destSettlement : container.settlementEntities.values()) {
+            if (!settlement.equals(destSettlement)) {
+                Vector3f destLocation = destSettlement.getComponent(LocationComponent.class).getWorldPosition();
+                ImmutableVector2f dest = new ImmutableVector2f(destLocation.x, destLocation.z);
+                if (!roadCache.containsEntry(source.toString(), dest.toString())) {
+                    roadQueue.roadQueue.add(calculateRoadParcel(source, dest));
+                    roadCache.put(source.toString(), dest.toString());
+                    roadCache.put(dest.toString(), source.toString());
+                }
+            }
+        }
 
         //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
         //This is due to ensuring that changes made while constructing are added
 
-        nameTagComponent.text =  Float.toString(populationComponent.populationSize);
+        nameTagComponent.text = Float.toString(populationComponent.populationSize);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(populationComponent);
         settlement.saveComponent(buildingQueue);
@@ -477,48 +483,34 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.send(new SettlementGrowthEvent());
     }
 
-    private Set<RoadParcel> calculateRoadParcels(EntityRef sourceSettlement) {
-        Vector3f sourceSite = sourceSettlement.getComponent(LocationComponent.class).getWorldPosition();
-        Vector2i source = new Vector2i(sourceSite.x, sourceSite.z);
-        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
-        for (String vector2iString : container.settlementEntities.keySet()) {
-            Vector2i dest = Toolbox.stringToVector2i(vector2iString);
-            if (dest.equals(source)) {
-                continue;
-            }
+    private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest) {
+        final float rectSize = 10;
+        final int margin = 5;
+        final int overlap = 2;
 
-            logger.info("Building road from {} to {}", source, dest);
-        }
+        logger.info("Building road from {} to {}", source, dest);
 
-        /*
-        LocationComponent locationComponent = sourceSettlement.getComponent(LocationComponent.class);
-        Vector3f source = locationComponent.getWorldPosition();
-        Set<RoadParcel> result = new HashSet<>();
+        Set<Rect2i> rects = new HashSet<>();
 
-        for (EntityRef destinationSettlement : entityManager.getEntitiesWith(Settlement.class)) {
-            if (destinationSettlement.equals(sourceSettlement)) {
-                continue;
-            }
+        Vector2f diff = new Vector2f(dest.sub(source));
+        ImmutableVector2f direction = new ImmutableVector2f(diff.normalize());
 
-            LocationComponent destinationLocation = destinationSettlement.getComponent(LocationComponent.class);
-            Vector3f destination = destinationLocation.getWorldPosition();
+        ImmutableVector2f roadStart = source.add(direction.scale(settlementMaxRadius + margin));
+        ImmutableVector2f roadEnd = dest.sub(direction.scale(settlementMaxRadius + margin));
 
-            Vector3f direction = destination.sub(source).normalize();
+        Vector2f i = new Vector2f(roadStart);
+        do {
+            ImmutableVector2i min = new ImmutableVector2i((int) i.x, (int) i.y);
+            i.add(direction.scale(rectSize));
+            ImmutableVector2i max = new ImmutableVector2i((int) i.x, (int) i.y);
+            i.sub(direction.scale(overlap));
 
-            Set<Vector3f> path = new HashSet<>();
-            for (int x = (int) source.x; x < destination.x; x++) {
-                float z = (direction.z / direction.x) * (x - source.x) + destination.z;
-                float y = (direction.y / direction.x) * (x - source.x) + destination.y;
+            rects.add(Rect2i.createFromMinAndMax(min, max));
+        } while (roadEnd.sub(i).dot(direction) == roadEnd.sub(i).length());
 
-                path.add(new Vector3f(x, y, z));
-            }
+        logger.info("Road rects: {}", rects);
 
-            result.add(new RoadParcel(path));
-
-        }*/
-
-
-        return new HashSet<>();
+        return new RoadParcel(rects);
     }
 
     public void buildRoads(EntityRef sourceSettlement) {

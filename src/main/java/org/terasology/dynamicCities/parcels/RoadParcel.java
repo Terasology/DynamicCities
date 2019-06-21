@@ -17,11 +17,7 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.math.geom.Rect2f;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector3f;
-import org.w3c.dom.css.Rect;
 
 import java.util.HashSet;
 import java.util.Set;
