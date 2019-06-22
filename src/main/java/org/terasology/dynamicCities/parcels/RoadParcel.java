@@ -17,39 +17,45 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
+import org.terasology.dynamicCities.roads.RoadSegment;
 import org.terasology.math.geom.Rect2i;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
+import java.util.stream.Collectors;
 
 public class RoadParcel implements Parcel {
-    private Set<Rect2i> rects = new HashSet<>();
-    private Orientation orientation;
+    public Vector<RoadSegment> rects;
+    public Orientation orientation;
 
-    public RoadParcel(Set<Rect2i> rects) {
-        this.rects = rects;
+    public enum Status {
+        COMPLETE,
+        PARTIAL,
+        NONE
     }
 
-    public RoadParcel() {
+    public RoadParcel(Vector<RoadSegment> rects) {
+        this.rects = rects;
     }
 
     public Set<Rect2i> expand(int dx, int dy) {
         Set<Rect2i> expandedRects = new HashSet<>();
         if (!rects.isEmpty()) {
-            for (Rect2i rect : rects) {
-                expandedRects.add(rect.expand(dx, dy));
+            for (RoadSegment roadRect : rects) {
+                expandedRects.add(roadRect.rect.expand(dx, dy));
             }
         }
         return expandedRects;
     }
 
     public Set<Rect2i> getRects() {
-        return rects;
+        return rects.stream().map(roadRect -> roadRect.rect).collect(Collectors.toSet());
     }
 
     @Override
     public Rect2i getShape() {
-        return rects.iterator().next();
+        return rects.iterator().next().rect;
     }
 
     @Override

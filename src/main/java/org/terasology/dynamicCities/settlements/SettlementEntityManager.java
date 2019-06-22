@@ -42,6 +42,7 @@ import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.resource.ResourceType;
 import org.terasology.dynamicCities.roads.RoadQueue;
+import org.terasology.dynamicCities.roads.RoadSegment;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.settlements.events.CheckBuildingSpawnPreconditionsEvent;
@@ -85,6 +86,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Vector;
+import java.util.stream.Collectors;
 
 
 @Share(value = SettlementEntityManager.class)
@@ -126,8 +129,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private BlockBufferSystem blockBufferSystem;
 
-    private int minDistance = 1000;
-    private int settlementMaxRadius = 256;
+    private int minDistance = 300;
+    private int settlementMaxRadius = 50;
     private int counter = 50;
     private int timer = 0;
     private Random rng;
@@ -473,7 +476,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 Vector3f destLocation = destSettlement.getComponent(LocationComponent.class).getWorldPosition();
                 ImmutableVector2f dest = new ImmutableVector2f(destLocation.x, destLocation.z);
                 if (!roadCache.containsEntry(source.toString(), dest.toString())) {
-                    roadQueue.roadQueue.add(calculateRoadParcel(source, dest));
+                    roadQueue.roadQueue.add(calculateRoadParcel(source, dest, center.y));
                     roadCache.put(source.toString(), dest.toString());
                     roadCache.put(dest.toString(), source.toString());
                 }
@@ -490,14 +493,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         settlement.send(new SettlementGrowthEvent());
     }
 
-    private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest) {
+    private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest, int height) {
         final float rectSize = 10;
         final int margin = 5;
         final int overlap = 2;
 
         logger.info("Building road from {} to {}", source, dest);
 
-        Set<Rect2i> rects = new HashSet<>();
+        Vector<RoadSegment> segments = new Vector<>();
 
         Vector2f diff = new Vector2f(dest.sub(source));
         ImmutableVector2f direction = new ImmutableVector2f(diff.normalize());
@@ -507,17 +510,44 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         Vector2f i = new Vector2f(roadStart);
         do {
-            ImmutableVector2i min = new ImmutableVector2i((int) i.x, (int) i.y);
+            ImmutableVector2i a = new ImmutableVector2i((int) i.x, (int) i.y);
             i.add(direction.scale(rectSize));
-            ImmutableVector2i max = new ImmutableVector2i((int) i.x, (int) i.y);
+            ImmutableVector2i b = new ImmutableVector2i((int) i.x, (int) i.y);
             i.sub(direction.scale(overlap));
 
-            rects.add(Rect2i.createFromMinAndMax(min, max));
+            Rect2i rect;
+//            if (a.getX() < b.getX() && a.getY() < b.getY()) {
+//                rect = Rect2i.createFromMinAndMax(a, b);
+//            } else if (a.getX() > b.getX() && a.getY() > b.getY()) {
+//                rect = Rect2i.createFromMinAndMax(b, a);
+//            } else {
+//                ImmutableVector2i min = new ImmutableVector2i(a.getX(), b.getY());
+//                ImmutableVector2i max = new
+//            }
+
+            // Must calculate actual min and max for the rect
+            // Ensure 'a' has lower x
+            if (a.getX() > b.getX()) {
+                ImmutableVector2i tmp = b;
+                b = a;
+                a = tmp;
+            }
+
+            if (a.getY() < b.getY()) {
+                rect = Rect2i.createFromMinAndMax(a, b);
+            } else {
+                rect = Rect2i.createFromMinAndMax(
+                        new ImmutableVector2i(a.getX(), b.getY()),
+                        new ImmutableVector2i(b.getX(), a.getY())
+                );
+            }
+
+            segments.add(new RoadSegment(rect, height));
         } while (roadEnd.sub(i).dot(direction) == roadEnd.sub(i).length());
 
-        logger.info("Road rects: {}", rects);
+        logger.info("Road segments: {}", segments.stream().map(seg -> seg.rect.min()).collect(Collectors.toSet()));
 
-        return new RoadParcel(rects);
+        return new RoadParcel(segments);
     }
 
     public void buildRoads(EntityRef sourceSettlement) {
@@ -534,9 +564,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 treeRemovalSystem.removeTreesInRegions(region);
             }
 
-            if (constructer.buildRoadParcel(parcel, sourceSettlement)) {
+            RoadParcel.Status status = constructer.buildRoadParcel(parcel, sourceSettlement);
+            if (status == RoadParcel.Status.COMPLETE) {
                 removedParcels.add(parcel);
                 logger.info("Removed parcel {} from pending parcels", parcel);
+            } else {
+                logger.warn("Parcel {} couldn't be completed. Status: {}", parcel, status);
             }
         }
         for (RoadParcel parcel : removedParcels) {
