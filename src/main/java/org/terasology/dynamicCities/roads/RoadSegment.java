@@ -16,48 +16,29 @@
 
 package org.terasology.dynamicCities.roads;
 
-import org.terasology.math.geom.ImmutableVector2i;
+import org.terasology.math.geom.Rect2i;
 
-/**
- * A road segment is a part of a road with direction. One segment's end is the next segment's start.
- */
+
 public class RoadSegment {
+    public Rect2i rect;
+    public int height;
 
-    private final ImmutableVector2i start;
-    private final ImmutableVector2i end;
-    private final float width;
-
-    public RoadSegment(ImmutableVector2i start, ImmutableVector2i end, float width) {
-        this.start = start;
-        this.end = end;
-        this.width = width;
-    }
-
-    /**
-     * @return the start point
-     */
-    public ImmutableVector2i getStart() {
-        return start;
-    }
-
-    /**
-     * @return the end point
-     */
-    public ImmutableVector2i getEnd() {
-        return end;
+    public RoadSegment(Rect2i rect, int height) {
+        this.rect = rect;
+        this.height = height;
     }
 
     /**
      * @return the length of the road segment in blocks
      */
     public float getLength() {
-        return (float) start.distance(end);
+        return rect.sizeX();
     }
 
     /**
      * @return the width of the road in blocks
      */
     public float getWidth() {
-        return width;
+        return rect.sizeY();
     }
 }

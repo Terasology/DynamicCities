@@ -49,6 +49,7 @@ import org.terasology.dynamicCities.playerTracking.PlayerTracker;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.BufferRasterTarget;
+import org.terasology.dynamicCities.rasterizer.RoadRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.DoorRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.SimpleDoorRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.WingDoorRasterizer;
@@ -66,6 +67,7 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.dynamicCities.roads.RoadSegment;
 import org.terasology.economy.components.MultiInvStorageComponent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -80,6 +82,7 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
+import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
@@ -154,6 +157,7 @@ public class Construction extends BaseComponentSystem {
     private Block water;
     private Block defaultBlock;
     private int maxMinDeviation = 40;
+    private RoadRasterizer roadRasterizer;
     private final List<AbsDynBuildingRasterizer> stdRasterizers = new ArrayList<>();
     private final List<WindowRasterizer> windowRasterizers = new ArrayList<>();
     private final List<DoorRasterizer> doorRasterizers = new ArrayList<>();
@@ -200,11 +204,12 @@ public class Construction extends BaseComponentSystem {
         plant = blockManager.getBlock("core:plant");
         defaultBlock = blockManager.getBlock("core:dirt");
 
+        roadRasterizer = new RoadRasterizer();
+
         stdRasterizers.add(new HollowBuildingPartRasterizer(theme, worldProvider));
         stdRasterizers.add(new RectPartRasterizer(theme, worldProvider));
         stdRasterizers.add(new RoundPartRasterizer(theme, worldProvider));
         stdRasterizers.add(new StaircaseRasterizer(theme, worldProvider));
-
 
         decorationRasterizers.add(new SingleBlockRasterizer(theme));
         decorationRasterizers.add(new ColumnRasterizer(theme));
@@ -488,10 +493,75 @@ public class Construction extends BaseComponentSystem {
         return true;
     }
 
-    public boolean buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
-        // TODO: This will convert my parcels into actual Road entities.
+    public RoadParcel.Status buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
         logger.info("Construction of parcel {} from settlement {} started...", parcel, settlement.getId());
-        return true;
+        boolean containsRelevantRegion = false;
+        boolean segmentFailed = false;
+
+        // Factor by which the rect will be expanded while flattening
+        ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(3, 3);
+
+
+        for (int i = 0; i < parcel.rects.size(); i++) {
+            RoadSegment segment = parcel.rects.elementAt(i);
+
+            // Check if the region is relevant
+            Region3i region = Region3i.createFromMinMax(
+                    new Vector3i(segment.rect.minX(), 255, segment.rect.minY()),
+                    new Vector3i(segment.rect.maxX(), -255, segment.rect.maxY())
+            );
+            if (!worldProvider.isRegionRelevant(region)) {
+                continue;
+            } else {
+                containsRelevantRegion = true;
+            }
+
+            // Flatten the rect
+            segment.height = flatten(segment.rect.expand(rectExpansionFactor), 10); // TODO: Find a solution for the height
+
+            // Create raster targets
+            RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, theme, segment.rect);
+            HeightMap hm = HeightMaps.constant(segment.height);
+
+            if (segment.height == -9999) {
+                segmentFailed = true;
+                continue;
+            }
+
+            // Check for player collision
+            Map<EntityRef, EntityRef> playerCityMap = playerTracker.getPlayerCityMap();
+
+            boolean shouldRaster = true;
+            for (EntityRef player : playerCityMap.keySet()) {
+                if (playerCityMap.get(player) == settlement) {
+                    LocationComponent playerLocation = player.getComponent(LocationComponent.class);
+                    if (playerLocation != null && segment.rect.contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
+                        segmentFailed = true;
+                        shouldRaster = false;
+                        break;
+                    }
+                }
+            }
+
+            // Rasterize the road
+            if (shouldRaster) {
+                roadRasterizer.raster(rasterTarget, segment, hm);
+            }
+        }
+
+        // TODO: Do I need a road entity?
+
+        if (!containsRelevantRegion) {
+            logger.warn("Failed. Parcel doesn't contain relevant regions.");
+            return RoadParcel.Status.NONE;
+        }
+
+        if (segmentFailed) {
+            logger.warn("Failed. A segment failed.");
+            return RoadParcel.Status.PARTIAL;
+        }
+
+        return RoadParcel.Status.COMPLETE;
     }
 
     /**
