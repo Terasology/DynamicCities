@@ -473,7 +473,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
         for (EntityRef destSettlement : container.settlementEntities.values()) {
             if (!settlement.equals(destSettlement)) {
-                Vector3f destLocation = destSettlement.getComponent(LocationComponent.class).getWorldPosition();
+                Vector3f destLocation = destSettlement.getComponent(LocationComponent.class).getLocalPosition();
                 ImmutableVector2f dest = new ImmutableVector2f(destLocation.x, destLocation.z);
                 if (!roadCache.containsEntry(source.toString(), dest.toString())) {
                     roadQueue.roadQueue.add(calculateRoadParcel(source, dest, center.y));
@@ -509,6 +509,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         ImmutableVector2f roadEnd = dest.sub(direction.scale(settlementMaxRadius + margin));
 
         Vector2f i = new Vector2f(roadStart);
+
+        boolean shouldContinue;
         do {
             ImmutableVector2i a = new ImmutableVector2i((int) i.x, (int) i.y);
             i.add(direction.scale(rectSize));
@@ -543,7 +545,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
 
             segments.add(new RoadSegment(rect, height));
-        } while (roadEnd.sub(i).dot(direction) == roadEnd.sub(i).length());
+
+            // Because these are floats, equating values will be a problem
+            // Instead, we'll make sure their different is below a threshold
+            float threshold = 0.0001f;
+            Vector2f remaining = new Vector2f(roadEnd.sub(i));
+            remaining.normalize();
+            shouldContinue = (new ImmutableVector2f(remaining)).sub(direction).length() < threshold;
+        } while (shouldContinue);
 
         logger.info("Road segments: {}", segments.stream().map(seg -> seg.rect.min()).collect(Collectors.toSet()));
 

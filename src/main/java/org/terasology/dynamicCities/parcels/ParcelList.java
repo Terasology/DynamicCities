@@ -66,8 +66,10 @@ public class ParcelList implements Component {
 
     public boolean isNotIntersecting(Rect2i rect) {
         for (Parcel spawnedParcels : parcels) {
-            if (spawnedParcels.getShape().overlaps(rect)) {
-               return false;
+            if (spawnedParcels instanceof RoadParcel) {
+                return ((RoadParcel) spawnedParcels).isNotIntersecting(rect);
+            } else if (spawnedParcels.getShape().overlaps(rect)) {
+                return false;
             }
         }
         return true;

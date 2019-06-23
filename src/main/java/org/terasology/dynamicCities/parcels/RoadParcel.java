@@ -30,9 +30,9 @@ public class RoadParcel implements Parcel {
     public Orientation orientation;
 
     public enum Status {
-        COMPLETE,
-        PARTIAL,
-        NONE
+        COMPLETE,  // All segments have been laid
+        PARTIAL,   // Some segments failed to be laid
+        NONE       // No segments were laid. All were irrelevant
     }
 
     public RoadParcel(Vector<RoadSegment> rects) {
@@ -51,6 +51,15 @@ public class RoadParcel implements Parcel {
 
     public Set<Rect2i> getRects() {
         return rects.stream().map(roadRect -> roadRect.rect).collect(Collectors.toSet());
+    }
+
+    public boolean isNotIntersecting(Rect2i rect) {
+        for (RoadSegment segment : rects) {
+            if (segment.rect.overlaps(rect)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

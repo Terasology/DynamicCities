@@ -166,6 +166,8 @@ public class Construction extends BaseComponentSystem {
     private final List<Block> plantBlocks = new ArrayList<>();
     private Logger logger = LoggerFactory.getLogger(Construction.class);
 
+    private Map<Integer, Integer> segmentCache = new HashMap<>();
+
     public void initialise() {
         theme = BlockTheme.builder(blockManager)
                 .register(DefaultBlockType.ROAD_FILL, "core:dirt")
@@ -505,6 +507,10 @@ public class Construction extends BaseComponentSystem {
         for (int i = 0; i < parcel.rects.size(); i++) {
             RoadSegment segment = parcel.rects.elementAt(i);
 
+            if (segmentCache.containsKey(segment.hashCode()) && segmentCache.get(segment.hashCode()) == parcel.hashCode()) {
+                continue;
+            }
+
             // Check if the region is relevant
             Region3i region = Region3i.createFromMinMax(
                     new Vector3i(segment.rect.minX(), 255, segment.rect.minY()),
@@ -546,6 +552,7 @@ public class Construction extends BaseComponentSystem {
             // Rasterize the road
             if (shouldRaster) {
                 roadRasterizer.raster(rasterTarget, segment, hm);
+                segmentCache.put(segment.hashCode(), parcel.hashCode());
             }
         }
 
