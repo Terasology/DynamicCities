@@ -37,7 +37,7 @@ public class RoadRasterizer {
 
         for (BaseVector2i pos : roadSegment.rect.contents()) {
             logger.info("Drawing dirt block at {}...", pos);
-            rasterTarget.setBlock(new Vector3i(pos.x(), heightMap.apply(pos), pos.y()), DefaultBlockType.ROAD_FILL);
+            rasterTarget.setBlock(new Vector3i(pos.x(), heightMap.apply(pos), pos.y()), DefaultBlockType.ROAD_SURFACE);
         }
 
         // Clean the region above the rect
