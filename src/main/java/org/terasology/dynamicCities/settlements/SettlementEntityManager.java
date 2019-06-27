@@ -485,10 +485,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest, int height) {
-        final float rectSize = 10;
-        final int margin = 5;
-        final int overlap = 2;
-
         logger.info("Building road from {} to {}", source, dest);
 
         Vector<RoadSegment> segments = new Vector<>();
@@ -496,30 +492,21 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         Vector2f diff = new Vector2f(dest.sub(source));
         ImmutableVector2f direction = new ImmutableVector2f(diff.normalize());
 
-        ImmutableVector2f roadStart = source.add(direction.scale(settlementMaxRadius + margin));
-        ImmutableVector2f roadEnd = dest.sub(direction.scale(settlementMaxRadius + margin));
+        ImmutableVector2f roadStart = source.add(direction.scale(settlementMaxRadius + RoadParcel.MARGIN));
+        ImmutableVector2f roadEnd = dest.sub(direction.scale(settlementMaxRadius + RoadParcel.MARGIN));
 
         Vector2f i = new Vector2f(roadStart);
 
         boolean shouldContinue;
         do {
             ImmutableVector2i a = new ImmutableVector2i((int) i.x, (int) i.y);
-            i.add(direction.scale(rectSize));
+            i.add(direction.scale(RoadParcel.RECT_SIZE));
             ImmutableVector2i b = new ImmutableVector2i((int) i.x, (int) i.y);
-            i.sub(direction.scale(overlap));
-
-            Rect2i rect;
-//            if (a.getX() < b.getX() && a.getY() < b.getY()) {
-//                rect = Rect2i.createFromMinAndMax(a, b);
-//            } else if (a.getX() > b.getX() && a.getY() > b.getY()) {
-//                rect = Rect2i.createFromMinAndMax(b, a);
-//            } else {
-//                ImmutableVector2i min = new ImmutableVector2i(a.getX(), b.getY());
-//                ImmutableVector2i max = new
-//            }
+            i.sub(direction.scale(RoadParcel.OVERLAP));
 
             // Must calculate actual min and max for the rect
             // Ensure 'a' has lower x
+            Rect2i rect;
             if (a.getX() > b.getX()) {
                 ImmutableVector2i tmp = b;
                 b = a;
@@ -535,7 +522,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 );
             }
 
-            segments.add(new RoadSegment(rect, height));
+            segments.add(new RoadSegment(rect, height, a, b));
 
             // Because these are floats, equating values will be a problem
             // Instead, we'll make sure their different is below a threshold

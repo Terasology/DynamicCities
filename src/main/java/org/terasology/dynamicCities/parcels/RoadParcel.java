@@ -26,14 +26,18 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 public class RoadParcel implements Parcel {
-    public Vector<RoadSegment> rects;
-    public Orientation orientation;
+    public static final int OVERLAP = 2; // Overlap between two road segments
+    public static final int RECT_SIZE = 10; // Size of the diagonal of a segment
+    public static final int MARGIN = 5; // Margin between settlement boundary and road start
 
     public enum Status {
         COMPLETE,  // All segments have been laid
         PARTIAL,   // Some segments failed to be laid
         NONE       // No segments were laid. All were irrelevant
     }
+
+    public Vector<RoadSegment> rects;
+    public Orientation orientation;
 
     public RoadParcel(Vector<RoadSegment> rects) {
         this.rects = rects;

@@ -150,7 +150,8 @@ public class Construction extends BaseComponentSystem {
     private InventoryManager inventoryManager;
 
 
-    private BlockTheme theme;
+    private BlockTheme cityTheme;
+    private BlockTheme roadTheme;
 
     private Block air;
     private Block plant;
@@ -169,7 +170,7 @@ public class Construction extends BaseComponentSystem {
     private Map<Integer, Integer> segmentCache = new HashMap<>();
 
     public void initialise() {
-        theme = BlockTheme.builder(blockManager)
+        cityTheme = BlockTheme.builder(blockManager)
                 .register(DefaultBlockType.ROAD_FILL, "core:dirt")
                 .register(DefaultBlockType.ROAD_SURFACE, "core:Gravel")
                 .register(DefaultBlockType.LOT_EMPTY, "core:dirt")
@@ -200,34 +201,40 @@ public class Construction extends BaseComponentSystem {
 
                 .build();
 
+        if (roadRasterizer == null) {
+            roadRasterizer = new RoadRasterizer();
+            roadTheme = BlockTheme.builder(blockManager)
+                    .register(DefaultBlockType.ROAD_FILL, "core:dirt")
+                    .register(DefaultBlockType.ROAD_SURFACE, "core:Gravel")
+                    .build();
+        }
+
         blockManager = CoreRegistry.get(BlockManager.class);
         air = blockManager.getBlock("engine:air");
         water = blockManager.getBlock("core:water");
         plant = blockManager.getBlock("core:plant");
         defaultBlock = blockManager.getBlock("core:dirt");
 
-        roadRasterizer = new RoadRasterizer();
+        stdRasterizers.add(new HollowBuildingPartRasterizer(cityTheme, worldProvider));
+        stdRasterizers.add(new RectPartRasterizer(cityTheme, worldProvider));
+        stdRasterizers.add(new RoundPartRasterizer(cityTheme, worldProvider));
+        stdRasterizers.add(new StaircaseRasterizer(cityTheme, worldProvider));
 
-        stdRasterizers.add(new HollowBuildingPartRasterizer(theme, worldProvider));
-        stdRasterizers.add(new RectPartRasterizer(theme, worldProvider));
-        stdRasterizers.add(new RoundPartRasterizer(theme, worldProvider));
-        stdRasterizers.add(new StaircaseRasterizer(theme, worldProvider));
+        decorationRasterizers.add(new SingleBlockRasterizer(cityTheme));
+        decorationRasterizers.add(new ColumnRasterizer(cityTheme));
 
-        decorationRasterizers.add(new SingleBlockRasterizer(theme));
-        decorationRasterizers.add(new ColumnRasterizer(theme));
+        doorRasterizers.add(new SimpleDoorRasterizer(cityTheme));
+        doorRasterizers.add(new WingDoorRasterizer(cityTheme));
 
-        doorRasterizers.add(new SimpleDoorRasterizer(theme));
-        doorRasterizers.add(new WingDoorRasterizer(theme));
+        windowRasterizers.add(new RectWindowRasterizer(cityTheme));
+        windowRasterizers.add(new SimpleWindowRasterizer(cityTheme));
 
-        windowRasterizers.add(new RectWindowRasterizer(theme));
-        windowRasterizers.add(new SimpleWindowRasterizer(theme));
-
-        roofRasterizers.add(new ConicRoofRasterizer(theme));
-        roofRasterizers.add(new DomeRoofRasterizer(theme));
-        roofRasterizers.add(new FlatRoofRasterizer(theme));
-        roofRasterizers.add(new HipRoofRasterizer(theme));
-        roofRasterizers.add(new PentRoofRasterizer(theme));
-        roofRasterizers.add(new SaddleRoofRasterizer(theme));
+        roofRasterizers.add(new ConicRoofRasterizer(cityTheme));
+        roofRasterizers.add(new DomeRoofRasterizer(cityTheme));
+        roofRasterizers.add(new FlatRoofRasterizer(cityTheme));
+        roofRasterizers.add(new HipRoofRasterizer(cityTheme));
+        roofRasterizers.add(new PentRoofRasterizer(cityTheme));
+        roofRasterizers.add(new SaddleRoofRasterizer(cityTheme));
 
         //Register plant blocks
         plantBlocks.add(blockManager.getBlock("core:GreenLeaf"));
@@ -237,6 +244,15 @@ public class Construction extends BaseComponentSystem {
         plantBlocks.add(blockManager.getBlock("core:BirchTrunk"));
         plantBlocks.add(blockManager.getBlock("core:RedLeaf"));
         plantBlocks.add(blockManager.getBlock("core:Cactus"));
+    }
+
+    /**
+     * Set the rasterizer that this system will use to generate roads
+     * @param rasterizer The rasterizer to be used
+     */
+    public void setRoadRasterizer(RoadRasterizer rasterizer, BlockTheme theme) {
+        roadRasterizer = rasterizer;
+        roadTheme = theme;
     }
 
     /**
@@ -347,7 +363,7 @@ public class Construction extends BaseComponentSystem {
         //Flatten the parcel area
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
 
-        RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, theme, dynParcel.shape);
+        RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, cityTheme, dynParcel.shape);
         Rect2i shape = dynParcel.shape;
         HeightMap hm = HeightMaps.constant(dynParcel.height);
 
@@ -523,10 +539,11 @@ public class Construction extends BaseComponentSystem {
             }
 
             // Flatten the rect
-            segment.height = flatten(segment.rect.expand(rectExpansionFactor), 10); // TODO: Find a solution for the height
+            // TODO: Find a way to store the surface height at that point to the segment here.
+            segment.height = flatten(segment.rect.expand(rectExpansionFactor), 10);
 
             // Create raster targets
-            RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, theme, segment.rect);
+            RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, roadTheme, segment.rect);
             HeightMap hm = HeightMaps.constant(segment.height);
 
             if (segment.height == -9999) {
