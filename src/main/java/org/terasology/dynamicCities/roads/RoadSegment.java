@@ -16,16 +16,31 @@
 
 package org.terasology.dynamicCities.roads;
 
+import org.terasology.math.geom.ImmutableVector2f;
+import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2f;
+import org.terasology.math.geom.Vector2i;
 
-
+/**
+ * A rectangular piece of the road with a start and an end point
+ */
 public class RoadSegment {
     public Rect2i rect;
     public int height;
+    public ImmutableVector2i start;
+    public ImmutableVector2i end;
 
     public RoadSegment(Rect2i rect, int height) {
         this.rect = rect;
         this.height = height;
+    }
+
+    public RoadSegment(Rect2i rect, int height, ImmutableVector2i start, ImmutableVector2i end) {
+        this.rect = rect;
+        this.height = height;
+        this.start = start;
+        this.end = end;
     }
 
     /**
@@ -40,5 +55,14 @@ public class RoadSegment {
      */
     public float getWidth() {
         return rect.sizeY();
+    }
+
+    /**
+     * @return a unit vector from start to end
+     */
+    public ImmutableVector2f getRoadDirection() {
+        return new ImmutableVector2f(
+                new Vector2i(end.sub(start)).toVector2f().normalize()
+        );
     }
 }
