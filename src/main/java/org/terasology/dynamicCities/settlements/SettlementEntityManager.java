@@ -448,29 +448,37 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
             buildingSpawned = 0;
         }
-        /**
-         * grow population
+        /*
+          grow population
          */
         for (String residentialZone : cultureComponent.residentialZones) {
             populationComponent.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
         }
 
 
-        /**
-         * Create roads between settlements
+        /*
+          Create roads between settlements
          */
         SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
         ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
-        for (EntityRef destSettlement : container.settlementEntities.values()) {
-            if (!settlement.equals(destSettlement)) {
-                Vector3f destLocation = destSettlement.getComponent(LocationComponent.class).getLocalPosition();
-                ImmutableVector2f dest = new ImmutableVector2f(destLocation.x, destLocation.z);
-                if (!roadCache.containsEntry(source.toString(), dest.toString())) {
-                    roadQueue.roadQueue.add(calculateRoadParcel(source, dest, center.y));
-                    roadCache.put(source.toString(), dest.toString());
-                    roadCache.put(dest.toString(), source.toString());
+
+        ImmutableVector2f dest = source;
+        float min = 10000000f; // TODO: Make this more elegant
+        for (EntityRef entity : container.settlementEntities.values()) {
+            if (!settlement.equals(entity)) {
+                Vector3f location = entity.getComponent(LocationComponent.class).getLocalPosition();
+                ImmutableVector2f location2D = new ImmutableVector2f(location.x, location.z);
+                if (!roadCache.containsEntry(source.toString(), location2D.toString()) && source.distance(location2D) <= min) {
+                    dest = location2D;
+                    min = source.distance(location2D);
                 }
             }
+        }
+
+        if (!source.equals(dest)) {
+            roadQueue.roadQueue.add(calculateRoadParcel(source, dest, center.y));
+            roadCache.put(source.toString(), dest.toString());
+            roadCache.put(dest.toString(), source.toString());
         }
 
         //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
