@@ -129,8 +129,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private BlockBufferSystem blockBufferSystem;
 
-    private int minDistance = 300;
-    private int settlementMaxRadius = 50;
+    private int minDistance = 500;
+    private int settlementMaxRadius = 150;
     private int counter = 50;
     private int timer = 0;
     private Random rng;
@@ -161,14 +161,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             return;
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
-
-        Set<Vector3f> uncheckedLocations = new HashSet<>();
-        for (EntityRef location : uncheckedSiteRegions) {
-            LocationComponent locationComponent = location.getComponent(LocationComponent.class);
-            uncheckedLocations.add(locationComponent.getWorldPosition());
-        }
-
-        logger.info("\n\n UNCHECKED SITE REGIONS ARE: {} \n\n", uncheckedLocations);
         for (EntityRef siteRegion : uncheckedSiteRegions) {
             boolean checkDistance = checkMinDistance(siteRegion);
             boolean checkBuildArea = checkBuildArea(siteRegion);
@@ -185,8 +177,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         for (EntityRef settlement : activeSettlements) {
             growSettlement(settlement);
             build(settlement);
-
-            logger.info("Now building roads from settlement {}...", settlement.getId());
             buildRoads(settlement);
         }
         counter = 250;
@@ -231,14 +221,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
-
         SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
+        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.population);
 
         // Generate name
         TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), themeManager.getTownTheme(cultureComponent.theme));
         settlementComponent.name = nameProvider.generateName();
-
-        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.population);
 
         //add surrounding regions to settlement
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
@@ -475,7 +463,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
 
         ImmutableVector2f dest = source;
-        float min = 10000000f; // TODO: Make this more elegant
+        float min = Float.MAX_VALUE;
         for (EntityRef entity : container.settlementEntities.values()) {
             if (!settlement.equals(entity)) {
                 Vector3f location = entity.getComponent(LocationComponent.class).getLocalPosition();
@@ -504,8 +492,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
     private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest, int height) {
-        logger.info("Building road from {} to {}", source, dest);
-
         Vector<RoadSegment> segments = new Vector<>();
 
         Vector2f diff = new Vector2f(dest.sub(source));
@@ -551,8 +537,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             shouldContinue = (new ImmutableVector2f(remaining)).sub(direction).length() < threshold;
         } while (shouldContinue);
 
-        logger.info("Road segments: {}", segments.stream().map(seg -> seg.rect.min()).collect(Collectors.toSet()));
-
         return new RoadParcel(segments);
     }
 
@@ -564,7 +548,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
 
         for (RoadParcel parcel : parcelsInQueue) {
-            logger.info("Processing parcel {} with rects {}", parcel, parcel.getRects());
             Set<Rect2i> expandedParcels = parcel.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
             for (Rect2i region : expandedParcels) {
                 treeRemovalSystem.removeTreesInRegions(region);
@@ -573,7 +556,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             RoadParcel.Status status = constructer.buildRoadParcel(parcel, sourceSettlement);
             if (status == RoadParcel.Status.COMPLETE) {
                 removedParcels.add(parcel);
-                logger.info("Removed parcel {} from pending parcels", parcel);
             } else {
                 logger.warn("Parcel {} couldn't be completed. Status: {}", parcel, status);
             }
@@ -585,8 +567,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         sourceSettlement.saveComponent(roadQueue);
         sourceSettlement.saveComponent(parcelList);
-
-        logger.info("Building complete, new road queue: {} \n new parcel list: {}", roadQueue, parcelList);
     }
 
     private Optional<DynParcel> placeParcel(Vector3i center, String zone, ParcelList parcels,

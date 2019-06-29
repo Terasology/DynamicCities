@@ -25,6 +25,9 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
+/**
+ * Marks regions where the road will be laid in terms of its segments
+ */
 public class RoadParcel implements Parcel {
     public static final int OVERLAP = 2; // Overlap between two road segments
     public static final int RECT_SIZE = 10; // Size of the diagonal of a segment
