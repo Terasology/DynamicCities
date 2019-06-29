@@ -19,7 +19,6 @@ package org.terasology.dynamicCities.roads;
 import org.terasology.math.geom.ImmutableVector2f;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 
 /**

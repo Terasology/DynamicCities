@@ -16,21 +16,20 @@
 package org.terasology.dynamicCities.roads;
 
 import org.terasology.cities.parcels.Parcel;
-import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.RoadParcel;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2f;
-import org.terasology.math.geom.Vector3f;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Holds all parcels that are yet to be completed.
+ */
 public class RoadQueue implements Component {
     public Set<RoadParcel> roadQueue;
-
 
     public RoadQueue() {
         roadQueue = new HashSet<>();

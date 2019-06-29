@@ -93,8 +93,8 @@ import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
-import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -247,8 +247,9 @@ public class Construction extends BaseComponentSystem {
     }
 
     /**
-     * Set the rasterizer that this system will use to generate roads
-     * @param rasterizer The rasterizer to be used
+     * Setup external rasterizer to be used for the road and it's block theme
+     * @param rasterizer to be used for the road
+     * @param theme      theme that the rasterizer will use
      */
     public void setRoadRasterizer(RoadRasterizer rasterizer, BlockTheme theme) {
         roadRasterizer = rasterizer;
@@ -257,9 +258,10 @@ public class Construction extends BaseComponentSystem {
 
     /**
      * Maybe return a structured data with (int or false) as return value
-     * @param area The area which should be flattened
+     *
+     * @param area          The area which should be flattened
      * @param defaultHeight A rough estimation of the mean height of the terrain
-     * @param filler The blocktype which should be used to fill up terrain under the mean height
+     * @param filler        The blocktype which should be used to fill up terrain under the mean height
      * @return The height on which it was flattened to
      */
     public int flatten(Rect2i area, int defaultHeight, Block filler) {
@@ -305,9 +307,9 @@ public class Construction extends BaseComponentSystem {
     public int flatten(Rect2i area, int defaultHeight) {
         return flatten(area, defaultHeight, defaultBlock);
     }
+
     /**
-     *
-     * @param area The area which should be sampled
+     * @param area   The area which should be sampled
      * @param height A rough estimation of the mean height of the terrain
      * @return
      */
@@ -410,13 +412,17 @@ public class Construction extends BaseComponentSystem {
         boolean needsRotation = buildingManager.needsRotation(dynParcel, building);
         if (needsRotation) {
             switch (dynParcel.getOrientation()) {
-                case NORTH: dynParcel.orientation = Orientation.EAST;
+                case NORTH:
+                    dynParcel.orientation = Orientation.EAST;
                     break;
-                case SOUTH: dynParcel.orientation = Orientation.WEST;
+                case SOUTH:
+                    dynParcel.orientation = Orientation.WEST;
                     break;
-                case WEST: dynParcel.orientation = Orientation.NORTH;
+                case WEST:
+                    dynParcel.orientation = Orientation.NORTH;
                     break;
-                case EAST: dynParcel.orientation = Orientation.SOUTH;
+                case EAST:
+                    dynParcel.orientation = Orientation.SOUTH;
                     break;
             }
         }
@@ -497,8 +503,6 @@ public class Construction extends BaseComponentSystem {
         }
 
 
-
-
         /**
          * Send block-change event to refresh the minimap
          */
@@ -512,12 +516,11 @@ public class Construction extends BaseComponentSystem {
     }
 
     public RoadParcel.Status buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
-        logger.info("Construction of parcel {} from settlement {} started...", parcel, settlement.getId());
         boolean containsRelevantRegion = false;
         boolean segmentFailed = false;
 
         // Factor by which the rect will be expanded while flattening
-        ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(3, 3);
+        ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(1, 1);
 
 
         for (int i = 0; i < parcel.rects.size(); i++) {
@@ -573,15 +576,11 @@ public class Construction extends BaseComponentSystem {
             }
         }
 
-        // TODO: Do I need a road entity?
-
         if (!containsRelevantRegion) {
-            logger.warn("Failed. Parcel doesn't contain relevant regions.");
             return RoadParcel.Status.NONE;
         }
 
         if (segmentFailed) {
-            logger.warn("Failed. A segment failed.");
             return RoadParcel.Status.PARTIAL;
         }
 
@@ -625,7 +624,7 @@ public class Construction extends BaseComponentSystem {
     public void onSpawnBlockRegions(SpawnStructureBufferedEvent event, EntityRef entity,
                                     SpawnBlockRegionsComponent spawnBlockRegionComponent) {
         BlockRegionTransform transformation = event.getTransformation();
-        for (SpawnBlockRegionsComponent.RegionToFill regionToFill: spawnBlockRegionComponent.regionsToFill) {
+        for (SpawnBlockRegionsComponent.RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
 
             Region3i region = regionToFill.region;

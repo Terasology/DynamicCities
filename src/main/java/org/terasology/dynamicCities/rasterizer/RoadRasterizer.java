@@ -15,8 +15,6 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
@@ -26,8 +24,10 @@ import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
 
+/**
+ * A default implementation of a rasterizer for roads. Creates simple dirt roads.
+ */
 public class RoadRasterizer {
-    private Logger logger = LoggerFactory.getLogger(RoadRasterizer.class);
 
     public RoadRasterizer() {
     }
@@ -36,7 +36,6 @@ public class RoadRasterizer {
         int upperHeight = 255;  // Height to which the region above the segment would be cleared
 
         for (BaseVector2i pos : roadSegment.rect.contents()) {
-            logger.info("Drawing dirt block at {}...", pos);
             rasterTarget.setBlock(new Vector3i(pos.x(), heightMap.apply(pos), pos.y()), DefaultBlockType.ROAD_SURFACE);
         }
 
