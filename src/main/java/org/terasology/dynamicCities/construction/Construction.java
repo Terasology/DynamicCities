@@ -45,6 +45,7 @@ import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.RoadParcel;
+import org.terasology.dynamicCities.parcels.RoadStatus;
 import org.terasology.dynamicCities.playerTracking.PlayerTracker;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
@@ -169,6 +170,9 @@ public class Construction extends BaseComponentSystem {
 
     private Map<Integer, Integer> segmentCache = new HashMap<>();
 
+    /**
+     * Initialises the system and rasterizers with default themes
+     */
     public void initialise() {
         cityTheme = BlockTheme.builder(blockManager)
                 .register(DefaultBlockType.ROAD_FILL, "core:dirt")
@@ -515,13 +519,19 @@ public class Construction extends BaseComponentSystem {
         return true;
     }
 
-    public RoadParcel.Status buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
+    public RoadStatus buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
         boolean containsRelevantRegion = false;
         boolean segmentFailed = false;
 
-        // Factor by which the rect will be expanded while flattening
-        ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(1, 1);
+        final int vertLimit = 255; // To check if region is relevant
 
+        final int segmentHeight = 10; // Height to be given to the flatten function
+        final int failHeight = -9999;
+
+        // Factor by which the rect will be expanded while flattening
+        final int expWidth = 1;
+        final int expHeight = 1;
+        final ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(expWidth, expHeight);
 
         for (int i = 0; i < parcel.rects.size(); i++) {
             RoadSegment segment = parcel.rects.elementAt(i);
@@ -532,8 +542,8 @@ public class Construction extends BaseComponentSystem {
 
             // Check if the region is relevant
             Region3i region = Region3i.createFromMinMax(
-                    new Vector3i(segment.rect.minX(), 255, segment.rect.minY()),
-                    new Vector3i(segment.rect.maxX(), -255, segment.rect.maxY())
+                    new Vector3i(segment.rect.minX(), vertLimit, segment.rect.minY()),
+                    new Vector3i(segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY())
             );
             if (!worldProvider.isRegionRelevant(region)) {
                 continue;
@@ -543,13 +553,13 @@ public class Construction extends BaseComponentSystem {
 
             // Flatten the rect
             // TODO: Find a way to store the surface height at that point to the segment here.
-            segment.height = flatten(segment.rect.expand(rectExpansionFactor), 10);
+            segment.height = flatten(segment.rect.expand(rectExpansionFactor), segmentHeight);
 
             // Create raster targets
             RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, roadTheme, segment.rect);
             HeightMap hm = HeightMaps.constant(segment.height);
 
-            if (segment.height == -9999) {
+            if (segment.height == failHeight) {
                 segmentFailed = true;
                 continue;
             }
@@ -577,14 +587,14 @@ public class Construction extends BaseComponentSystem {
         }
 
         if (!containsRelevantRegion) {
-            return RoadParcel.Status.NONE;
+            return RoadStatus.NONE;
         }
 
         if (segmentFailed) {
-            return RoadParcel.Status.PARTIAL;
+            return RoadStatus.PARTIAL;
         }
 
-        return RoadParcel.Status.COMPLETE;
+        return RoadStatus.COMPLETE;
     }
 
     /**

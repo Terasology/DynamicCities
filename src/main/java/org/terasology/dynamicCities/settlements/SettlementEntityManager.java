@@ -30,6 +30,7 @@ import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.parcels.RoadParcel;
+import org.terasology.dynamicCities.parcels.RoadStatus;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.PopulationComponent;
@@ -553,8 +554,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
                 treeRemovalSystem.removeTreesInRegions(region);
             }
 
-            RoadParcel.Status status = constructer.buildRoadParcel(parcel, sourceSettlement);
-            if (status == RoadParcel.Status.COMPLETE) {
+            RoadStatus status = constructer.buildRoadParcel(parcel, sourceSettlement);
+            if (status == RoadStatus.COMPLETE) {
                 removedParcels.add(parcel);
             } else {
                 logger.warn("Parcel {} couldn't be completed. Status: {}", parcel, status);
