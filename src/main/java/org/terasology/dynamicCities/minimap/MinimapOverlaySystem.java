@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.minimap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.minimap.events.AddCentreOverlayEvent;
 import org.terasology.dynamicCities.minimap.events.AddDistrictOverlayEvent;
 import org.terasology.dynamicCities.minimap.events.RemoveDistrictOverlayEvent;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
@@ -39,7 +40,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 @RegisterSystem(RegisterMode.CLIENT)
-public class DistrictOverlaySystem extends BaseComponentSystem {
+public class MinimapOverlaySystem extends BaseComponentSystem {
 
 
     @In
@@ -54,7 +55,7 @@ public class DistrictOverlaySystem extends BaseComponentSystem {
     @In
     private NetworkSystem networkSystem;
 
-    private Logger logger = LoggerFactory.getLogger(DistrictOverlaySystem.class);
+    private Logger logger = LoggerFactory.getLogger(MinimapOverlaySystem.class);
 
     private EntityRef clientEntity;
 
@@ -69,8 +70,14 @@ public class DistrictOverlaySystem extends BaseComponentSystem {
         }
         isOverlayAdded = new HashMap<>();
     }
+
+    /**
+     * Checks network constraints and adds the DistrictOverlay to all settlement entities
+     * @param event
+     * @param entityRef
+     */
     @ReceiveEvent
-    public void onAddOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
+    public void onAddDistrictOverlayEvent(AddDistrictOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.NONE && !isOverlaySinglePlayerAdded) {
             Iterator<EntityRef> entityRefs =  entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
             if (entityRefs.hasNext()) {
@@ -105,6 +112,44 @@ public class DistrictOverlaySystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Checks network constraints and adds the CentreOverlay to all settlement entities
+     * @param event
+     * @param entityRef
+     */
+    @ReceiveEvent
+    public void onAddCentreOverlayEvent(AddCentreOverlayEvent event, EntityRef entityRef) {
+        if (networkSystem.getMode() == NetworkMode.NONE) {
+            Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+            if (entities.hasNext()) {
+                minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+            }
+        }
+
+        if (networkSystem.getMode() == NetworkMode.CLIENT) {
+            if (clientEntity.getComponent(ClientComponent.class).character.getId() == entityRef.getId() && !isOverlayAdded.getOrDefault(entityRef, false)) {
+                Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+                if (entities.hasNext()) {
+                    minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+                }
+            }
+        }
+
+        if (networkSystem.getMode() == NetworkMode.DEDICATED_SERVER && !isOverlayAdded.getOrDefault(entityRef, false)) {
+            if (localPlayer.getCharacterEntity() == entityRef) {
+                Iterator<EntityRef> entities = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+                if (entities.hasNext()) {
+                    minimapSystem.addOverlay(new CentreOverlay(entities.next()));
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes DistrictOverlay from the map
+     * @param event
+     * @param entityRef
+     */
     @ReceiveEvent
     public void onRemoveDistrictOverlayEvent(RemoveDistrictOverlayEvent event, EntityRef entityRef) {
         if (networkSystem.getMode() == NetworkMode.CLIENT) {

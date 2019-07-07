@@ -44,10 +44,13 @@ import org.terasology.dynamicCities.decoration.ColumnRasterizer;
 import org.terasology.dynamicCities.decoration.DecorationRasterizer;
 import org.terasology.dynamicCities.decoration.SingleBlockRasterizer;
 import org.terasology.dynamicCities.parcels.DynParcel;
+import org.terasology.dynamicCities.parcels.RoadParcel;
+import org.terasology.dynamicCities.parcels.RoadStatus;
 import org.terasology.dynamicCities.playerTracking.PlayerTracker;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
 import org.terasology.dynamicCities.rasterizer.BufferRasterTarget;
+import org.terasology.dynamicCities.rasterizer.RoadRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.DoorRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.SimpleDoorRasterizer;
 import org.terasology.dynamicCities.rasterizer.doors.WingDoorRasterizer;
@@ -65,6 +68,7 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
+import org.terasology.dynamicCities.roads.RoadSegment;
 import org.terasology.economy.components.MultiInvStorageComponent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -79,8 +83,10 @@ import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
+import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
@@ -88,8 +94,8 @@ import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
-import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
@@ -145,13 +151,15 @@ public class Construction extends BaseComponentSystem {
     private InventoryManager inventoryManager;
 
 
-    private BlockTheme theme;
+    private BlockTheme cityTheme;
+    private BlockTheme roadTheme;
 
     private Block air;
     private Block plant;
     private Block water;
     private Block defaultBlock;
     private int maxMinDeviation = 40;
+    private RoadRasterizer roadRasterizer;
     private final List<AbsDynBuildingRasterizer> stdRasterizers = new ArrayList<>();
     private final List<WindowRasterizer> windowRasterizers = new ArrayList<>();
     private final List<DoorRasterizer> doorRasterizers = new ArrayList<>();
@@ -160,8 +168,13 @@ public class Construction extends BaseComponentSystem {
     private final List<Block> plantBlocks = new ArrayList<>();
     private Logger logger = LoggerFactory.getLogger(Construction.class);
 
+    private Map<Integer, Integer> segmentCache = new HashMap<>();
+
+    /**
+     * Initialises the system and rasterizers with default themes
+     */
     public void initialise() {
-        theme = BlockTheme.builder(blockManager)
+        cityTheme = BlockTheme.builder(blockManager)
                 .register(DefaultBlockType.ROAD_FILL, "core:dirt")
                 .register(DefaultBlockType.ROAD_SURFACE, "core:Gravel")
                 .register(DefaultBlockType.LOT_EMPTY, "core:dirt")
@@ -192,33 +205,40 @@ public class Construction extends BaseComponentSystem {
 
                 .build();
 
+        if (roadRasterizer == null) {
+            roadRasterizer = new RoadRasterizer();
+            roadTheme = BlockTheme.builder(blockManager)
+                    .register(DefaultBlockType.ROAD_FILL, "core:dirt")
+                    .register(DefaultBlockType.ROAD_SURFACE, "core:Gravel")
+                    .build();
+        }
+
         blockManager = CoreRegistry.get(BlockManager.class);
         air = blockManager.getBlock("engine:air");
         water = blockManager.getBlock("core:water");
         plant = blockManager.getBlock("core:plant");
         defaultBlock = blockManager.getBlock("core:dirt");
 
-        stdRasterizers.add(new HollowBuildingPartRasterizer(theme, worldProvider));
-        stdRasterizers.add(new RectPartRasterizer(theme, worldProvider));
-        stdRasterizers.add(new RoundPartRasterizer(theme, worldProvider));
-        stdRasterizers.add(new StaircaseRasterizer(theme, worldProvider));
+        stdRasterizers.add(new HollowBuildingPartRasterizer(cityTheme, worldProvider));
+        stdRasterizers.add(new RectPartRasterizer(cityTheme, worldProvider));
+        stdRasterizers.add(new RoundPartRasterizer(cityTheme, worldProvider));
+        stdRasterizers.add(new StaircaseRasterizer(cityTheme, worldProvider));
 
+        decorationRasterizers.add(new SingleBlockRasterizer(cityTheme));
+        decorationRasterizers.add(new ColumnRasterizer(cityTheme));
 
-        decorationRasterizers.add(new SingleBlockRasterizer(theme));
-        decorationRasterizers.add(new ColumnRasterizer(theme));
+        doorRasterizers.add(new SimpleDoorRasterizer(cityTheme));
+        doorRasterizers.add(new WingDoorRasterizer(cityTheme));
 
-        doorRasterizers.add(new SimpleDoorRasterizer(theme));
-        doorRasterizers.add(new WingDoorRasterizer(theme));
+        windowRasterizers.add(new RectWindowRasterizer(cityTheme));
+        windowRasterizers.add(new SimpleWindowRasterizer(cityTheme));
 
-        windowRasterizers.add(new RectWindowRasterizer(theme));
-        windowRasterizers.add(new SimpleWindowRasterizer(theme));
-
-        roofRasterizers.add(new ConicRoofRasterizer(theme));
-        roofRasterizers.add(new DomeRoofRasterizer(theme));
-        roofRasterizers.add(new FlatRoofRasterizer(theme));
-        roofRasterizers.add(new HipRoofRasterizer(theme));
-        roofRasterizers.add(new PentRoofRasterizer(theme));
-        roofRasterizers.add(new SaddleRoofRasterizer(theme));
+        roofRasterizers.add(new ConicRoofRasterizer(cityTheme));
+        roofRasterizers.add(new DomeRoofRasterizer(cityTheme));
+        roofRasterizers.add(new FlatRoofRasterizer(cityTheme));
+        roofRasterizers.add(new HipRoofRasterizer(cityTheme));
+        roofRasterizers.add(new PentRoofRasterizer(cityTheme));
+        roofRasterizers.add(new SaddleRoofRasterizer(cityTheme));
 
         //Register plant blocks
         plantBlocks.add(blockManager.getBlock("core:GreenLeaf"));
@@ -231,10 +251,21 @@ public class Construction extends BaseComponentSystem {
     }
 
     /**
+     * Setup external rasterizer to be used for the road and it's block theme
+     * @param rasterizer to be used for the road
+     * @param theme      theme that the rasterizer will use
+     */
+    public void setRoadRasterizer(RoadRasterizer rasterizer, BlockTheme theme) {
+        roadRasterizer = rasterizer;
+        roadTheme = theme;
+    }
+
+    /**
      * Maybe return a structured data with (int or false) as return value
-     * @param area The area which should be flattened
+     *
+     * @param area          The area which should be flattened
      * @param defaultHeight A rough estimation of the mean height of the terrain
-     * @param filler The blocktype which should be used to fill up terrain under the mean height
+     * @param filler        The blocktype which should be used to fill up terrain under the mean height
      * @return The height on which it was flattened to
      */
     public int flatten(Rect2i area, int defaultHeight, Block filler) {
@@ -280,9 +311,9 @@ public class Construction extends BaseComponentSystem {
     public int flatten(Rect2i area, int defaultHeight) {
         return flatten(area, defaultHeight, defaultBlock);
     }
+
     /**
-     *
-     * @param area The area which should be sampled
+     * @param area   The area which should be sampled
      * @param height A rough estimation of the mean height of the terrain
      * @return
      */
@@ -338,7 +369,7 @@ public class Construction extends BaseComponentSystem {
         //Flatten the parcel area
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
 
-        RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, theme, dynParcel.shape);
+        RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, cityTheme, dynParcel.shape);
         Rect2i shape = dynParcel.shape;
         HeightMap hm = HeightMaps.constant(dynParcel.height);
 
@@ -369,6 +400,9 @@ public class Construction extends BaseComponentSystem {
             Optional<Prefab> entityPrefab = assetManager.getAsset(building.resourceUrn, Prefab.class);
             if (entityPrefab.isPresent()) {
                 dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
+                dynParcel.buildingEntity.addComponent(new LocationComponent(new Vector3f(
+                        (dynParcel.getShape().minX() + dynParcel.getShape().maxX()) / 2, dynParcel.height,
+                        (dynParcel.getShape().minY() + dynParcel.getShape().maxY()) / 2))); // midpoint of the parcel shape, and the bottom of the building
                 dynParcel.buildingEntity.addComponent(new SettlementRefComponent(settlement));
                 dynParcel.buildingEntity.addComponent(new DynParcelRefComponent(dynParcel));
                 dynParcel.buildingEntity.send(new BuildingEntitySpawnedEvent());
@@ -382,13 +416,17 @@ public class Construction extends BaseComponentSystem {
         boolean needsRotation = buildingManager.needsRotation(dynParcel, building);
         if (needsRotation) {
             switch (dynParcel.getOrientation()) {
-                case NORTH: dynParcel.orientation = Orientation.EAST;
+                case NORTH:
+                    dynParcel.orientation = Orientation.EAST;
                     break;
-                case SOUTH: dynParcel.orientation = Orientation.WEST;
+                case SOUTH:
+                    dynParcel.orientation = Orientation.WEST;
                     break;
-                case WEST: dynParcel.orientation = Orientation.NORTH;
+                case WEST:
+                    dynParcel.orientation = Orientation.NORTH;
                     break;
-                case EAST: dynParcel.orientation = Orientation.SOUTH;
+                case EAST:
+                    dynParcel.orientation = Orientation.SOUTH;
                     break;
             }
         }
@@ -469,8 +507,6 @@ public class Construction extends BaseComponentSystem {
         }
 
 
-
-
         /**
          * Send block-change event to refresh the minimap
          */
@@ -481,6 +517,84 @@ public class Construction extends BaseComponentSystem {
         settlement.send(new PlaceBlocks(blockPos));
         dynParcel.setBuildingTypeName(building.name);
         return true;
+    }
+
+    public RoadStatus buildRoadParcel(RoadParcel parcel, EntityRef settlement) {
+        boolean containsRelevantRegion = false;
+        boolean segmentFailed = false;
+
+        final int vertLimit = 255; // To check if region is relevant
+
+        final int segmentHeight = 10; // Height to be given to the flatten function
+        final int failHeight = -9999;
+
+        // Factor by which the rect will be expanded while flattening
+        final int expWidth = 1;
+        final int expHeight = 1;
+        final ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(expWidth, expHeight);
+
+        for (int i = 0; i < parcel.rects.size(); i++) {
+            RoadSegment segment = parcel.rects.elementAt(i);
+
+            if (segmentCache.containsKey(segment.hashCode()) && segmentCache.get(segment.hashCode()) == parcel.hashCode()) {
+                continue;
+            }
+
+            // Check if the region is relevant
+            Region3i region = Region3i.createFromMinMax(
+                    new Vector3i(segment.rect.minX(), vertLimit, segment.rect.minY()),
+                    new Vector3i(segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY())
+            );
+            if (!worldProvider.isRegionRelevant(region)) {
+                continue;
+            } else {
+                containsRelevantRegion = true;
+            }
+
+            // Flatten the rect
+            // TODO: Find a way to store the surface height at that point to the segment here.
+            segment.height = flatten(segment.rect.expand(rectExpansionFactor), segmentHeight);
+
+            // Create raster targets
+            RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, roadTheme, segment.rect);
+            HeightMap hm = HeightMaps.constant(segment.height);
+
+            if (segment.height == failHeight) {
+                segmentFailed = true;
+                continue;
+            }
+
+            // Check for player collision
+            Map<EntityRef, EntityRef> playerCityMap = playerTracker.getPlayerCityMap();
+
+            boolean shouldRaster = true;
+            for (EntityRef player : playerCityMap.keySet()) {
+                if (playerCityMap.get(player) == settlement) {
+                    LocationComponent playerLocation = player.getComponent(LocationComponent.class);
+                    if (playerLocation != null && segment.rect.contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
+                        segmentFailed = true;
+                        shouldRaster = false;
+                        break;
+                    }
+                }
+            }
+
+            // Rasterize the road
+            if (shouldRaster) {
+                roadRasterizer.raster(rasterTarget, segment, hm);
+                segmentCache.put(segment.hashCode(), parcel.hashCode());
+            }
+        }
+
+        if (!containsRelevantRegion) {
+            return RoadStatus.NONE;
+        }
+
+        if (segmentFailed) {
+            return RoadStatus.PARTIAL;
+        }
+
+        return RoadStatus.COMPLETE;
     }
 
     /**
@@ -520,7 +634,7 @@ public class Construction extends BaseComponentSystem {
     public void onSpawnBlockRegions(SpawnStructureBufferedEvent event, EntityRef entity,
                                     SpawnBlockRegionsComponent spawnBlockRegionComponent) {
         BlockRegionTransform transformation = event.getTransformation();
-        for (SpawnBlockRegionsComponent.RegionToFill regionToFill: spawnBlockRegionComponent.regionsToFill) {
+        for (SpawnBlockRegionsComponent.RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
 
             Region3i region = regionToFill.region;

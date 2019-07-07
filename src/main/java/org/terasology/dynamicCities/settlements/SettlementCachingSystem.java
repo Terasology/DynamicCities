@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.settlements;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.minimap.events.AddCentreOverlayEvent;
 import org.terasology.dynamicCities.minimap.events.AddDistrictOverlayEvent;
 import org.terasology.dynamicCities.minimap.events.RemoveDistrictOverlayEvent;
 import org.terasology.dynamicCities.playerTracking.OnEnterSettlementEvent;
@@ -93,6 +94,7 @@ public class SettlementCachingSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void addOverlayToClient(OnEnterSettlementEvent event, EntityRef player) {
         player.send(new AddDistrictOverlayEvent());
+        player.send(new AddCentreOverlayEvent());
     }
 
     @ReceiveEvent
