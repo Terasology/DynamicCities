@@ -72,6 +72,7 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
+import org.terasology.protobuf.EntityData;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
@@ -208,6 +209,25 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     public boolean checkMinDistanceCell(String posString) {
         return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
+    }
+
+    /**
+     * Check if a point lies in any settlement
+     * @param pos Point to be tested
+     * @return True if pos is not inside any settlement
+     */
+    public boolean checkOutsideAllSettlements(Vector2i pos) {
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        for (String vector2iString : container.settlementEntities.keySet()) {
+            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
+            EntityRef settlement = container.settlementEntities.get(vector2iString);
+            ParcelList parcels = settlement.getComponent(ParcelList.class);
+
+            if (pos.distance(activePosition) < parcels.builtUpRadius) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private EntityRef createSettlement(EntityRef siteRegion) {
