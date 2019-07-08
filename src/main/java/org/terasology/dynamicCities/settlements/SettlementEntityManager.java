@@ -72,7 +72,6 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
-import org.terasology.protobuf.EntityData;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.rendering.nui.Color;
@@ -87,7 +86,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 
 @Share(value = SettlementEntityManager.class)
@@ -213,6 +211,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     /**
      * Check if a point lies in any settlement
+     *
      * @param pos Point to be tested
      * @return True if pos is not inside any settlement
      */
