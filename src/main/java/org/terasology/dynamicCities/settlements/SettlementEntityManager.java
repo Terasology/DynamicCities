@@ -86,7 +86,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
-import java.util.stream.Collectors;
 
 
 @Share(value = SettlementEntityManager.class)
@@ -208,6 +207,26 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     public boolean checkMinDistanceCell(String posString) {
         return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
+    }
+
+    /**
+     * Check if a point lies in any settlement
+     *
+     * @param pos Point to be tested
+     * @return True if pos is not inside any settlement
+     */
+    public boolean checkOutsideAllSettlements(Vector2i pos) {
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        for (String vector2iString : container.settlementEntities.keySet()) {
+            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
+            EntityRef settlement = container.settlementEntities.get(vector2iString);
+            ParcelList parcels = settlement.getComponent(ParcelList.class);
+
+            if (pos.distance(activePosition) < parcels.builtUpRadius) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private EntityRef createSettlement(EntityRef siteRegion) {
