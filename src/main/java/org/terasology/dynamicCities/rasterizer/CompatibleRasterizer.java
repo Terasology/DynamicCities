@@ -15,6 +15,7 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
+import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.dynamicCities.resource.ResourceType;
@@ -44,6 +45,7 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
     protected Block oakTrunk;
     protected Block pineTrunk;
     protected Block birchTrunk;
+    protected BiomeRegistry biomeRegistry;
 
     @Override
     public void initialize() {
@@ -61,6 +63,7 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
         oakTrunk = blockManager.getBlock("core:OakTrunk");
         pineTrunk = blockManager.getBlock("core:PineTrunk");
         birchTrunk = blockManager.getBlock("core:BirchTrunk");
+        biomeRegistry = CoreRegistry.get(BiomeRegistry.class);
     }
 
     @Override
