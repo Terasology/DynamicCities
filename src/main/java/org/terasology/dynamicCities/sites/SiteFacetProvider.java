@@ -25,8 +25,8 @@ import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.rendering.nui.properties.Range;
-import org.terasology.utilities.procedural.Noise;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.ConfigurableFacetProvider;
@@ -38,7 +38,7 @@ import org.terasology.world.generation.facets.SeaLevelFacet;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 /**
- *
+ * Marks sites suitable to build settlements on
  */
 @Produces(SiteFacet.class)
 @Requires({ @Facet(RoughnessFacet.class),
@@ -48,21 +48,15 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
 
     private SiteConfiguration config = new SiteConfiguration();
 
-
-    private Noise sizeNoiseGen;
     @Override
     public void setSeed(long seed) {
-        this.sizeNoiseGen = new WhiteNoise(seed ^ 0x2347928);
     }
 
     @Override
     public void process(GeneratingRegion region) {
 
-
         RoughnessFacet roughnessFacet = region.getRegionFacet(RoughnessFacet.class);
         ResourceFacet resourceFacet = region.getRegionFacet(ResourceFacet.class);
-
-
 
         Border3D border = region.getBorderForFacet(SiteFacet.class);
         Region3i coreReg = region.getRegion();
@@ -79,9 +73,8 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
                 }
             }
 
-            int population = TeraMath.fastAbs(Math.round(sizeNoiseGen.noise(minPos.getX(), minPos.getY())
-                    * (SettlementConstants.MAX_POPULATIONSIZE - SettlementConstants.MIN_POPULATIONSIZE))) + SettlementConstants.MIN_POPULATIONSIZE;
-            SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY(), population);
+            SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY());
+
             siteFacet.setSiteComponent(siteComponent);
         }
 

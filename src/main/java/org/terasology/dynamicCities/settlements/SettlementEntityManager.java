@@ -34,6 +34,7 @@ import org.terasology.dynamicCities.parcels.RoadStatus;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.PopulationComponent;
+import org.terasology.dynamicCities.population.ThemeManager;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
@@ -71,6 +72,7 @@ import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -113,6 +115,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private CultureManager cultureManager;
 
     @In
+    private ThemeManager themeManager;
+
+    @In
     private DistrictManager districtManager;
 
     @In
@@ -137,7 +142,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     public void postBegin() {
 
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
-        rng = new FastRandom(regionEntityManager.hashCode() & 0x921233);
+        long seed = regionEntityManager.hashCode() & 0x921233;
+        rng = new FastRandom(seed);
 
     }
 
@@ -145,7 +151,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     public void update(float delta) {
         if (!settlementCachingSystem.isInitialised()) {
             return;
-        } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
+        } else if (settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
 
@@ -234,9 +240,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
-
-        PopulationComponent populationComponent = new PopulationComponent(siteComponent.getPopulation());
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
+
+        SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
+
+        // Generate name
+        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), themeManager.getTownTheme(cultureComponent.theme));
+        settlementComponent.name = nameProvider.generateName();
+
+        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.population);
 
         //add surrounding regions to settlement
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
@@ -256,12 +268,12 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         BuildingQueue buildingQueue = new BuildingQueue();
         RoadQueue roadQueue = new RoadQueue();
 
-        //NameTagStuff
-        NameTagComponent settlementName = new NameTagComponent();
-        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + populationComponent.populationSize;
-        settlementName.textColor = Color.CYAN;
-        settlementName.yOffset = 20;
-        settlementName.scale = 20;
+        //Add the name tag
+        NameTagComponent nameTagComponent = new NameTagComponent();
+        nameTagComponent.text = settlementComponent.name;
+        nameTagComponent.textColor = Color.CYAN;
+        nameTagComponent.yOffset = 20;
+        nameTagComponent.scale = 20;
 
         //population growth
         MarketSubscriberComponent populationSubscriberComponent = new MarketSubscriberComponent(1);
@@ -273,10 +285,11 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         NetworkComponent networkComponent = new NetworkComponent();
         networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
         settlementEntity.addComponent(locationComponent);
+        settlementEntity.addComponent(settlementComponent);
         settlementEntity.addComponent(districtGrid);
         settlementEntity.addComponent(cultureComponent);
         settlementEntity.addComponent(populationComponent);
-        settlementEntity.addComponent(settlementName);
+        settlementEntity.addComponent(nameTagComponent);
         settlementEntity.addComponent(regionEntitiesComponent);
         settlementEntity.addComponent(parcels);
         settlementEntity.addComponent(buildingQueue);
@@ -492,7 +505,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
         //This is due to ensuring that changes made while constructing are added
 
-        nameTagComponent.text = Float.toString(populationComponent.populationSize);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(populationComponent);
         settlement.saveComponent(buildingQueue);
