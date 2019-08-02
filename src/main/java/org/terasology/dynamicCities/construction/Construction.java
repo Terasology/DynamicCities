@@ -474,30 +474,35 @@ public class Construction extends BaseComponentSystem {
             List<EntityRef> templates = templatesOptional.get();
             for (EntityRef template : templates) {
                 //Transform Commonworlds rotation to StructureTemplates rotation
-                Side startSide = Side.RIGHT;
+                Side startSide = Side.BACK;
                 Side endSide;
                 switch (dynParcel.orientation.ordinal() / 2) {
                     case 0:
-                        endSide = Side.RIGHT;
-                        break;
-                    case 1:
                         endSide = Side.FRONT;
                         break;
-                    case 2:
-                        endSide = Side.LEFT;
+                    case 1:
+                        endSide = Side.RIGHT;
                         break;
-                    case 3:
+                    case 2:
                         endSide = Side.BACK;
                         break;
+                    case 3:
+                        endSide = Side.LEFT;
+                        break;
                     default:
-                        endSide = Side.RIGHT;
+                        endSide = Side.FRONT;
                 }
 
+                // offset within the parcel, so the template is placed at the centre.
+                BlockRegionTransform localTransform = BlockRegionTransform.createMovingThenRotating(Vector3i.zero(), startSide, endSide);
+                Vector3i microOffset = localTransform.transformVector3i(
+                        BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))).invert();
 
-                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class)));
-                Vector3i finalLocation = blockRegionTransform.transformVector3i(new Vector3i(shape.minX() + Math.round(shape.sizeX() / 2f), dynParcel.height,
-                        shape.minY() + Math.round(shape.sizeY() / 2f)));
-                blockRegionTransform = BlockRegionTransform.createMovingThenRotating(finalLocation, startSide, endSide);
+                // offset in world space
+                Vector3i worldOffset = new Vector3i(shape.minX() + Math.round((shape.sizeX()) / 2f) - 1, dynParcel.height,
+                        shape.minY() + Math.round((shape.sizeY()) / 2f) - 1);
+                Vector3i finalLocation = worldOffset.add(microOffset);
+                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, finalLocation);
 
                 template.send(new SpawnStructureBufferedEvent(blockRegionTransform));
                 if (building.isEntity) {
