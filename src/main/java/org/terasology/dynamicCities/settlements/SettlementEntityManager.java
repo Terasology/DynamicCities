@@ -131,8 +131,8 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     private int minDistance = 500;
     private int settlementMaxRadius = 150;
-    private int counter = 50;
-    private int timer = 0;
+    private float counter = 10;
+    private float timer = 0;
     private Random rng;
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
@@ -155,9 +155,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
 
-        counter--;
-        timer++;
-        if (counter != 0) {
+        counter -= delta;
+        timer += delta;
+        if (counter > 0) {
             return;
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
@@ -179,7 +179,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             build(settlement);
             buildRoads(settlement);
         }
-        counter = 250;
+        counter = 40;
     }
 
 
