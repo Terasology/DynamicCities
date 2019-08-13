@@ -55,10 +55,10 @@ import org.terasology.economy.components.MarketSubscriberComponent;
 import org.terasology.economy.events.SubscriberRegistrationEvent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
@@ -80,6 +80,7 @@ import org.terasology.rendering.nui.Color;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
+import org.terasology.world.time.WorldTimeEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -92,7 +93,7 @@ import java.util.Vector;
 
 @Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class SettlementEntityManager extends BaseComponentSystem implements UpdateSubscriberSystem {
+public class SettlementEntityManager extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
@@ -131,8 +132,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     private int minDistance = 500;
     private int settlementMaxRadius = 150;
-    private float counter = 10;
-    private float timer = 0;
+    private int cyclesLeft = 2; // 1 cycle = approx. 20 seconds
     private Random rng;
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
@@ -147,17 +147,16 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
     }
 
-    @Override
-    public void update(float delta) {
+    @ReceiveEvent
+    public void onWorldTimeEvent(WorldTimeEvent worldTimeEvent, EntityRef entityRef) {
         if (!settlementCachingSystem.isInitialised()) {
             return;
         } else if (settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
 
-        counter -= delta;
-        timer += delta;
-        if (counter > 0) {
+        cyclesLeft--;
+        if (cyclesLeft != 0) {
             return;
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
@@ -179,7 +178,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             build(settlement);
             buildRoads(settlement);
         }
-        counter = 40;
+        cyclesLeft = 2;
     }
 
 
