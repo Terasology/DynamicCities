@@ -28,9 +28,8 @@ import org.terasology.world.generation.facets.base.FieldFacet3D;
 
 /**
  * Tests different implementations of {@link FieldFacet3D}.
- *
  */
-public class Grid2DFloatFacetTest{
+public class Grid2DFloatFacetTest {
 
     private Grid2DFloatFacet facet;
 
@@ -53,6 +52,7 @@ public class Grid2DFloatFacetTest{
             super(targetRegion, border, gridSize);
         }
     }
+
     /**
      * Check unset values
      */
