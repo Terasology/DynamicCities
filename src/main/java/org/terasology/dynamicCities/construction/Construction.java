@@ -175,18 +175,18 @@ public class Construction extends BaseComponentSystem {
      */
     public void initialise() {
         cityTheme = BlockTheme.builder(blockManager)
-                .register(DefaultBlockType.ROAD_FILL, "core:dirt")
-                .register(DefaultBlockType.ROAD_SURFACE, "core:Gravel")
-                .register(DefaultBlockType.LOT_EMPTY, "core:dirt")
+                .register(DefaultBlockType.ROAD_FILL, "CoreBlocks:dirt")
+                .register(DefaultBlockType.ROAD_SURFACE, "CoreBlocks:Gravel")
+                .register(DefaultBlockType.LOT_EMPTY, "CoreBlocks:dirt")
                 .register(DefaultBlockType.BUILDING_WALL, "Cities:stonawall1")
                 .register(DefaultBlockType.BUILDING_FLOOR, "Cities:stonawall1dark")
-                .register(DefaultBlockType.BUILDING_FOUNDATION, "core:gravel")
-                .register(DefaultBlockType.TOWER_STAIRS, "core:CobbleStone")
+                .register(DefaultBlockType.BUILDING_FOUNDATION, "CoreBlocks:gravel")
+                .register(DefaultBlockType.TOWER_STAIRS, "CoreBlocks:CobbleStone")
                 .register(DefaultBlockType.ROOF_FLAT, "Cities:rooftiles2")
                 .register(DefaultBlockType.ROOF_HIP, "Cities:wood3")
                 .register(DefaultBlockType.ROOF_SADDLE, "Cities:wood3")
-                .register(DefaultBlockType.ROOF_DOME, "core:plank")
-                .register(DefaultBlockType.ROOF_GABLE, "core:plank")
+                .register(DefaultBlockType.ROOF_DOME, "CoreBlocks:plank")
+                .register(DefaultBlockType.ROOF_GABLE, "CoreBlocks:plank")
                 .register(DefaultBlockType.SIMPLE_DOOR, BlockManager.AIR_ID)
                 .register(DefaultBlockType.WING_DOOR, BlockManager.AIR_ID)
                 .register(DefaultBlockType.WINDOW_GLASS, BlockManager.AIR_ID)
@@ -195,29 +195,29 @@ public class Construction extends BaseComponentSystem {
                 // -- requires Fences module
                 .registerFamily(DefaultBlockType.FENCE, "Fences:Fence")
                 .registerFamily(DefaultBlockType.FENCE_GATE, BlockManager.AIR_ID)  // there is no fence gate :-(
-                .registerFamily(DefaultBlockType.TOWER_STAIRS, "core:CobbleStone:engine:stair")
+                .registerFamily(DefaultBlockType.TOWER_STAIRS, "CoreBlocks:CobbleStone:engine:stair")
                 .registerFamily(DefaultBlockType.BARREL, "StructuralResources:Barrel")
-                .registerFamily(DefaultBlockType.LADDER, "Core:Ladder")
-                .registerFamily(DefaultBlockType.PILLAR_BASE, "core:CobbleStone:StructuralResources:pillarBase")
-                .registerFamily(DefaultBlockType.PILLAR_MIDDLE, "core:CobbleStone:StructuralResources:pillar")
-                .registerFamily(DefaultBlockType.PILLAR_TOP, "core:CobbleStone:StructuralResources:pillarTop")
-                .registerFamily(DefaultBlockType.TORCH, "Core:Torch")
+                .registerFamily(DefaultBlockType.LADDER, "CoreBlocks:Ladder")
+                .registerFamily(DefaultBlockType.PILLAR_BASE, "CoreBlocks:CobbleStone:StructuralResources:pillarBase")
+                .registerFamily(DefaultBlockType.PILLAR_MIDDLE, "CoreBlocks:CobbleStone:StructuralResources:pillar")
+                .registerFamily(DefaultBlockType.PILLAR_TOP, "CoreBlocks:CobbleStone:StructuralResources:pillarTop")
+                .registerFamily(DefaultBlockType.TORCH, "CoreBlocks:Torch")
 
                 .build();
 
         if (roadRasterizer == null) {
             roadRasterizer = new RoadRasterizer();
             roadTheme = BlockTheme.builder(blockManager)
-                    .register(DefaultBlockType.ROAD_FILL, "core:dirt")
-                    .register(DefaultBlockType.ROAD_SURFACE, "core:Gravel")
+                    .register(DefaultBlockType.ROAD_FILL, "CoreBlocks:dirt")
+                    .register(DefaultBlockType.ROAD_SURFACE, "CoreBlocks:Gravel")
                     .build();
         }
 
         blockManager = CoreRegistry.get(BlockManager.class);
         air = blockManager.getBlock("engine:air");
-        water = blockManager.getBlock("core:water");
-        plant = blockManager.getBlock("core:plant");
-        defaultBlock = blockManager.getBlock("core:dirt");
+        water = blockManager.getBlock("CoreBlocks:Water");
+        plant = blockManager.getBlock("CoreAssets:plant");
+        defaultBlock = blockManager.getBlock("CoreBlocks:Dirt");
 
         stdRasterizers.add(new HollowBuildingPartRasterizer(cityTheme, worldProvider));
         stdRasterizers.add(new RectPartRasterizer(cityTheme, worldProvider));
@@ -241,13 +241,13 @@ public class Construction extends BaseComponentSystem {
         roofRasterizers.add(new SaddleRoofRasterizer(cityTheme));
 
         //Register plant blocks
-        plantBlocks.add(blockManager.getBlock("core:GreenLeaf"));
-        plantBlocks.add(blockManager.getBlock("core:OakTrunk"));
-        plantBlocks.add(blockManager.getBlock("core:DarkLeaf"));
-        plantBlocks.add(blockManager.getBlock("core:PineTrunk"));
-        plantBlocks.add(blockManager.getBlock("core:BirchTrunk"));
-        plantBlocks.add(blockManager.getBlock("core:RedLeaf"));
-        plantBlocks.add(blockManager.getBlock("core:Cactus"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:GreenLeaf"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:OakTrunk"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:DarkLeaf"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:PineTrunk"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:BirchTrunk"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:RedLeaf"));
+        plantBlocks.add(blockManager.getBlock("CoreBlocks:Cactus"));
     }
 
     /**
@@ -645,7 +645,7 @@ public class Construction extends BaseComponentSystem {
             Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
-            if (block.getBlockFamily() == blockManager.getBlockFamily("core:chest")) {
+            if (block.getBlockFamily() == blockManager.getBlockFamily("CoreBlocks:chest")) {
                 for (Vector3i pos : region) {
                     worldProvider.setBlock(pos, block);
                 }
