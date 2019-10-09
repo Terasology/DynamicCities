@@ -58,7 +58,13 @@ import org.terasology.dynamicCities.rasterizer.parts.HollowBuildingPartRasterize
 import org.terasology.dynamicCities.rasterizer.parts.RectPartRasterizer;
 import org.terasology.dynamicCities.rasterizer.parts.RoundPartRasterizer;
 import org.terasology.dynamicCities.rasterizer.parts.StaircaseRasterizer;
-import org.terasology.dynamicCities.rasterizer.roofs.*;
+import org.terasology.dynamicCities.rasterizer.roofs.ConicRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.DomeRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.FlatRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.HipRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.PentRoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.RoofRasterizer;
+import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
@@ -75,7 +81,13 @@ import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
-import org.terasology.math.geom.*;
+import org.terasology.math.geom.BaseVector2i;
+import org.terasology.math.geom.BaseVector3i;
+import org.terasology.math.geom.ImmutableVector2i;
+import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2i;
+import org.terasology.math.geom.Vector3f;
+import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
@@ -92,7 +104,11 @@ import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
