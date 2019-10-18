@@ -8,7 +8,7 @@
         {"id" : "CoreBlocks", "minVersion" : "1.0.0"},
         {"id" : "Core", "minVersion" : "2.0.0"},
         {"id" : "CommonWorld", "minVersion" : "0.2.2"},
-        {"id" : "Cities", "minVersion" : "0.6.0"},
+        {"id" : "Cities", "minVersion" : "1.0.0"},
         {"id" : "Minimap", "minVersion" : "1.0.0"},
         {"id" : "Economy", "minVersion" : "0.1.0"},
         {"id" : "StructureTemplates", "minVersion" : "0.3.0"},
