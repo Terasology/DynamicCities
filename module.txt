@@ -12,7 +12,7 @@
         {"id" : "Minimap", "minVersion" : "1.0.0"},
         {"id" : "Economy", "minVersion" : "0.1.0"},
         {"id" : "StructureTemplates", "minVersion" : "0.3.0"},
-        {"id" : "StructuralResources", "minVersion" : "1.0.2"},
+        {"id" : "StructuralResources", "minVersion" : "2.0.0"},
         {"id" : "NameGenerator", "minVersion" : "0.4.0"},
         {"id" : "ModuleTestingEnvironment", "minVersion" : "0.1.0"}
     ],
