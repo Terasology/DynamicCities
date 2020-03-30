@@ -132,7 +132,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     private int minDistance = 500;
     private int settlementMaxRadius = 150;
-    private int cyclesLeft = 2; // 1 cycle = approx. 20 seconds
+    private int cyclesLeft; // 1 cycle = approx. 20 seconds
+    private int NumberOfCyclesOnReset = 2;
     private Random rng;
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
@@ -144,6 +145,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         long seed = regionEntityManager.hashCode() & 0x921233;
         rng = new FastRandom(seed);
+        cyclesLeft = NumberOfCyclesOnReset;
 
     }
 
@@ -178,7 +180,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             build(settlement);
             buildRoads(settlement);
         }
-        cyclesLeft = 2;
+        cyclesLeft = NumberOfCyclesOnReset;
     }
 
 
@@ -648,5 +650,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         return true;
     }
 
+    public void setCityCyclesBeforeGrowth(int cycles){
+        NumberOfCyclesOnReset = cycles;
+    }
 
 }
