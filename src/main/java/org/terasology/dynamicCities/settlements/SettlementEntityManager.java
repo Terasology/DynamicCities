@@ -133,7 +133,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
     private int minDistance = 500;
     private int settlementMaxRadius = 150;
     private int cyclesLeft; // 1 cycle = approx. 20 seconds
-    private int NumberOfCyclesOnReset = 2;
+    private int NUMBER_OF_CYCLES_ON_RESET = 2;
     private Random rng;
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
@@ -145,7 +145,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         long seed = regionEntityManager.hashCode() & 0x921233;
         rng = new FastRandom(seed);
-        cyclesLeft = NumberOfCyclesOnReset;
+        cyclesLeft = NUMBER_OF_CYCLES_ON_RESET;
 
     }
 
@@ -180,7 +180,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             build(settlement);
             buildRoads(settlement);
         }
-        cyclesLeft = NumberOfCyclesOnReset;
+        cyclesLeft = NUMBER_OF_CYCLES_ON_RESET;
     }
 
 
@@ -650,8 +650,13 @@ public class SettlementEntityManager extends BaseComponentSystem {
         return true;
     }
 
+    /**
+     * This function sets the number of cycles the city must wait before growing. Each cycle usually lasts about 20 seconds.
+     * @param cycles The number of cycles to wait.
+     */
+
     public void setCityCyclesBeforeGrowth(int cycles){
-        NumberOfCyclesOnReset = cycles;
+        NUMBER_OF_CYCLES_ON_RESET = cycles;
     }
 
 }
