@@ -385,7 +385,7 @@ public class Construction extends BaseComponentSystem {
         //Flatten the parcel area
         dynParcel.height = flatten(dynParcel.shape, dynParcel.height);
 
-        RequestRasterTargetEvent requestRasterTargetEvent = new RequestRasterTargetEvent(theme, dynParcel.shape);
+        RequestRasterTargetEvent requestRasterTargetEvent = new RequestRasterTargetEvent(cityTheme, dynParcel.shape);
         settlement.send(requestRasterTargetEvent);
         RasterTarget rasterTarget = requestRasterTargetEvent.rasterTarget;
         Rect2i shape = dynParcel.shape;
