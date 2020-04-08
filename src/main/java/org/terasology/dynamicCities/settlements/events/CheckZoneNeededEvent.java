@@ -16,15 +16,27 @@
 package org.terasology.dynamicCities.settlements.events;
 
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.entitySystem.event.ConsumableEvent;
 
-public class CheckBuildingSpawnPreconditionsEvent implements Event {
-    public boolean check;
-    public boolean isHandled;
+/**
+ * Sent to check whether an entity needs a parcel of the given zone type
+ */
+public class CheckZoneNeededEvent implements ConsumableEvent {
+    public boolean needed;
     public String zone;
+    private boolean consumed;
 
-    public CheckBuildingSpawnPreconditionsEvent(String zone) {
+    public CheckZoneNeededEvent(String zone) {
         this.zone = zone;
     }
-    public CheckBuildingSpawnPreconditionsEvent() {}
+
+    @Override
+    public boolean isConsumed() {
+        return consumed;
+    }
+
+    @Override
+    public void consume() {
+        this.consumed = true;
+    }
 }
