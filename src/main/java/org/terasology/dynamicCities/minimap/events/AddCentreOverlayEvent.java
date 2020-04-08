@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 MovingBlocks
+ * Copyright 2019 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.dynamicCities.construction.events;
-
+package org.terasology.dynamicCities.minimap.events;
 
 import org.terasology.entitySystem.event.Event;
-import org.terasology.structureTemplates.util.BlockRegionTransform;
+import org.terasology.network.BroadcastEvent;
 
-public class SpawnStructureBufferedEvent implements Event {
-    private BlockRegionTransform transformation;
+/**
+ * Event to be used to add the centre overlay to the minimap when the player first enters a city.
+ */
+@BroadcastEvent
+public class AddCentreOverlayEvent implements Event {
+    public AddCentreOverlayEvent() {
 
-    public SpawnStructureBufferedEvent(BlockRegionTransform transform) {
-        this.transformation = transform;
-    }
-
-    public BlockRegionTransform getTransformation() {
-        return transformation;
     }
 }

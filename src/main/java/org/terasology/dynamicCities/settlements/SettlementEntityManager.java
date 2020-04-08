@@ -16,12 +16,8 @@
 package org.terasology.dynamicCities.settlements;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -33,9 +29,12 @@ import org.terasology.dynamicCities.construction.TreeRemovalSystem;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
+import org.terasology.dynamicCities.parcels.RoadParcel;
+import org.terasology.dynamicCities.parcels.RoadStatus;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.population.PopulationComponent;
+import org.terasology.dynamicCities.population.ThemeManager;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.region.components.RegionEntitiesComponent;
 import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
@@ -43,6 +42,8 @@ import org.terasology.dynamicCities.region.components.RoughnessFacetComponent;
 import org.terasology.dynamicCities.region.components.UnassignedRegionComponent;
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.resource.ResourceType;
+import org.terasology.dynamicCities.roads.RoadQueue;
+import org.terasology.dynamicCities.roads.RoadSegment;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.settlements.events.CheckSiteSuitabilityEvent;
@@ -60,17 +61,20 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
+import org.terasology.math.geom.ImmutableVector2f;
+import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -78,11 +82,20 @@ import org.terasology.rendering.nui.Color;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.generation.Border3D;
+import org.terasology.world.time.WorldTimeEvent;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Vector;
 
 
 @Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class SettlementEntityManager extends BaseComponentSystem implements UpdateSubscriberSystem {
+public class SettlementEntityManager extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
@@ -105,6 +118,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     private CultureManager cultureManager;
 
     @In
+    private ThemeManager themeManager;
+
+    @In
     private DistrictManager districtManager;
 
     @In
@@ -116,32 +132,33 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     @In
     private BlockBufferSystem blockBufferSystem;
 
-    private int minDistance = 1000;
-    private int settlementMaxRadius = 256;
-    private int counter = 50;
-    private int timer = 0;
+    private int minDistance = 500;
+    private int settlementMaxRadius = 150;
+    private int cyclesLeft = 2; // 1 cycle = approx. 20 seconds
     private Random rng;
+    private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
     private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
+
     @Override
     public void postBegin() {
 
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
-        rng = new FastRandom(regionEntityManager.hashCode() & 0x921233);
+        long seed = regionEntityManager.hashCode() & 0x921233;
+        rng = new FastRandom(seed);
 
     }
 
-    @Override
-    public void update(float delta) {
+    @ReceiveEvent
+    public void onWorldTimeEvent(WorldTimeEvent worldTimeEvent, EntityRef entityRef) {
         if (!settlementCachingSystem.isInitialised()) {
             return;
-        } else if (settlementCachingSystem.isInitialised() && settlementEntities == null) {
+        } else if (settlementEntities == null) {
             settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
 
-        counter--;
-        timer++;
-        if (counter != 0) {
+        cyclesLeft--;
+        if (cyclesLeft != 0) {
             return;
         }
         Iterable<EntityRef> uncheckedSiteRegions = entityManager.getEntitiesWith(SiteComponent.class);
@@ -168,8 +185,9 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         for (EntityRef settlement : activeSettlements) {
             growSettlement(settlement);
             build(settlement);
+            buildRoads(settlement);
         }
-        counter = 250;
+        cyclesLeft = 2;
     }
 
     /**
@@ -250,13 +268,40 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
     }
 
+    /**
+     * Check if a point lies in any settlement
+     *
+     * @param pos Point to be tested
+     * @return True if pos is not inside any settlement
+     */
+    public boolean checkOutsideAllSettlements(Vector2i pos) {
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        for (String vector2iString : container.settlementEntities.keySet()) {
+            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
+            EntityRef settlement = container.settlementEntities.get(vector2iString);
+            ParcelList parcels = settlement.getComponent(ParcelList.class);
+
+            if (pos.distance(activePosition) < parcels.builtUpRadius) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private EntityRef createSettlement(EntityRef siteRegion) {
         EntityRef settlementEntity = entityManager.create();
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
         LocationComponent locationComponent = siteRegion.getComponent(LocationComponent.class);
-        PopulationComponent populationComponent = new PopulationComponent(siteComponent.getPopulation());
         CultureComponent cultureComponent = cultureManager.getRandomCulture();
+
+        SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
+
+        // Generate name
+        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), themeManager.getTownTheme(cultureComponent.theme));
+        settlementComponent.name = nameProvider.generateName();
+
+        PopulationComponent populationComponent = new PopulationComponent(settlementComponent.population);
 
         //add surrounding regions to settlement
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
@@ -274,13 +319,14 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
 
         //Storage for incomplete parcels
         BuildingQueue buildingQueue = new BuildingQueue();
+        RoadQueue roadQueue = new RoadQueue();
 
-        //NameTagStuff
-        NameTagComponent settlementName = new NameTagComponent();
-        settlementName.text = "testcity regions: " + regionEntitiesComponent.regionEntities.size() + " " + populationComponent.populationSize;
-        settlementName.textColor = Color.CYAN;
-        settlementName.yOffset = 20;
-        settlementName.scale = 20;
+        //Add the name tag
+        NameTagComponent nameTagComponent = new NameTagComponent();
+        nameTagComponent.text = settlementComponent.name;
+        nameTagComponent.textColor = Color.CYAN;
+        nameTagComponent.yOffset = 20;
+        nameTagComponent.scale = 20;
 
         //population growth
         MarketSubscriberComponent populationSubscriberComponent = new MarketSubscriberComponent(1);
@@ -292,13 +338,15 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         NetworkComponent networkComponent = new NetworkComponent();
         networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
         settlementEntity.addComponent(locationComponent);
+        settlementEntity.addComponent(settlementComponent);
         settlementEntity.addComponent(districtGrid);
         settlementEntity.addComponent(cultureComponent);
         settlementEntity.addComponent(populationComponent);
-        settlementEntity.addComponent(settlementName);
+        settlementEntity.addComponent(nameTagComponent);
         settlementEntity.addComponent(regionEntitiesComponent);
         settlementEntity.addComponent(parcels);
         settlementEntity.addComponent(buildingQueue);
+        settlementEntity.addComponent(roadQueue);
         settlementEntity.addComponent(new ActiveSettlementComponent());
         settlementEntity.addComponent(networkComponent);
         settlementEntity.addComponent(populationSubscriberComponent);
@@ -371,7 +419,6 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
     }
 
 
-
     public void build(EntityRef settlement) {
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
@@ -418,6 +465,7 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
         PopulationComponent populationComponent = settlement.getComponent(PopulationComponent.class);
         ParcelList parcels = settlement.getComponent(ParcelList.class);
         BuildingQueue buildingQueue = settlement.getComponent(BuildingQueue.class);
+        RoadQueue roadQueue = settlement.getComponent(RoadQueue.class);
         LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
         NameTagComponent nameTagComponent = settlement.getComponent(NameTagComponent.class);
         CultureComponent cultureComponent = settlement.getComponent(CultureComponent.class);
@@ -484,22 +532,125 @@ public class SettlementEntityManager extends BaseComponentSystem implements Upda
             }
             buildingSpawned = 0;
         }
-        /**
-         * grow population
+        /*
+          grow population
          */
         for (String residentialZone : cultureComponent.residentialZones) {
             populationComponent.capacity += parcels.areaPerZone.getOrDefault(residentialZone, 0);
         }
 
+
+        /*
+          Create roads between settlements
+         */
+        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
+
+        ImmutableVector2f dest = source;
+        float min = Float.MAX_VALUE;
+        for (EntityRef entity : container.settlementEntities.values()) {
+            if (!settlement.equals(entity)) {
+                Vector3f location = entity.getComponent(LocationComponent.class).getLocalPosition();
+                ImmutableVector2f location2D = new ImmutableVector2f(location.x, location.z);
+                if (!roadCache.containsEntry(source.toString(), location2D.toString()) && source.distance(location2D) <= min) {
+                    dest = location2D;
+                    min = source.distance(location2D);
+                }
+            }
+        }
+
+        if (!source.equals(dest)) {
+            roadQueue.roadQueue.add(calculateRoadParcel(source, dest, center.y));
+            roadCache.put(source.toString(), dest.toString());
+            roadCache.put(dest.toString(), source.toString());
+        }
+
         //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
         //This is due to ensuring that changes made while constructing are added
 
-        nameTagComponent.text =  Float.toString(populationComponent.populationSize);
         settlement.saveComponent(nameTagComponent);
         settlement.saveComponent(populationComponent);
         settlement.saveComponent(buildingQueue);
         settlement.saveComponent(parcels);
         settlement.send(new SettlementGrowthEvent());
+    }
+
+    private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest, int height) {
+        Vector<RoadSegment> segments = new Vector<>();
+
+        Vector2f diff = new Vector2f(dest.sub(source));
+        ImmutableVector2f direction = new ImmutableVector2f(diff.normalize());
+
+        ImmutableVector2f roadStart = source.add(direction.scale(settlementMaxRadius + RoadParcel.MARGIN));
+        ImmutableVector2f roadEnd = dest.sub(direction.scale(settlementMaxRadius + RoadParcel.MARGIN));
+
+        Vector2f i = new Vector2f(roadStart);
+
+        boolean shouldContinue;
+        do {
+            ImmutableVector2i a = new ImmutableVector2i((int) i.x, (int) i.y);
+            i.add(direction.scale(RoadParcel.RECT_SIZE));
+            ImmutableVector2i b = new ImmutableVector2i((int) i.x, (int) i.y);
+            i.sub(direction.scale(RoadParcel.OVERLAP));
+
+            // Must calculate actual min and max for the rect
+            // Ensure 'a' has lower x
+            Rect2i rect;
+            if (a.getX() > b.getX()) {
+                ImmutableVector2i tmp = b;
+                b = a;
+                a = tmp;
+            }
+
+            if (a.getY() < b.getY()) {
+                rect = Rect2i.createFromMinAndMax(a, b);
+            } else {
+                rect = Rect2i.createFromMinAndMax(
+                        new ImmutableVector2i(a.getX(), b.getY()),
+                        new ImmutableVector2i(b.getX(), a.getY())
+                );
+            }
+
+            segments.add(new RoadSegment(rect, height, a, b));
+
+            // Because these are floats, equating values will be a problem
+            // Instead, we'll make sure their different is below a threshold
+            float threshold = 0.0001f;
+            Vector2f remaining = new Vector2f(roadEnd.sub(i));
+            remaining.normalize();
+            shouldContinue = (new ImmutableVector2f(remaining)).sub(direction).length() < threshold;
+        } while (shouldContinue);
+
+        return new RoadParcel(segments);
+    }
+
+    public void buildRoads(EntityRef sourceSettlement) {
+        RoadQueue roadQueue = sourceSettlement.getComponent(RoadQueue.class);
+        ParcelList parcelList = sourceSettlement.getComponent(ParcelList.class);
+        Set<RoadParcel> removedParcels = new HashSet<>();
+        Set<RoadParcel> parcelsInQueue = roadQueue.roadQueue;
+
+
+        for (RoadParcel parcel : parcelsInQueue) {
+            Set<Rect2i> expandedParcels = parcel.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+            for (Rect2i region : expandedParcels) {
+                treeRemovalSystem.removeTreesInRegions(region);
+            }
+
+            RoadStatus status = constructer.buildRoadParcel(parcel, sourceSettlement);
+            if (status == RoadStatus.COMPLETE) {
+                removedParcels.add(parcel);
+            } else {
+                logger.warn("Parcel {} couldn't be completed. Status: {}", parcel, status);
+            }
+        }
+        for (RoadParcel parcel : removedParcels) {
+            parcelList.addParcel(parcel);
+        }
+        parcelsInQueue.removeAll(removedParcels);
+
+        sourceSettlement.saveComponent(roadQueue);
+        sourceSettlement.saveComponent(parcelList);
     }
 
     private Optional<DynParcel> placeParcel(Vector3i center, String zone, ParcelList parcels,

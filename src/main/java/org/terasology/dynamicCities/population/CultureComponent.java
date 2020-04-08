@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.terasology.dynamicCities.population;
 
 
@@ -25,12 +26,12 @@ import java.util.Map;
 
 public class CultureComponent implements Component {
 
-    //Defines how much blocks^2 a population unit needs
-    public String name;
     public Map<String, Integer> buildingNeedPerZone;
+    public String name;
     public List<String> availableBuildings;
     public List<String> residentialZones;
     public float growthRate;
+    public String theme = null;
 
 
     public int getBuildingNeedsForZone(String zone) {

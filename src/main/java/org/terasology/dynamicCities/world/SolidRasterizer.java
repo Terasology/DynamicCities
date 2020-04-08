@@ -15,6 +15,7 @@
  */
 package org.terasology.dynamicCities.world;
 
+import org.terasology.biomesAPI.Biome;
 import org.terasology.core.world.CoreBiome;
 import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.facets.ResourceFacet;
@@ -22,7 +23,6 @@ import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.world.biomes.Biome;
 import org.terasology.world.block.Block;
 import org.terasology.world.chunks.ChunkConstants;
 import org.terasology.world.chunks.CoreChunk;
@@ -30,8 +30,6 @@ import org.terasology.world.generation.Region;
 import org.terasology.world.generation.facets.DensityFacet;
 import org.terasology.world.generation.facets.SeaLevelFacet;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
-import org.terasology.world.liquid.LiquidData;
-import org.terasology.world.liquid.LiquidType;
 
 /**
  */
@@ -40,7 +38,6 @@ public class SolidRasterizer extends CompatibleRasterizer {
 
     @Override
     public void generateChunk(CoreChunk chunk, Region chunkRegion) {
-        LiquidData waterLiquid = new LiquidData(LiquidType.WATER, LiquidData.MAX_LIQUID_DEPTH);
         DensityFacet solidityFacet = chunkRegion.getFacet(DensityFacet.class);
         SurfaceHeightFacet surfaceFacet = chunkRegion.getFacet(SurfaceHeightFacet.class);
         BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
@@ -52,7 +49,7 @@ public class SolidRasterizer extends CompatibleRasterizer {
         for (Vector3i pos : ChunkConstants.CHUNK_REGION) {
             pos2d.set(pos.x, pos.z);
             Biome biome = biomeFacet.get(pos2d);
-            chunk.setBiome(pos.x, pos.y, pos.z, biome);
+            biomeRegistry.setBiome(biome, chunk, pos.x, pos.y, pos.z);
 
             int posY = pos.y + chunk.getChunkWorldOffsetY();
             float density = solidityFacet.get(pos);
@@ -69,7 +66,6 @@ public class SolidRasterizer extends CompatibleRasterizer {
                     setBlock(chunk, ice, pos, resourceFacet);
                 } else if (posY <= seaLevel) {         // either OCEAN or SNOW
                     setBlock(chunk, water, pos, resourceFacet);
-                    setLiquid(chunk, waterLiquid, pos, resourceFacet);
                 }
             }
         }

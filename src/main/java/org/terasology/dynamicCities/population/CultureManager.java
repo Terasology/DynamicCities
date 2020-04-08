@@ -29,8 +29,8 @@ import org.terasology.registry.Share;
 import org.terasology.utilities.random.MersenneRandom;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Share(CultureManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -49,6 +49,11 @@ public class CultureManager extends BaseComponentSystem {
             //Get building data
             if (prefab.hasComponent(CultureComponent.class)) {
                 CultureComponent cultureComponent = prefab.getComponent(CultureComponent.class);
+                if (cultureComponent.theme != null) {
+                    cultureComponent.theme = cultureComponent.theme.toLowerCase();
+                } else {
+                    logger.warn("No theme defined for culture " + cultureComponent.name);
+                }
                 if (!cultureComponent.buildingNeedPerZone.isEmpty()) {
                     cultureComponents.add(cultureComponent);
                     cultureComponent.buildingNeedPerZone = Toolbox.stringsToLowerCase(cultureComponent.buildingNeedPerZone);
@@ -67,20 +72,18 @@ public class CultureManager extends BaseComponentSystem {
                 }
             }
         }
-        String cultureNames = "[";
-        Iterator<CultureComponent> iter = cultureComponents.iterator();
-        while (iter.hasNext()) {
-            cultureNames += iter.next().name;
-            if (iter.hasNext()) {
-                cultureNames += ", ";
-            }
-        }
-        cultureNames += "]";
+
+        String cultureNames = cultureComponents
+                .stream()
+                .map(c -> c.name)
+                .collect(Collectors.joining(", ", "[", "]"))
+                .toString();
+
         logger.info("Finished loading cultures: " + cultureComponents.size() + " culture types found: " + cultureNames);
         rng = new MersenneRandom(assetManager.hashCode() * 5 + this.hashCode());
     }
 
-    public CultureComponent getRandomCulture ( ) {
+    public CultureComponent getRandomCulture() {
         if (!cultureComponents.isEmpty()) {
             int max = cultureComponents.size();
             int index = rng.nextInt(max);

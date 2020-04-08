@@ -17,7 +17,7 @@ package org.terasology.dynamicCities.buildings.events;
 
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.Event;
-import org.terasology.structureTemplates.util.transform.BlockRegionTransform;
+import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**
  * A little in between event to link chests to the parcel building entity

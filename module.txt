@@ -1,38 +1,20 @@
 {
     "id" : "DynamicCities",
-    "version" : "0.2.0-SNAPSHOT",
+    "version" : "0.2.1-SNAPSHOT",
     "author" : "Cpt Crunchy",
     "displayName" : "Dynamic Cities",
     "description" : "Simulates complex city development over progressing game time based on the worlds resources. Needs a city culture to actually create cities.",
     "dependencies" : [
-        {
-            "id" : "Core",
-            "minVersion" : "1.0.0"
-        },
-        {
-            "id" : "CommonWorld",
-            "minVersion" : "0.2.2-SNAPSHOT"
-        },
-        {
-            "id" : "Cities",
-            "minVersion" : "0.6.0"
-        },
-        {
-            "id" : "Minimap",
-            "minVersion" : "1.0.0-SNAPSHOT"
-        },
-        {
-            "id" : "Economy",
-            "minVersion" : "0.1.0-SNAPSHOT"
-        },
-        {
-            "id" : "StructureTemplates",
-            "minVersion" : "0.2.0-SNAPSHOT"
-        },
-        {
-            "id" : "StructuralResources",
-            "minVersion" : "1.0.0-SNAPSHOT"
-        }
+        {"id" : "CoreBlocks", "minVersion" : "1.0.0"},
+        {"id" : "Core", "minVersion" : "3.0.0"},
+        {"id" : "CommonWorld", "minVersion" : "0.2.2"},
+        {"id" : "Cities", "minVersion" : "1.0.0"},
+        {"id" : "Minimap", "minVersion" : "1.0.0"},
+        {"id" : "Economy", "minVersion" : "0.1.0"},
+        {"id" : "StructureTemplates", "minVersion" : "0.3.0"},
+        {"id" : "StructuralResources", "minVersion" : "2.0.0"},
+        {"id" : "NameGenerator", "minVersion" : "0.4.0"},
+        {"id" : "ModuleTestingEnvironment", "minVersion" : "0.1.0"}
     ],
     "isGameplay" : "false",
     "serverSideOnly" : false,
