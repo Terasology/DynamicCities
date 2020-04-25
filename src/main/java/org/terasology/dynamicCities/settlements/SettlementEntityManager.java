@@ -134,7 +134,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     private int minDistance = 500;
     private int settlementMaxRadius = 150;
-    private int cyclesLeft = 2; // 1 cycle = approx. 20 seconds
+    private int cyclesLeft; // 1 cycle = approx. 20 seconds
+    private int cyclesBeforeGrowth = 2;
     private Random rng;
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
 
@@ -146,6 +147,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         long seed = regionEntityManager.hashCode() & 0x921233;
         rng = new FastRandom(seed);
+        cyclesLeft = cyclesBeforeGrowth;
 
     }
 
@@ -187,12 +189,12 @@ public class SettlementEntityManager extends BaseComponentSystem {
             build(settlement);
             buildRoads(settlement);
         }
-        cyclesLeft = 2;
+        cyclesLeft = cyclesBeforeGrowth;
     }
 
     /**
      * Checks the provided region entity for suitability as a settlement in response to a CheckSiteSuitabilityEvent
-     *
+     * <p>
      * The default behavior will check that the region satisfies default distance and build area thresholds, and also
      * ensures that the region's "sides" have been loaded. This can be extended by registering a new event handler
      * with the same signature and annotation, but a lower priority. It can also be disabled completely by using a
@@ -214,7 +216,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     /**
      * Checks whether the settlement needs the given zone
-     *
+     * <p>
      * The default behavior checks the culture need for the zone, multiplies that by the population, then subtracts
      * the areaPerZone for the given zone according to the ParcelList. If that "allowed zone area" is greater than
      * the minimum area of all buildings for that zone, the check passes.
@@ -446,13 +448,13 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     /**
      * Attempts to place new parcels for the settlement as needed
-     *
+     * <p>
      * For each zone type, this settlement sends a {@link CheckZoneNeededEvent}. If the event's
      * `needed` field is true, a parcel is placed for that zone if possible. This method will then continue to place
      * parcels for that zone as needed, sending a new event each time until one finally returns false or until the
      * SettlementEntityManager is unable to place a needed parcel. In that case, the city's radius is increased and
      * process for that particular zone type stops.
-     *
+     * <p>
      * Also inflates the population capacity based on the area of each residential zone in the settlement
      *
      * @param settlement
@@ -710,6 +712,10 @@ public class SettlementEntityManager extends BaseComponentSystem {
             }
         }
         return true;
+    }
+
+    public void setCyclesBeforeGrowth(int cycles) {
+        cyclesBeforeGrowth = cycles;
     }
 
 
