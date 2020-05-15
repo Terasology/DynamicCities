@@ -663,7 +663,7 @@ public class Construction extends BaseComponentSystem {
             Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
-            if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAssets:chest")) {
+            if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAdvancedAssets:chest")) {
                 for (Vector3i pos : region) {
                     entity.send(new SetBlockEvent(pos, block));
                 }

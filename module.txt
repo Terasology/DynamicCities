@@ -7,6 +7,7 @@
     "dependencies": [
         { "id": "Cities", "minVersion": "1.0.0" },
         { "id": "CommonWorld", "minVersion": "0.2.2" },
+        { "id": "CoreAdvancedAssets", "minVersion": "1.1.0" },
         { "id": "CoreAssets", "minVersion": "2.0.1" },
         { "id": "Economy", "minVersion": "0.1.0" },
         { "id": "Minimap", "minVersion": "1.0.0" },
