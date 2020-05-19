@@ -50,19 +50,19 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
     @Override
     public void initialize() {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
-        stone = blockManager.getBlock("CoreBlocks:stone");
-        hardStone = blockManager.getBlock("CoreBlocks:hardstone");
-        cobbleStone = blockManager.getBlock("CoreBlocks:cobblestone");
-        mantlestone = blockManager.getBlock("CoreBlocks:mantlestone");
-        water = blockManager.getBlock("CoreBlocks:water");
-        ice = blockManager.getBlock("CoreBlocks:Ice");
-        sand = blockManager.getBlock("CoreBlocks:Sand");
-        grass = blockManager.getBlock("CoreBlocks:Grass");
-        snow = blockManager.getBlock("CoreBlocks:Snow");
-        dirt = blockManager.getBlock("CoreBlocks:Dirt");
-        oakTrunk = blockManager.getBlock("CoreBlocks:OakTrunk");
-        pineTrunk = blockManager.getBlock("CoreBlocks:PineTrunk");
-        birchTrunk = blockManager.getBlock("CoreBlocks:BirchTrunk");
+        stone = blockManager.getBlock("CoreAssets:stone");
+        hardStone = blockManager.getBlock("CoreAssets:hardstone");
+        cobbleStone = blockManager.getBlock("CoreAssets:cobblestone");
+        mantlestone = blockManager.getBlock("CoreAssets:mantlestone");
+        water = blockManager.getBlock("CoreAssets:water");
+        ice = blockManager.getBlock("CoreAssets:Ice");
+        sand = blockManager.getBlock("CoreAssets:Sand");
+        grass = blockManager.getBlock("CoreAssets:Grass");
+        snow = blockManager.getBlock("CoreAssets:Snow");
+        dirt = blockManager.getBlock("CoreAssets:Dirt");
+        oakTrunk = blockManager.getBlock("CoreAssets:OakTrunk");
+        pineTrunk = blockManager.getBlock("CoreAssets:PineTrunk");
+        birchTrunk = blockManager.getBlock("CoreAssets:BirchTrunk");
         biomeRegistry = CoreRegistry.get(BiomeRegistry.class);
     }
 

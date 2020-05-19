@@ -180,18 +180,18 @@ public class Construction extends BaseComponentSystem {
      */
     public void initialise() {
         cityTheme = BlockTheme.builder(blockManager)
-                .register(DefaultBlockType.ROAD_FILL, "CoreBlocks:dirt")
-                .register(DefaultBlockType.ROAD_SURFACE, "CoreBlocks:Gravel")
-                .register(DefaultBlockType.LOT_EMPTY, "CoreBlocks:dirt")
+                .register(DefaultBlockType.ROAD_FILL, "CoreAssets:dirt")
+                .register(DefaultBlockType.ROAD_SURFACE, "CoreAssets:Gravel")
+                .register(DefaultBlockType.LOT_EMPTY, "CoreAssets:dirt")
                 .register(DefaultBlockType.BUILDING_WALL, "StructuralResources:StoneBlocks")
                 .register(DefaultBlockType.BUILDING_FLOOR, "StructuralResources:StoneBlocksDark")
-                .register(DefaultBlockType.BUILDING_FOUNDATION, "CoreBlocks:gravel")
-                .register(DefaultBlockType.TOWER_STAIRS, "CoreBlocks:CobbleStone")
+                .register(DefaultBlockType.BUILDING_FOUNDATION, "CoreAssets:gravel")
+                .register(DefaultBlockType.TOWER_STAIRS, "CoreAssets:CobbleStone")
                 .register(DefaultBlockType.ROOF_FLAT, "StructuralResources:RoofTilesLarge")
                 .register(DefaultBlockType.ROOF_HIP, "StructuralResources:PlanksEvenDark")
                 .register(DefaultBlockType.ROOF_SADDLE, "StructuralResources:PlanksEvenDark")
-                .register(DefaultBlockType.ROOF_DOME, "CoreBlocks:plank")
-                .register(DefaultBlockType.ROOF_GABLE, "CoreBlocks:plank")
+                .register(DefaultBlockType.ROOF_DOME, "CoreAssets:plank")
+                .register(DefaultBlockType.ROOF_GABLE, "CoreAssets:plank")
                 .register(DefaultBlockType.SIMPLE_DOOR, BlockManager.AIR_ID)
                 .register(DefaultBlockType.WING_DOOR, BlockManager.AIR_ID)
                 .register(DefaultBlockType.WINDOW_GLASS, BlockManager.AIR_ID)
@@ -200,29 +200,29 @@ public class Construction extends BaseComponentSystem {
                 // -- requires Fences module
                 .registerFamily(DefaultBlockType.FENCE, "Fences:Fence")
                 .registerFamily(DefaultBlockType.FENCE_GATE, BlockManager.AIR_ID)  // there is no fence gate :-(
-                .registerFamily(DefaultBlockType.TOWER_STAIRS, "CoreBlocks:CobbleStone:engine:stair")
+                .registerFamily(DefaultBlockType.TOWER_STAIRS, "CoreAssets:CobbleStone:engine:stair")
                 .registerFamily(DefaultBlockType.BARREL, "StructuralResources:Barrel")
-                .registerFamily(DefaultBlockType.LADDER, "CoreBlocks:Ladder")
-                .registerFamily(DefaultBlockType.PILLAR_BASE, "CoreBlocks:CobbleStone:StructuralResources:pillarBase")
-                .registerFamily(DefaultBlockType.PILLAR_MIDDLE, "CoreBlocks:CobbleStone:StructuralResources:pillar")
-                .registerFamily(DefaultBlockType.PILLAR_TOP, "CoreBlocks:CobbleStone:StructuralResources:pillarTop")
-                .registerFamily(DefaultBlockType.TORCH, "CoreBlocks:Torch")
+                .registerFamily(DefaultBlockType.LADDER, "CoreAssets:Ladder")
+                .registerFamily(DefaultBlockType.PILLAR_BASE, "CoreAssets:CobbleStone:StructuralResources:pillarBase")
+                .registerFamily(DefaultBlockType.PILLAR_MIDDLE, "CoreAssets:CobbleStone:StructuralResources:pillar")
+                .registerFamily(DefaultBlockType.PILLAR_TOP, "CoreAssets:CobbleStone:StructuralResources:pillarTop")
+                .registerFamily(DefaultBlockType.TORCH, "CoreAssets:Torch")
 
                 .build();
 
         if (roadRasterizer == null) {
             roadRasterizer = new RoadRasterizer();
             roadTheme = BlockTheme.builder(blockManager)
-                    .register(DefaultBlockType.ROAD_FILL, "CoreBlocks:dirt")
-                    .register(DefaultBlockType.ROAD_SURFACE, "CoreBlocks:Gravel")
+                    .register(DefaultBlockType.ROAD_FILL, "CoreAssets:dirt")
+                    .register(DefaultBlockType.ROAD_SURFACE, "CoreAssets:Gravel")
                     .build();
         }
 
         blockManager = CoreRegistry.get(BlockManager.class);
         air = blockManager.getBlock("engine:air");
-        water = blockManager.getBlock("CoreBlocks:Water");
+        water = blockManager.getBlock("CoreAssets:Water");
         plant = blockManager.getBlock("CoreAssets:plant");
-        defaultBlock = blockManager.getBlock("CoreBlocks:Dirt");
+        defaultBlock = blockManager.getBlock("CoreAssets:Dirt");
 
         stdRasterizers.add(new HollowBuildingPartRasterizer(cityTheme, worldProvider));
         stdRasterizers.add(new RectPartRasterizer(cityTheme, worldProvider));
@@ -246,13 +246,13 @@ public class Construction extends BaseComponentSystem {
         roofRasterizers.add(new SaddleRoofRasterizer(cityTheme));
 
         //Register plant blocks
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:GreenLeaf"));
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:OakTrunk"));
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:DarkLeaf"));
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:PineTrunk"));
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:BirchTrunk"));
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:RedLeaf"));
-        plantBlocks.add(blockManager.getBlock("CoreBlocks:Cactus"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:GreenLeaf"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:OakTrunk"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:DarkLeaf"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:PineTrunk"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:BirchTrunk"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:RedLeaf"));
+        plantBlocks.add(blockManager.getBlock("CoreAssets:Cactus"));
     }
 
     /**
@@ -663,7 +663,7 @@ public class Construction extends BaseComponentSystem {
             Region3i region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
-            if (block.getBlockFamily() == blockManager.getBlockFamily("CoreBlocks:chest")) {
+            if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAdvancedAssets:chest")) {
                 for (Vector3i pos : region) {
                     entity.send(new SetBlockEvent(pos, block));
                 }
