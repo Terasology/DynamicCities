@@ -14,7 +14,7 @@
         { "id": "Economy", "minVersion": "1.0.0" },
         { "id": "Inventory", "minVersion": "1.1.0" },
         { "id": "Minimap", "minVersion": "1.0.0" },
-        { "id": "ModuleTestingEnvironment", "minVersion": "0.1.0" },
+        { "id": "ModuleTestingEnvironment", "minVersion": "0.2.0" },
         { "id": "NameGenerator", "minVersion": "1.0.0" },
         { "id": "StructureTemplates", "minVersion": "1.0.0" },
         { "id": "StructuralResources", "minVersion": "2.1.0" }
