@@ -46,7 +46,7 @@ import org.terasology.world.block.Block;
 public class BlockBufferSystem extends BaseComponentSystem {
 
     public static final String PLACE_BLOCKS_ACTION_ID = "BlockBufferSystem:placeBlocksAction";
-    public static final int BLOCKS_PER_UPDATE = 1000;
+    public static final int BLOCKS_PER_UPDATE = 200;
 
     private static final Logger logger = LoggerFactory.getLogger(BlockBufferSystem.class);
 
