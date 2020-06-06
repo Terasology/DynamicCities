@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class CultureComponent implements Component {
 
-    public Map<String, Integer> buildingNeedPerZone;
+    public Map<String, Float> buildingNeedPerZone;
     public String name;
     public List<String> availableBuildings;
     public List<String> residentialZones;
@@ -34,7 +34,7 @@ public class CultureComponent implements Component {
     public String theme = null;
 
 
-    public int getBuildingNeedsForZone(String zone) {
+    public float getBuildingNeedsForZone(String zone) {
         if (buildingNeedPerZone.containsKey(zone)) {
             return buildingNeedPerZone.get(zone);
         } else {
@@ -44,7 +44,7 @@ public class CultureComponent implements Component {
 
     public float getProcentualOfZone(String zone) {
         float total = 0;
-        for (Integer need : buildingNeedPerZone.values()) {
+        for (Float need : buildingNeedPerZone.values()) {
             total += need;
         }
         if (total == 0) {

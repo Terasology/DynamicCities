@@ -104,9 +104,9 @@ public class Toolbox {
             iterator.set(iterator.next().toLowerCase());
         }
     }
-    public static Map<String, Integer> stringsToLowerCase(Map<String, Integer> map) {
+    public static Map<String, Float> stringsToLowerCase(Map<String, Float> map) {
         Set<String> keySet = Collections.unmodifiableSet(map.keySet());
-        Map<String, Integer> newMap = new HashMap<>();
+        Map<String, Float> newMap = new HashMap<>();
         for (String key : keySet) {
             newMap.put(key.toLowerCase(), map.get(key));
         }
