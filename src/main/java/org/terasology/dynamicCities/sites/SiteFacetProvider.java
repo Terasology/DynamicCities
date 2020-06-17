@@ -66,6 +66,7 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
                 }
             }
 
+            // Removes sites that are too close to spawn. Spawn is assumed to be at (0, 0, 0).
             if (minPos.length() > config.minSpawnGap) {
                 SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY());
                 siteFacet.setSiteComponent(siteComponent);
@@ -103,6 +104,7 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
         @Range(label = "Minimum distance between towns", min = 10, max = 1000, increment = 10, precision = 1)
         private int minDistance = 128;
 
+        // Spawn is assumed to be at (0, 0, 0) for this setting.
         @Range(label = "Minimum distance from spawn", min = 0, max = 1000, increment = 10, precision = 1)
         private int minSpawnGap = 200;
     }
