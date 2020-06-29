@@ -16,18 +16,12 @@
 
 package org.terasology.dynamicCities.sites;
 
-import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.dynamicCities.resource.ResourceType;
-import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.Region3i;
-import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.rendering.nui.properties.Range;
-import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.ConfigurableFacetProvider;
 import org.terasology.world.generation.Facet;
@@ -56,7 +50,6 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
     public void process(GeneratingRegion region) {
 
         RoughnessFacet roughnessFacet = region.getRegionFacet(RoughnessFacet.class);
-        ResourceFacet resourceFacet = region.getRegionFacet(ResourceFacet.class);
 
         Border3D border = region.getBorderForFacet(SiteFacet.class);
         Region3i coreReg = region.getRegion();
@@ -73,9 +66,11 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
                 }
             }
 
-            SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY());
-
-            siteFacet.setSiteComponent(siteComponent);
+            // Removes sites that are too close to spawn. Spawn is assumed to be at (0, 0, 0).
+            if (minPos.length() > config.minSpawnGap) {
+                SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY());
+                siteFacet.setSiteComponent(siteComponent);
+            }
         }
 
 
@@ -108,5 +103,9 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
 
         @Range(label = "Minimum distance between towns", min = 10, max = 1000, increment = 10, precision = 1)
         private int minDistance = 128;
+
+        // Spawn is assumed to be at (0, 0, 0) for this setting.
+        @Range(label = "Minimum distance from spawn", min = 0, max = 1000, increment = 10, precision = 1)
+        private int minSpawnGap = 200;
     }
 }
