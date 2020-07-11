@@ -18,8 +18,11 @@ package org.terasology.dynamicCities.buildings.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.network.Replicate;
 
 public final class SettlementRefComponent implements Component {
+
+    @Replicate
     public EntityRef settlement;
 
     public SettlementRefComponent() {
