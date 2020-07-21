@@ -18,6 +18,7 @@ package org.terasology.dynamicCities.playerTracking;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.settlements.SettlementCachingSystem;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
@@ -136,6 +137,7 @@ public class PlayerTracker extends BaseComponentSystem {
 
     @ReceiveEvent
     public void onEnterArea(OnEnterSettlementEvent event, EntityRef entity) {
+        entity.addComponent(new SettlementRefComponent(event.getSettlement()));
 
         Client client = networkSystem.getOwner(entity);
         String playerName = String.format("%s (%s)", client.getName(), client.getId());
@@ -154,6 +156,7 @@ public class PlayerTracker extends BaseComponentSystem {
      */
     @ReceiveEvent
     public void onLeaveArea(OnLeaveSettlementEvent event, EntityRef entity) {
+        entity.removeComponent(SettlementRefComponent.class);
 
         Client client = networkSystem.getOwner(entity);
         String playerName = String.format("%s (%s)", client.getName(), client.getId());

@@ -18,14 +18,22 @@ package org.terasology.dynamicCities.settlements.components;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.network.Replicate;
 
 public class MarketComponent implements Component {
 
     public EntityRef market;
 
+    @Replicate
+    public long marketId;
+
     public MarketComponent() {
     }
     public MarketComponent(EntityRef market) {
         this.market = market;
+    }
+
+    public long getMarketId() {
+        return marketId;
     }
 }
