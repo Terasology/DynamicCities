@@ -1,21 +1,9 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.minimap;
 
 
+import org.joml.Rectanglei;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.districts.DistrictType;
@@ -24,17 +12,17 @@ import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
 import org.terasology.math.geom.Rect2f;
 import org.terasology.math.geom.Rect2fTransformer;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.minimap.overlays.MinimapOverlay;
-import org.terasology.rendering.nui.Canvas;
-import org.terasology.rendering.nui.Color;
+import org.terasology.nui.Canvas;
+import org.terasology.nui.Color;
 
 public class DistrictOverlay implements MinimapOverlay {
 
@@ -61,8 +49,8 @@ public class DistrictOverlay implements MinimapOverlay {
             logger.error("No SettlementCacheComponent found!");
             return;
         }
-        Rect2f screenRect = Rect2f.createFromMinAndSize(new Vector2f(canvas.getRegion().minX(), canvas.getRegion().minY()),
-                new Vector2f(canvas.getRegion().maxX(), canvas.getRegion().maxY()));
+        Rect2f screenRect = Rect2f.createFromMinAndSize(new Vector2f(canvas.getRegion().minX, canvas.getRegion().minY),
+                new Vector2f(canvas.getRegion().maxX, canvas.getRegion().maxY));
         Rect2fTransformer t = new Rect2fTransformer(worldRect, screenRect);
         for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
             if (!settlement.isActive()) {
@@ -97,7 +85,7 @@ public class DistrictOverlay implements MinimapOverlay {
                         int sizeY = Math.round(districtFacet.getGridSize() * t.getScaleY());
                         DistrictType districtType = districtFacet.getDistrict(worldPoint.x(), worldPoint.y());
                         Color districtColor = districtType.getColor().alterAlpha(130);
-                        Rect2i gridRect = Rect2i.createFromMinAndSize(lx, ly, sizeX, sizeY);
+                        Rectanglei gridRect = JomlUtil.rectangleiFromMinAndSize(lx, ly, sizeX, sizeY);
                         canvas.drawFilledRectangle(gridRect, districtColor);
                     }
                 }
