@@ -1,25 +1,12 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.districts;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.utilities.Toolbox;
-import org.terasology.math.geom.Vector2i;
+import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,9 +112,12 @@ public class Kmeans {
 
                 means[i][j] = (1 / clusterSum[i]) * clusterVector[i][j];
             }
-            Vector2i clusterPosition = new Vector2i(clusterVector[i][0], clusterVector[i][1]);
+            Vector2i clusterPosition = new Vector2i((int) clusterVector[i][0], (int) clusterVector[i][1]);
             if (clusterPoints[i] != 0) {
-                clusterCenters.add(i, clusterPosition.div(clusterPoints[i]));
+                Vector2i toAdd = new Vector2i(clusterPosition);
+                toAdd.x /= clusterPoints[i];
+                toAdd.y /= clusterPoints[i];
+                clusterCenters.add(i, toAdd);
             } else {
                 clusterCenters.add(i, clusterPosition);
             }

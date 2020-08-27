@@ -1,21 +1,9 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements.components;
 
 
+import org.joml.Rectanglei;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
@@ -23,11 +11,11 @@ import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
 import org.terasology.entitySystem.Component;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
+import org.joml.Vector2i;
 import org.terasology.network.Replicate;
 import org.terasology.utilities.procedural.WhiteNoise;
 import org.terasology.world.generation.Border3D;
@@ -46,13 +34,13 @@ public class DistrictFacetComponent implements Component {
      * TODO: Assign districts similar to parcels (look up if needs are already fulfilled before placement)
      */
     @Replicate
-    public Rect2i relativeRegion = Rect2i.EMPTY;
+    public Rectanglei relativeRegion = new Rectanglei();
     @Replicate
-    public Rect2i worldRegion = Rect2i.EMPTY;
+    public Rectanglei worldRegion = new Rectanglei();
     @Replicate
-    public Rect2i gridWorldRegion = Rect2i.EMPTY;
+    public Rectanglei gridWorldRegion = new Rectanglei();
     @Replicate
-    public Rect2i gridRelativeRegion = Rect2i.EMPTY;
+    public Rectanglei gridRelativeRegion = new Rectanglei();
     @Replicate
     public int gridSize;
     @Replicate
@@ -71,15 +59,15 @@ public class DistrictFacetComponent implements Component {
     public DistrictFacetComponent() { }
 
     public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, CultureComponent cultureComponent) {
-        worldRegion = border.expandTo2D(targetRegion);
-        relativeRegion = border.expandTo2D(targetRegion.size());
+        worldRegion = JomlUtil.from(border.expandTo2D(targetRegion));
+        relativeRegion = JomlUtil.from(border.expandTo2D(targetRegion.size()));
         this.gridSize = gridSize;
-        center = new Vector2i(targetRegion.center().x(), targetRegion.center().z());
-        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.sizeX() / (2 * gridSize),
+        center = new Vector2i((int) targetRegion.center().x(), (int) targetRegion.center().z());
+        gridWorldRegion = new Rectanglei(center.x() - targetRegion.sizeX() / (2 * gridSize),
                 center.y() - targetRegion.sizeY() / (2 * gridSize),
                 center.x() + targetRegion.sizeX() / (2 * gridSize),
                 center.y() + targetRegion.sizeY() / (2 * gridSize));
-        gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
+        gridRelativeRegion = new Rectanglei(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
         WhiteNoise randNumberGen = new WhiteNoise(seed);
 
         /**
@@ -90,8 +78,8 @@ public class DistrictFacetComponent implements Component {
         Kmeans kmeans = new Kmeans();
         for (int i = 0; i < gridRelativeRegion.area(); i++) {
             List<Float> list = new ArrayList<>();
-            list.add((float) Math.round(i / gridWorldRegion.sizeX()));
-            list.add((float) Math.round(i % gridWorldRegion.sizeX()));
+            list.add((float) Math.round(i / gridWorldRegion.lengthX()));
+            list.add((float) Math.round(i % gridWorldRegion.lengthX()));
             list.add(TeraMath.fastAbs(randNumberGen.noise(786332, 262333)));
             list.add(TeraMath.fastAbs(randNumberGen.noise(126743, 748323)));
             data.add(list);
@@ -105,7 +93,7 @@ public class DistrictFacetComponent implements Component {
         districtTypeMap = new HashMap<>(districtMap.size());
         districtCenters = new ArrayList<>();
         for (Vector2i districtCenter : kmeans.getCenters()) {
-            districtCenters.add(districtCenter.mul(gridSize).add(worldRegion.min()));
+            districtCenters.add(districtCenter.mul(gridSize).add(new Vector2i(worldRegion.minX, worldRegion.minY)));
         }
         //Calc district sizes
         int[] tempSize = new int[districtCount];
@@ -153,8 +141,7 @@ public class DistrictFacetComponent implements Component {
                         tempZoneArea.put(zone, tempZoneArea.getOrDefault(zone, 0f) + area);
                         if (!culturalNeedsPercentage.containsKey(zone)) {
                             diff = Float.MAX_VALUE;
-                        }
-                        else if (tempZoneArea.get(zone) / totalAssignedArea > culturalNeedsPercentage.get(zone)) {
+                        } else if (tempZoneArea.get(zone) / totalAssignedArea > culturalNeedsPercentage.get(zone)) {
                             diff = 9999999f;
                         } else {
                             diff += TeraMath.fastAbs(tempZoneArea.get(zone) / totalAssignedArea - culturalNeedsPercentage.get(zone));
@@ -196,7 +183,7 @@ public class DistrictFacetComponent implements Component {
     }
 
     public Vector2i getWorldPoint(int x, int y) {
-        if (!gridWorldRegion.contains(x, y)) {
+        if (!gridWorldRegion.containsPoint(x, y)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, gridWorldRegion.toString()));
         }
         int xRelative = x - center.x();
@@ -204,7 +191,7 @@ public class DistrictFacetComponent implements Component {
         int xNew = center.x() + Math.round((float) xRelative * gridSize);
         int yNew = center.y() + Math.round((float) yRelative * gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!worldRegion.contains(gridPoint)) {
+        if (!worldRegion.containsPoint(gridPoint)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, worldRegion.toString()));
         }
         return gridPoint;
@@ -215,13 +202,13 @@ public class DistrictFacetComponent implements Component {
     }
 
     public Vector2i getRelativeGridPoint(int x, int y) {
-        if (!relativeRegion.contains(x, y)) {
+        if (!relativeRegion.containsPoint(x, y)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, relativeRegion.toString()));
         }
         int xNew = Math.round((float) x / gridSize);
         int yNew = Math.round((float) y / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!gridRelativeRegion.contains(gridPoint)) {
+        if (!gridRelativeRegion.containsPoint(gridPoint)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridRelativeRegion.toString()));
         }
         return gridPoint;
@@ -232,7 +219,7 @@ public class DistrictFacetComponent implements Component {
     }
 
     public Vector2i getWorldGridPoint(int x, int y) {
-        if (!worldRegion.contains(x, y)) {
+        if (!worldRegion.containsPoint(x, y)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, worldRegion.toString()));
         }
         int xRelative = x - center.x();
@@ -240,7 +227,7 @@ public class DistrictFacetComponent implements Component {
         int xNew = center.x() + Math.round((float) xRelative / gridSize);
         int yNew = center.y() + Math.round((float) yRelative / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!gridWorldRegion.contains(gridPoint)) {
+        if (!gridWorldRegion.containsPoint(gridPoint)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridWorldRegion.toString()));
         }
         return gridPoint;
@@ -255,29 +242,29 @@ public class DistrictFacetComponent implements Component {
     }
 
     protected int getRelativeGridIndex(int x, int z) {
-        if (!gridRelativeRegion.contains(x, z)) {
+        if (!gridRelativeRegion.containsPoint(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
-        return x - gridRelativeRegion.minX() + gridRelativeRegion.sizeX() * (z - gridRelativeRegion.minY());
+        return x - gridRelativeRegion.minX + gridRelativeRegion.lengthX() * (z - gridRelativeRegion.minY);
     }
 
     protected int getWorldGridIndex(int x, int z) {
-        if (!gridWorldRegion.contains(x, z)) {
+        if (!gridWorldRegion.containsPoint(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
-        return x - gridWorldRegion.minX() + gridWorldRegion.sizeX() * (z - gridWorldRegion.minY());
+        return x - gridWorldRegion.minX + gridWorldRegion.lengthX() * (z - gridWorldRegion.minY);
     }
 
-    public Rect2i getGridWorldRegion() {
+    public Rectanglei getGridWorldRegion() {
         return gridWorldRegion;
     }
 
-    public Rect2i getGridRelativeRegion() {
+    public Rectanglei getGridRelativeRegion() {
         return gridRelativeRegion;
     }
 
     public int get(int x, int y) {
-        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        Vector2i gridPos = getRelativeGridPoint(x, y);
         return districtMap.get(getRelativeGridIndex(gridPos.x(), gridPos.y()));
     }
 
@@ -286,7 +273,7 @@ public class DistrictFacetComponent implements Component {
     }
 
     public int getWorld(int x, int y) {
-        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        Vector2i gridPos = getWorldGridPoint(x, y);
         return districtMap.get(getWorldGridIndex(gridPos.x(), gridPos.y()));
     }
 
