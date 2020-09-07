@@ -18,12 +18,12 @@ package org.terasology.dynamicCities.population;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.assets.management.AssetManager;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.utilities.random.MersenneRandom;
