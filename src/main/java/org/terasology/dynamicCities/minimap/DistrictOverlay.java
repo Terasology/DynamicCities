@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.minimap;
 
+import org.joml.Circlef;
 import org.joml.Rectanglei;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Circlef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.math.JomlUtil;
 import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.Color;
@@ -23,8 +23,8 @@ import org.terasology.nui.util.RectUtility;
 public class DistrictOverlay implements MinimapOverlay {
 
 
-    private EntityRef settlementCachingEntity;
-    private Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
+    private final EntityRef settlementCachingEntity;
+    private final Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
 
 
     public DistrictOverlay(EntityRef entityRef) {
@@ -43,7 +43,8 @@ public class DistrictOverlay implements MinimapOverlay {
             logger.error("No SettlementCacheComponent found!");
             return;
         }
-        for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
+        for (EntityRef settlement :
+                settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
             if (!settlement.isActive()) {
                 continue;
             }
@@ -62,10 +63,12 @@ public class DistrictOverlay implements MinimapOverlay {
                 logger.error("Cannot find districtFacet component for settlement: " + settlement.toString());
                 return;
             }
-            Vector2f pos = new Vector2f(locationComponent.getLocalPosition().x(), locationComponent.getLocalPosition().z());
+            Vector2f pos = new Vector2f(locationComponent.getLocalPosition().x(),
+                    locationComponent.getLocalPosition().z());
             Circlef cityRadius = new Circlef(pos.x, pos.y, parcelList.builtUpRadius);
 
-            Rectanglei worldRectExpanded = RectUtility.expand(worldRect, districtFacet.getGridSize(), districtFacet.getGridSize());
+            Rectanglei worldRectExpanded = RectUtility.expand(worldRect, districtFacet.getGridSize(),
+                    districtFacet.getGridSize());
             if (new Vector2f(worldRect.minX, worldRect.minY).distance(pos) <= settlement.getComponent(ParcelList.class).builtUpRadius + new Vector2i(worldRect.maxX - worldRect.minX, worldRect.maxY - worldRect.minY).length()) {
 
                 Rectanglei gridWorldRegion = districtFacet.getGridWorldRegion();
@@ -74,9 +77,12 @@ public class DistrictOverlay implements MinimapOverlay {
                         Vector2i worldPoint = districtFacet.getWorldPoint(x, y);
 
                         if (worldRectExpanded.containsPoint(worldPoint) && new Vector2f(worldPoint).distance(cityRadius.x, cityRadius.y) < cityRadius.r) {
-                            Vector2i gridPos = RectUtility.map(worldRect, canvas.getRegion(), new Vector2i(worldPoint.x, worldPoint.y), new Vector2i());
-                            int sizeX = Math.round(districtFacet.getGridSize() * (float) canvas.getRegion().lengthX() /  (float) worldRect.lengthX());
-                            int sizeY = Math.round(districtFacet.getGridSize() * (float) canvas.getRegion().lengthY() /  (float) worldRect.lengthY());
+                            Vector2i gridPos = RectUtility.map(worldRect, canvas.getRegion(),
+                                    new Vector2i(worldPoint.x, worldPoint.y), new Vector2i());
+                            int sizeX =
+                                    Math.round(districtFacet.getGridSize() * (float) canvas.getRegion().lengthX() / (float) worldRect.lengthX());
+                            int sizeY =
+                                    Math.round(districtFacet.getGridSize() * (float) canvas.getRegion().lengthY() / (float) worldRect.lengthY());
                             DistrictType districtType = districtFacet.getDistrict(worldPoint.x(), worldPoint.y());
                             Color districtColor = districtType.getColor().alterAlpha(130);
                             Rectanglei gridRect = JomlUtil.rectangleiFromMinAndSize(gridPos.x, gridPos.y, sizeX, sizeY);

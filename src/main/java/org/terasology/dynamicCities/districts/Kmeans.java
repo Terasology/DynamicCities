@@ -3,10 +3,10 @@
 package org.terasology.dynamicCities.districts;
 
 
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.utilities.Toolbox;
-import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +16,13 @@ public class Kmeans {
 
     private List<Vector2i> clusterCenters;
     private boolean initialised;
-    private Logger logger = LoggerFactory.getLogger(Kmeans.class);
+    private final Logger logger = LoggerFactory.getLogger(Kmeans.class);
+
     public Kmeans() {
         initialised = false;
     }
+
     /**
-     *
      * @param map: rows are datapoints, columns are variables: x-pos, y-pos, probabilities
      * @param clusters: Count of clusters
      * @return
@@ -29,7 +30,8 @@ public class Kmeans {
     public int[] kmeans(float[][] map, int clusters) {
         /**
          * Initialisierung: Wähle k zufällige Mittelwerte (Means) aus dem Datensatz.
-         * Zuordnung: Jedes Datenobjekt wird demjenigen Cluster zugeordnet, bei dem die Cluster-Varianz am wenigsten erhöht wird.
+         * Zuordnung: Jedes Datenobjekt wird demjenigen Cluster zugeordnet, bei dem die Cluster-Varianz am wenigsten 
+         * erhöht wird.
          * Aktualisieren: Berechne die Mittelpunkte der Cluster neu
          * Weightvectors are used as means
          * For better results, start at distinct bfc's

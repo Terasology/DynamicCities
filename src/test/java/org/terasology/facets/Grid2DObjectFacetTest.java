@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.facets;
 
@@ -20,11 +7,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DObjectFacet;
-import org.terasology.math.Region3i;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.facets.base.ObjectFacet3D;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.ObjectFacet3D;
 
 /**
  * Tests different implementations of {@link ObjectFacet3D}.
@@ -43,16 +30,9 @@ public class Grid2DObjectFacetTest {
         facet = createFacet(region, border, gridSize);
     }
 
-    private class IntegerTestFacet extends Grid2DObjectFacet<Integer> {
-        public IntegerTestFacet(Region3i targetRegion, Border3D border, int gridSize) {
-            super(targetRegion, border, gridSize, Integer.class);
-        }
-    }
-
     protected IntegerTestFacet createFacet(Region3i region, Border3D extendBy, int gridSize) {
         return new IntegerTestFacet(region, extendBy, gridSize);
     }
-
 
     @Test
     public void testRelativeGridPoints() {
@@ -99,13 +79,13 @@ public class Grid2DObjectFacetTest {
         facet.setWorld(0, 0, 1);
     }
 
-    // Powers of 2 can be represented as float without rounding errors !
-
     @Test
     public void testPrimitiveGetSet() {
         facet.set(0, 2, 2);
         Assert.assertEquals(Integer.valueOf(2), facet.get(0, 2));
     }
+
+    // Powers of 2 can be represented as float without rounding errors !
 
     @Test
     public void testBoxedGetSet() {
@@ -129,6 +109,12 @@ public class Grid2DObjectFacetTest {
     public void testMixedGetSet2() {
         facet.setWorld(24, 46, 32);
         Assert.assertEquals(Integer.valueOf(32), facet.get(14, 16), 0.0);
+    }
+
+    private class IntegerTestFacet extends Grid2DObjectFacet<Integer> {
+        public IntegerTestFacet(Region3i targetRegion, Border3D border, int gridSize) {
+            super(targetRegion, border, gridSize, Integer.class);
+        }
     }
 
 

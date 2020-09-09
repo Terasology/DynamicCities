@@ -1,27 +1,14 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.facets;
 
-import org.terasology.math.Region3i;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.facets.base.BaseFieldFacet2D;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
 
 public class RoughnessFacet extends Grid2DFloatFacet {
@@ -35,11 +22,12 @@ public class RoughnessFacet extends Grid2DFloatFacet {
     public void calcRoughness(Vector2i gridPoint, BaseFieldFacet2D facet) {
 
         int halfGridSize = Math.round(gridSize / 2);
-        Rect2i gridCell = Rect2i.createFromMinAndMax(gridPoint.sub(halfGridSize, halfGridSize), gridPoint.add(halfGridSize, halfGridSize));
+        Rect2i gridCell = Rect2i.createFromMinAndMax(gridPoint.sub(halfGridSize, halfGridSize),
+                gridPoint.add(halfGridSize, halfGridSize));
         float deviation = 0;
         float meanValue = meanHeight(gridCell, facet);
-        for(BaseVector2i pos : gridCell.contents()) {
-            deviation += Math.pow(facet.getWorld(pos) - meanValue,2);
+        for (BaseVector2i pos : gridCell.contents()) {
+            deviation += Math.pow(facet.getWorld(pos) - meanValue, 2);
         }
 
         deviation = TeraMath.sqrt(deviation / (gridCell.area()));
@@ -57,7 +45,8 @@ public class RoughnessFacet extends Grid2DFloatFacet {
         positions[1] = new Vector2i(min.x(), min.y());
         positions[2] = new Vector2i(min.x() + gridCell.sizeX(), min.y());
         positions[3] = new Vector2i(min.x(), min.y() + gridCell.sizeY());
-        positions[4] = new Vector2i(min.x() + Math.round(0.5f * gridCell.sizeX()), min.y() + Math.round(0.5f * gridCell.sizeY()));
+        positions[4] = new Vector2i(min.x() + Math.round(0.5f * gridCell.sizeX()),
+                min.y() + Math.round(0.5f * gridCell.sizeY()));
 
         float mean = 0;
 
@@ -70,7 +59,7 @@ public class RoughnessFacet extends Grid2DFloatFacet {
 
     public float getMeanDeviation() {
         float mean = 0;
-        for(BaseVector2i pos : getWorldRegion().contents()) {
+        for (BaseVector2i pos : getWorldRegion().contents()) {
             mean += getWorld(pos);
         }
         mean /= getGridRelativeRegion().area();

@@ -1,25 +1,12 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.region.components;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
@@ -35,7 +22,7 @@ public final class ResourceFacetComponent implements Component {
 
     public boolean privateToOwner = true;
 
-    
+
     public Rect2i relativeRegion = Rect2i.EMPTY;
     public Rect2i worldRegion = Rect2i.EMPTY;
     public Rect2i gridWorldRegion = Rect2i.EMPTY;
@@ -43,11 +30,12 @@ public final class ResourceFacetComponent implements Component {
     public int gridSize;
     public Vector2i center = new Vector2i();
 
-    
+
     public List<Map<String, Resource>> data = Lists.newArrayList();
 
 
-    public ResourceFacetComponent() { }
+    public ResourceFacetComponent() {
+    }
 
     public ResourceFacetComponent(ResourceFacet resourceFacet) {
 
@@ -80,8 +68,8 @@ public final class ResourceFacetComponent implements Component {
     }
 
     /**
-     * Copy of the methods used to access the data. Maybe there is a better way than storing them all here but @MappedContainer
-     * wants flat hierarchies.
+     * Copy of the methods used to access the data. Maybe there is a better way than storing them all here but
+     * @MappedContainer wants flat hierarchies.
      */
 
 
@@ -91,7 +79,8 @@ public final class ResourceFacetComponent implements Component {
 
     public Vector2i getWorldPoint(int x, int y) {
         if (!gridWorldRegion.contains(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y,
+                    gridWorldRegion.toString()));
         }
         int xRelative = x - center.x();
         int yRelative = y - center.y();
@@ -99,7 +88,8 @@ public final class ResourceFacetComponent implements Component {
         int yNew = center.y() + Math.round((float) yRelative * gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
         if (!worldRegion.contains(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, worldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew,
+                    worldRegion.toString()));
         }
         return gridPoint;
     }
@@ -110,13 +100,15 @@ public final class ResourceFacetComponent implements Component {
 
     public Vector2i getRelativeGridPoint(int x, int y) {
         if (!relativeRegion.contains(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, relativeRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y,
+                    relativeRegion.toString()));
         }
         int xNew = Math.round((float) x / gridSize);
         int yNew = Math.round((float) y / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
         if (!gridRelativeRegion.contains(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridRelativeRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew,
+                    gridRelativeRegion.toString()));
         }
         return gridPoint;
     }
@@ -127,7 +119,8 @@ public final class ResourceFacetComponent implements Component {
 
     public Vector2i getWorldGridPoint(int x, int y) {
         if (!worldRegion.contains(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, worldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y,
+                    worldRegion.toString()));
         }
         int xRelative = x - center.x();
         int yRelative = y - center.y();
@@ -135,7 +128,8 @@ public final class ResourceFacetComponent implements Component {
         int yNew = center.y() + Math.round((float) yRelative / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
         if (!gridWorldRegion.contains(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew,
+                    gridWorldRegion.toString()));
         }
         return gridPoint;
     }
@@ -150,14 +144,16 @@ public final class ResourceFacetComponent implements Component {
 
     protected int getRelativeGridIndex(int x, int z) {
         if (!gridRelativeRegion.contains(x, z)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z,
+                    gridWorldRegion.toString()));
         }
         return x - gridRelativeRegion.minX() + gridRelativeRegion.sizeX() * (z - gridRelativeRegion.minY());
     }
 
     protected int getWorldGridIndex(int x, int z) {
         if (!gridWorldRegion.contains(x, z)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z,
+                    gridWorldRegion.toString()));
         }
         return x - gridWorldRegion.minX() + gridWorldRegion.sizeX() * (z - gridWorldRegion.minY());
     }

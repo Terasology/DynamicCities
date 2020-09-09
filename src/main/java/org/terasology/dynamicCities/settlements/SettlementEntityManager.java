@@ -42,16 +42,22 @@ import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.economy.components.MarketSubscriberComponent;
 import org.terasology.economy.events.SubscriberRegistrationEvent;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.nameTags.NameTagComponent;
-import org.terasology.logic.players.MinimapSystem;
-import org.terasology.math.Region3i;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.logic.nameTags.NameTagComponent;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.network.NetworkComponent;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.Share;
+import org.terasology.engine.utilities.random.FastRandom;
+import org.terasology.engine.utilities.random.Random;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.time.WorldTimeEvent;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
 import org.terasology.math.geom.ImmutableVector2f;
@@ -61,15 +67,9 @@ import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
+import org.terasology.minimap.logic.MinimapSystem;
 import org.terasology.namegenerator.town.TownNameProvider;
-import org.terasology.network.NetworkComponent;
-import org.terasology.registry.In;
-import org.terasology.registry.Share;
 import org.terasology.nui.Color;
-import org.terasology.utilities.random.FastRandom;
-import org.terasology.utilities.random.Random;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.time.WorldTimeEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -84,48 +84,35 @@ import java.util.Vector;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SettlementEntityManager extends BaseComponentSystem {
 
+    private final int minDistance = 500;
+    private final int settlementMaxRadius = 150;
+    private final Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
+    private final Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
     @In
     private EntityManager entityManager;
-
     private EntityRef settlementEntities;
-
     @In
     private RegionEntityManager regionEntityManager;
-
     @In
     private Construction constructer;
-
     @In
     private MinimapSystem minimapSystem;
-
     @In
     private BuildingManager buildingManager;
-
     @In
     private CultureManager cultureManager;
-
     @In
     private ThemeManager themeManager;
-
     @In
     private DistrictManager districtManager;
-
     @In
     private SettlementCachingSystem settlementCachingSystem;
-
     @In
     private TreeRemovalSystem treeRemovalSystem;
-
     @In
     private BlockBufferSystem blockBufferSystem;
-
-    private int minDistance = 500;
-    private int settlementMaxRadius = 150;
     private int cyclesLeft = 2; // 1 cycle = approx. 20 seconds
     private Random rng;
-    private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
-
-    private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
 
     @Override
     public void postBegin() {
@@ -179,11 +166,11 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     /**
      * Checks the provided region entity for suitability as a settlement in response to a CheckSiteSuitabilityEvent
-     *
+     * <p>
      * The default behavior will check that the region satisfies default distance and build area thresholds, and also
-     * ensures that the region's "sides" have been loaded. This can be extended by registering a new event handler
-     * with the same signature and annotation, but a lower priority. It can also be disabled completely by using a
-     * higher priority and consuming the event in your handler.
+     * ensures that the region's "sides" have been loaded. This can be extended by registering a new event handler with
+     * the same signature and annotation, but a lower priority. It can also be disabled completely by using a higher
+     * priority and consuming the event in your handler.
      *
      * @param event
      * @param siteRegion
@@ -201,10 +188,10 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     /**
      * Checks whether the settlement needs the given zone
-     *
-     * The default behavior checks the culture need for the zone, multiplies that by the population, then subtracts
-     * the areaPerZone for the given zone according to the ParcelList. If that "allowed zone area" is greater than
-     * the minimum area of all buildings for that zone, the check passes.
+     * <p>
+     * The default behavior checks the culture need for the zone, multiplies that by the population, then subtracts the
+     * areaPerZone for the given zone according to the ParcelList. If that "allowed zone area" is greater than the
+     * minimum area of all buildings for that zone, the check passes.
      *
      * @param event
      * @param settlement
@@ -285,7 +272,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         SettlementComponent settlementComponent = siteRegion.getComponent(SettlementComponent.class);
 
         // Generate name
-        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(), themeManager.getTownTheme(cultureComponent.theme));
+        TownNameProvider nameProvider = new TownNameProvider(rng.nextLong(),
+                themeManager.getTownTheme(cultureComponent.theme));
         settlementComponent.name = nameProvider.generateName();
 
         PopulationComponent populationComponent = new PopulationComponent(settlementComponent.population);
@@ -294,9 +282,11 @@ public class SettlementEntityManager extends BaseComponentSystem {
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
 
         //Create the district facet and DistrictTypeMap
-        Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
+        Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()),
+                SettlementConstants.SETTLEMENT_RADIUS);
         Border3D border = new Border3D(0, 0, 0);
-        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, siteComponent.hashCode(), districtManager, cultureComponent);
+        DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border,
+                SettlementConstants.DISTRICT_GRIDSIZE, siteComponent.hashCode(), districtManager, cultureComponent);
         if (districtGrid.districtMap.size() < 1) {
             logger.error("DistrictFacetComponent.districtMap not initialised!");
         }
@@ -320,7 +310,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         populationSubscriberComponent.productStorage = settlementEntity;
         populationSubscriberComponent.consumptionStorage = settlementEntity;
         populationSubscriberComponent.productionInterval = 500;
-        populationSubscriberComponent.production.put(populationComponent.popResourceType, Math.round(cultureComponent.growthRate));
+        populationSubscriberComponent.production.put(populationComponent.popResourceType,
+                Math.round(cultureComponent.growthRate));
 
         NetworkComponent networkComponent = new NetworkComponent();
         networkComponent.replicateMode = NetworkComponent.ReplicateMode.ALWAYS;
@@ -413,7 +404,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         Set<DynParcel> parcelsInQueue = buildingQueue.buildingQueue;
 
         for (DynParcel dynParcel : parcelsInQueue) {
-            Rect2i expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+            Rect2i expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS,
+                    SettlementConstants.MAX_TREE_RADIUS);
             if (!treeRemovalSystem.removeTreesInRegions(expandedParcel)) {
                 continue;
             }
@@ -433,13 +425,13 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     /**
      * Attempts to place new parcels for the settlement as needed
-     *
-     * For each zone type, this settlement sends a {@link CheckZoneNeededEvent}. If the event's
-     * `needed` field is true, a parcel is placed for that zone if possible. This method will then continue to place
-     * parcels for that zone as needed, sending a new event each time until one finally returns false or until the
-     * SettlementEntityManager is unable to place a needed parcel. In that case, the city's radius is increased and
-     * process for that particular zone type stops.
-     *
+     * <p>
+     * For each zone type, this settlement sends a {@link CheckZoneNeededEvent}. If the event's `needed` field is true,
+     * a parcel is placed for that zone if possible. This method will then continue to place parcels for that zone as
+     * needed, sending a new event each time until one finally returns false or until the SettlementEntityManager is
+     * unable to place a needed parcel. In that case, the city's radius is increased and process for that particular
+     * zone type stops.
+     * <p>
      * Also inflates the population capacity based on the area of each residential zone in the settlement
      *
      * @param settlement
@@ -501,7 +493,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
                     break;
                 }
 
-                Optional<DynParcel> parcelOptional = placeParcel(center, zone, parcels, buildingQueue, districtFacetComponent, maxIterations);
+                Optional<DynParcel> parcelOptional = placeParcel(center, zone, parcels, buildingQueue,
+                        districtFacetComponent, maxIterations);
                 //Grow settlement radius if no valid area was found
                 if (!parcelOptional.isPresent() && parcels.cityRadius < SettlementConstants.SETTLEMENT_RADIUS) {
                     parcels.cityRadius += SettlementConstants.BUILD_RADIUS_INTERVALL;
@@ -552,7 +545,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
             roadCache.put(dest.toString(), source.toString());
         }
 
-        //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the build() method
+        //Note: Saving of the actual added parcels to the parcel list happens when they are successfully build in the
+        // build() method
         //This is due to ensuring that changes made while constructing are added
 
         settlement.saveComponent(nameTagComponent);
@@ -619,7 +613,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
 
         for (RoadParcel parcel : parcelsInQueue) {
-            Set<Rect2i> expandedParcels = parcel.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+            Set<Rect2i> expandedParcels = parcel.expand(SettlementConstants.MAX_TREE_RADIUS,
+                    SettlementConstants.MAX_TREE_RADIUS);
             for (Rect2i region : expandedParcels) {
                 treeRemovalSystem.removeTreesInRegions(region);
             }
@@ -641,7 +636,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
     }
 
     private Optional<DynParcel> placeParcel(Vector3i center, String zone, ParcelList parcels,
-                                            BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
+                                            BuildingQueue buildingQueue,
+                                            DistrictFacetComponent districtFacetComponent, int maxIterations) {
         int iter = 0;
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
         int minSize = (minMaxSizes.get(zone).get(0).getX() < minMaxSizes.get(zone).get(0).getY())
@@ -657,10 +653,11 @@ public class SettlementEntityManager extends BaseComponentSystem {
         do {
             iter++;
             float angle = rng.nextFloat(0, 360);
-            //Subtract the maximum tree radius (13) from the parcel radius -> Some bigger buildings still could cause issues
+            //Subtract the maximum tree radius (13) from the parcel radius -> Some bigger buildings still could cause
+            // issues
             radius = rng.nextFloat(0, parcels.cityRadius - 32);
-            rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
-                    (int) Math.round(radius * Math.cos((double) angle)) + center.z());
+            rectPosition.set((int) Math.round(radius * Math.sin(angle) + center.x()),
+                    (int) Math.round(radius * Math.cos(angle)) + center.z());
             shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
         } while ((!parcels.isNotIntersecting(shape) || !buildingQueue.isNotIntersecting(shape)
                 || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)) || !checkIfTerrainIsBuildable(shape))

@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.dynamicCities.region;
 
@@ -25,23 +12,22 @@ import org.terasology.dynamicCities.region.components.UnregisteredRegionComponen
 import org.terasology.dynamicCities.settlements.SettlementFacet;
 import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
-import org.terasology.entitySystem.entity.EntityStore;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Region3i;
+import org.terasology.engine.entitySystem.entity.EntityStore;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.network.NetworkComponent;
+import org.terasology.engine.world.generation.EntityBuffer;
+import org.terasology.engine.world.generation.EntityProvider;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.facets.SurfaceHeightFacet;
+import org.terasology.engine.world.generation.facets.base.BaseFieldFacet2D;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.network.NetworkComponent;
-import org.terasology.world.generation.EntityBuffer;
-import org.terasology.world.generation.EntityProvider;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
-import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
 /**
- * Add an entity for each region to serve as storage for relevant data
- * At worldgen create for each region one
- * Afterwards, if no settlement is adjacent clear them of unrelevant data
- * Only create an entity if it's a surface region
+ * Add an entity for each region to serve as storage for relevant data At worldgen create for each region one
+ * Afterwards, if no settlement is adjacent clear them of unrelevant data Only create an entity if it's a surface
+ * region
  */
 
 public class RegionEntityProvider implements EntityProvider {
@@ -86,7 +72,7 @@ public class RegionEntityProvider implements EntityProvider {
             buffer.enqueue(entityStore);
 
         }
-   }
+    }
 
     //Checks if the region is on the surface
     protected boolean checkCorners(Region3i worldRegion, BaseFieldFacet2D facet) {
@@ -95,7 +81,7 @@ public class RegionEntityProvider implements EntityProvider {
         int counter = 0;
         float[] corners = new float[5];
         Vector2i[] positions = new Vector2i[5];
-        
+
         positions[0] = new Vector2i(max.x(), max.z());
         positions[1] = new Vector2i(min.x(), min.z());
         positions[2] = new Vector2i(min.x() + worldRegion.sizeX(), min.z());

@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.region.components;
 
 import com.google.common.collect.Maps;
@@ -22,8 +9,8 @@ import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.dynamicCities.world.trees.TreeGenerator;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorLSystem;
-import org.terasology.entitySystem.Component;
-import org.terasology.math.Region3i;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.math.Region3i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector3i;
@@ -35,14 +22,14 @@ import java.util.Map;
 public final class TreeFacetComponent implements Component {
 
 
-    public boolean privateToOwner = true;
-
     public final Map<String, TreeGeneratorContainer> relData = Maps.newLinkedHashMap();
+    public boolean privateToOwner = true;
     public Region3i relativeRegion = Region3i.EMPTY;
     public Region3i worldRegion = Region3i.EMPTY;
     public Vector3i center = new Vector3i();
 
-    public TreeFacetComponent() { }
+    public TreeFacetComponent() {
+    }
 
     public TreeFacetComponent(TreeFacet treeFacet) {
 
@@ -55,7 +42,8 @@ public final class TreeFacetComponent implements Component {
                 TreeGeneratorLSystem treeGen = (TreeGeneratorLSystem) entry.getValue();
                 RecursiveTreeGeneratorLSystem recursiveTreeGeneratorLSystem = treeGen.getRecursiveGenerator();
                 TreeGeneratorContainer container = new TreeGeneratorContainer(treeGen.getLeafType().toString(),
-                        treeGen.getBarkType().toString(), treeGen.getInitialAxiom(), TreeGeneratorLSystem.class.toString(), recursiveTreeGeneratorLSystem.getMaxDepth(),
+                        treeGen.getBarkType().toString(), treeGen.getInitialAxiom(),
+                        TreeGeneratorLSystem.class.toString(), recursiveTreeGeneratorLSystem.getMaxDepth(),
                         recursiveTreeGeneratorLSystem.getAngle(), recursiveTreeGeneratorLSystem.getRuleSet());
                 relData.put(entry.getKey().toString(), container);
             } else if (entry.getValue().getClass() == TreeGeneratorCactus.class) {
@@ -72,36 +60,36 @@ public final class TreeFacetComponent implements Component {
     private Rect2i copyRect2i(Rect2i value) {
         return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
     }
-    
+
     public TreeGeneratorContainer get(int x, int y, int z) {
         return get(new Vector3i(x, y, z));
     }
 
-    
+
     public TreeGeneratorContainer get(BaseVector3i pos) {
         checkRelativeCoords(pos.x(), pos.y(), pos.z());
 
         return relData.get(pos.toString());
     }
 
-    
+
     public void set(int x, int y, int z, TreeGeneratorContainer value) {
         set(new Vector3i(x, y, z), value);
     }
 
-    
+
     public void set(BaseVector3i pos, TreeGeneratorContainer value) {
         checkRelativeCoords(pos.x(), pos.y(), pos.z());
 
         relData.put(pos.toString(), value); // TODO: consider using an immutable vector here
     }
 
-    
+
     public TreeGeneratorContainer getWorld(BaseVector3i pos) {
         return getWorld(pos.x(), pos.y(), pos.z());
     }
 
-    
+
     public TreeGeneratorContainer getWorld(int x, int y, int z) {
         checkWorldCoords(x, y, z);
 
@@ -109,12 +97,12 @@ public final class TreeFacetComponent implements Component {
         return relData.get(index.toString());
     }
 
-    
+
     public void setWorld(BaseVector3i pos, TreeGeneratorContainer value) {
         setWorld(pos.x(), pos.y(), pos.z(), value);
     }
 
-    
+
     public void setWorld(int x, int y, int z, TreeGeneratorContainer value) {
         checkWorldCoords(x, y, z);
 
@@ -188,7 +176,7 @@ public final class TreeFacetComponent implements Component {
                 z - relativeRegion.minZ() + worldRegion.minZ());
     }
 
-    
+
     public String toString() {
         Vector3i worldMin = worldRegion.min();
         Vector3i relMin = relativeRegion.min();

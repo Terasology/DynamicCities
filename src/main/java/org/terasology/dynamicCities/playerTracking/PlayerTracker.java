@@ -10,25 +10,25 @@ import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.settlements.SettlementCachingSystem;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.characters.events.OnEnterBlockEvent;
-import org.terasology.logic.console.Console;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.nameTags.NameTagComponent;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.characters.events.OnEnterBlockEvent;
+import org.terasology.engine.logic.console.Console;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.logic.nameTags.NameTagComponent;
+import org.terasology.engine.network.Client;
+import org.terasology.engine.network.NetworkSystem;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.Share;
+import org.terasology.engine.world.WorldComponent;
+import org.terasology.engine.world.chunks.event.PurgeWorldEvent;
 import org.terasology.math.geom.Circle;
 import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector3f;
-import org.terasology.network.Client;
-import org.terasology.network.NetworkSystem;
-import org.terasology.registry.In;
-import org.terasology.registry.Share;
 import org.terasology.nui.FontColor;
-import org.terasology.world.WorldComponent;
-import org.terasology.world.chunks.event.PurgeWorldEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,23 +42,19 @@ import java.util.Objects;
 public class PlayerTracker extends BaseComponentSystem {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayerTracker.class);
-
+    private final Map<EntityRef, EntityRef> prevLoc = new HashMap<>();
     @In
     private NetworkSystem networkSystem;
-
     @In
     private Console console;
-
     @In
     private SettlementEntityManager settlementEntityManager;
-
     @In
     private SettlementCachingSystem settlementCachingSystem;
 
-    private final Map<EntityRef, EntityRef> prevLoc = new HashMap<>();
-
     /**
      * Called whenever a block is entered
+     *
      * @param event the event
      * @param entity the character entity reference "player:engine"
      */
@@ -96,7 +92,8 @@ public class PlayerTracker extends BaseComponentSystem {
             Circle circle = new Circle(site.getLocalPosition().x(), site.getLocalPosition().z(), radius);
             if (circle.contains(worldPos)) {
                 if (newSettlement != null) {
-                    logger.warn("{} appears to be in {} and {} at the same time!", name, newSettlement.getComponent(NameTagComponent.class).text,
+                    logger.warn("{} appears to be in {} and {} at the same time!", name,
+                            newSettlement.getComponent(NameTagComponent.class).text,
                             settlement.getComponent(NameTagComponent.class).text);
                 }
 
@@ -117,8 +114,8 @@ public class PlayerTracker extends BaseComponentSystem {
 
     /**
      * Called whenever a named area is entered
+     *
      * @param event the event
-
      * @param entity the character entity reference "player:engine"
      */
 
@@ -138,6 +135,7 @@ public class PlayerTracker extends BaseComponentSystem {
 
     /**
      * Called whenever a named area is entered
+     *
      * @param event the event
      * @param entity the character entity reference "player:engine"
      */

@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements;
 
 
@@ -24,18 +11,18 @@ import org.terasology.dynamicCities.minimap.events.RemoveDistrictOverlayEvent;
 import org.terasology.dynamicCities.playerTracking.OnEnterSettlementEvent;
 import org.terasology.dynamicCities.settlements.components.ActiveSettlementComponent;
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.network.ClientComponent;
-import org.terasology.network.NetworkComponent;
-import org.terasology.network.NetworkSystem;
-import org.terasology.network.events.DisconnectedEvent;
-import org.terasology.registry.In;
-import org.terasology.registry.Share;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.network.ClientComponent;
+import org.terasology.engine.network.NetworkComponent;
+import org.terasology.engine.network.NetworkSystem;
+import org.terasology.engine.network.events.DisconnectedEvent;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.Share;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,22 +32,18 @@ import java.util.Iterator;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SettlementCachingSystem extends BaseComponentSystem {
 
+    private final Logger logger = LoggerFactory.getLogger(SettlementCachingSystem.class);
     private EntityRef settlementEntities;
-
     @In
     private EntityManager entityManager;
-
     @In
     private NetworkSystem networkSystem;
-
-
-    private Logger logger = LoggerFactory.getLogger(SettlementCachingSystem.class);
-
     private boolean isInitialised;
 
     @Override
     public void postBegin() {
-        Iterator<EntityRef> settlementEntitiesIterator = entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
+        Iterator<EntityRef> settlementEntitiesIterator =
+                entityManager.getEntitiesWith(SettlementsCacheComponent.class).iterator();
         settlementEntities = settlementEntitiesIterator.hasNext() ? settlementEntitiesIterator.next() : null;
         if (settlementEntities == null) {
             NetworkComponent networkComponent = new NetworkComponent();
@@ -71,7 +54,8 @@ public class SettlementCachingSystem extends BaseComponentSystem {
             settlementEntities = entityManager.create(settlementsCacheComponent, networkComponent);
             settlementEntities.setAlwaysRelevant(true);
         } else {
-            SettlementsCacheComponent settlementsCacheComponent = settlementEntities.getComponent(SettlementsCacheComponent.class);
+            SettlementsCacheComponent settlementsCacheComponent =
+                    settlementEntities.getComponent(SettlementsCacheComponent.class);
             if (settlementsCacheComponent.networkCache == null) {
                 settlementsCacheComponent.networkCache = new ArrayList<>();
             }
@@ -101,6 +85,7 @@ public class SettlementCachingSystem extends BaseComponentSystem {
     public void removeOverlayOfClient(DisconnectedEvent event, EntityRef client) {
         client.getComponent(ClientComponent.class).character.send(new RemoveDistrictOverlayEvent());
     }
+
     public SettlementsCacheComponent getSettlementEntitiesComponent() {
         if (settlementEntities.hasComponent(SettlementsCacheComponent.class)) {
             return settlementEntities.getComponent(SettlementsCacheComponent.class);
@@ -109,6 +94,7 @@ public class SettlementCachingSystem extends BaseComponentSystem {
             return null;
         }
     }
+
     public EntityRef getSettlementCacheEntity() {
         return settlementEntities;
     }

@@ -4,28 +4,28 @@ package org.terasology.dynamicCities.minimap;
 
 import org.joml.Rectanglef;
 import org.joml.Rectanglei;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.rendering.assets.texture.Texture;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.minimap.overlays.MinimapOverlay;
-import org.terasology.nui.util.RectUtility;
-import org.terasology.rendering.assets.texture.Texture;
 import org.terasology.nui.Canvas;
-import org.terasology.utilities.Assets;
+import org.terasology.nui.util.RectUtility;
 
 import java.util.Optional;
 
 public class CentreOverlay implements MinimapOverlay {
     private static final int ICON_SIZE = 32;
 
-    private EntityRef settlementCachingEntity;
-    private Vector2i iconSize = new Vector2i(ICON_SIZE, ICON_SIZE);
+    private final EntityRef settlementCachingEntity;
+    private final Vector2i iconSize = new Vector2i(ICON_SIZE, ICON_SIZE);
 
-    private Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
+    private final Logger logger = LoggerFactory.getLogger(DistrictOverlay.class);
 
     public CentreOverlay(EntityRef entityRef) {
         this.settlementCachingEntity = entityRef;
@@ -38,7 +38,8 @@ public class CentreOverlay implements MinimapOverlay {
             return;
         }
 
-        for (EntityRef settlement : settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
+        for (EntityRef settlement :
+                settlementCachingEntity.getComponent(SettlementsCacheComponent.class).settlementEntities.values()) {
             if (!settlement.isActive()) {
                 continue;
             }
@@ -48,8 +49,10 @@ public class CentreOverlay implements MinimapOverlay {
                 return;
             }
 
-            Vector2f location = new Vector2f(locationComponent.getLocalPosition().x(), locationComponent.getLocalPosition().z());
-            Vector2i mapPoint = RectUtility.map(worldRect, canvas.getRegion(), new Vector2i((int) location.x, (int) location.y), new Vector2i());
+            Vector2f location = new Vector2f(locationComponent.getLocalPosition().x(),
+                    locationComponent.getLocalPosition().z());
+            Vector2i mapPoint = RectUtility.map(worldRect, canvas.getRegion(), new Vector2i((int) location.x,
+                    (int) location.y), new Vector2i());
 
             Vector2i min = clamp(mapPoint, canvas.getRegion());
             Rectanglei region = RectUtility.createFromMinAndSize(min.x, min.y, iconSize.x, iconSize.y);
@@ -65,6 +68,7 @@ public class CentreOverlay implements MinimapOverlay {
 
     /**
      * Constrains a point to a specified region. Works like a vector clamp.
+     *
      * @param point: the coordinates of the point to be clamped
      * @param box: limits
      * @return new clamped coordinates of point

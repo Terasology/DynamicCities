@@ -4,21 +4,21 @@ package org.terasology.dynamicCities.settlements.components;
 
 
 import org.joml.Rectanglei;
+import org.joml.Vector2i;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
-import org.terasology.entitySystem.Component;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.math.JomlUtil;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.network.Replicate;
+import org.terasology.engine.utilities.procedural.WhiteNoise;
+import org.terasology.engine.world.generation.Border3D;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
-import org.joml.Vector2i;
-import org.terasology.network.Replicate;
-import org.terasology.utilities.procedural.WhiteNoise;
-import org.terasology.world.generation.Border3D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +30,8 @@ import java.util.stream.IntStream;
 public class DistrictFacetComponent implements Component {
 
     /**
-     * TODO: Count the area for each district. Define consumption of zonearea for each district (evenly distributed atm).
-     * TODO: Assign districts similar to parcels (look up if needs are already fulfilled before placement)
+     * TODO: Count the area for each district. Define consumption of zonearea for each district (evenly distributed
+     * atm). TODO: Assign districts similar to parcels (look up if needs are already fulfilled before placement)
      */
     @Replicate
     public Rectanglei relativeRegion = new Rectanglei();
@@ -56,9 +56,11 @@ public class DistrictFacetComponent implements Component {
     @Replicate
     public List<Vector2i> districtCenters;
 
-    public DistrictFacetComponent() { }
+    public DistrictFacetComponent() {
+    }
 
-    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, CultureComponent cultureComponent) {
+    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed,
+                                  DistrictManager districtManager, CultureComponent cultureComponent) {
         worldRegion = JomlUtil.from(border.expandTo2D(targetRegion));
         relativeRegion = JomlUtil.from(border.expandTo2D(targetRegion.size()));
         this.gridSize = gridSize;
@@ -85,7 +87,7 @@ public class DistrictFacetComponent implements Component {
             data.add(list);
         }
         /*districtCount = Math.round(TeraMath.fastAbs(randNumberGen.noise(15233, 45129)
-                * SettlementConstants.MAX_DISTRICTS));*/
+         * SettlementConstants.MAX_DISTRICTS));*/
         districtCount = SettlementConstants.MAX_DISTRICTS;
         int[] intMap = kmeans.kmeans(data, districtCount);
         districtMap = new ArrayList<>();
@@ -108,7 +110,8 @@ public class DistrictFacetComponent implements Component {
 
     private void mapDistrictTypes(DistrictManager districtManager, CultureComponent cultureComponent) {
         Map<String, Float> zoneArea = new HashMap<>();
-        ProbabilityDistribution<DistrictType> probabilityDistribution = new ProbabilityDistribution<>(districtManager.hashCode() | 413357);
+        ProbabilityDistribution<DistrictType> probabilityDistribution =
+                new ProbabilityDistribution<>(districtManager.hashCode() | 413357);
         Map<String, Float> culturalNeedsPercentage = cultureComponent.getProcentualsForZone();
         int totalAssignedArea = 0;
 
@@ -184,7 +187,8 @@ public class DistrictFacetComponent implements Component {
 
     public Vector2i getWorldPoint(int x, int y) {
         if (!gridWorldRegion.containsPoint(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y,
+                    gridWorldRegion.toString()));
         }
         int xRelative = x - center.x();
         int yRelative = y - center.y();
@@ -192,7 +196,8 @@ public class DistrictFacetComponent implements Component {
         int yNew = center.y() + Math.round((float) yRelative * gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
         if (!worldRegion.containsPoint(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, worldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew,
+                    worldRegion.toString()));
         }
         return gridPoint;
     }
@@ -203,13 +208,15 @@ public class DistrictFacetComponent implements Component {
 
     public Vector2i getRelativeGridPoint(int x, int y) {
         if (!relativeRegion.containsPoint(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, relativeRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y,
+                    relativeRegion.toString()));
         }
         int xNew = Math.round((float) x / gridSize);
         int yNew = Math.round((float) y / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
         if (!gridRelativeRegion.containsPoint(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridRelativeRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew,
+                    gridRelativeRegion.toString()));
         }
         return gridPoint;
     }
@@ -220,7 +227,8 @@ public class DistrictFacetComponent implements Component {
 
     public Vector2i getWorldGridPoint(int x, int y) {
         if (!worldRegion.containsPoint(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, worldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y,
+                    worldRegion.toString()));
         }
         int xRelative = x - center.x();
         int yRelative = y - center.y();
@@ -228,7 +236,8 @@ public class DistrictFacetComponent implements Component {
         int yNew = center.y() + Math.round((float) yRelative / gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
         if (!gridWorldRegion.containsPoint(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew,
+                    gridWorldRegion.toString()));
         }
         return gridPoint;
     }
@@ -243,14 +252,16 @@ public class DistrictFacetComponent implements Component {
 
     protected int getRelativeGridIndex(int x, int z) {
         if (!gridRelativeRegion.containsPoint(x, z)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z,
+                    gridWorldRegion.toString()));
         }
         return x - gridRelativeRegion.minX + gridRelativeRegion.lengthX() * (z - gridRelativeRegion.minY);
     }
 
     protected int getWorldGridIndex(int x, int z) {
         if (!gridWorldRegion.containsPoint(x, z)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z,
+                    gridWorldRegion.toString()));
         }
         return x - gridWorldRegion.minX + gridWorldRegion.lengthX() * (z - gridWorldRegion.minY);
     }

@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.facets;
 
@@ -20,11 +7,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DFloatFacet;
-import org.terasology.math.Region3i;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.facets.base.FieldFacet3D;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.FieldFacet3D;
 
 /**
  * Tests different implementations of {@link FieldFacet3D}.
@@ -45,12 +32,6 @@ public class Grid2DFloatFacetTest {
 
     protected Grid2DFloatFacet createFacet(Region3i region, Border3D extendBy, int gridSize) {
         return new FloatTestFacet(region, extendBy, gridSize);
-    }
-
-    public class FloatTestFacet extends Grid2DFloatFacet {
-        public FloatTestFacet(Region3i targetRegion, Border3D border, int gridSize) {
-            super(targetRegion, border, gridSize);
-        }
     }
 
     /**
@@ -104,13 +85,13 @@ public class Grid2DFloatFacetTest {
         facet.setWorld(0, 0, 1);
     }
 
-    // Powers of 2 can be represented as float without rounding errors !
-
     @Test
     public void testPrimitiveGetSet() {
         facet.set(0, 1, 2.0f);
         Assert.assertEquals(2.0f, facet.get(0, 1), 0.0);
     }
+
+    // Powers of 2 can be represented as float without rounding errors !
 
     @Test
     public void testBoxedGetSet() {
@@ -136,6 +117,12 @@ public class Grid2DFloatFacetTest {
     public void testMixedGetSet2() {
         facet.setWorld(24, 46, 32f);
         Assert.assertEquals(32.0f, facet.get(14, 16), 0.0);
+    }
+
+    public class FloatTestFacet extends Grid2DFloatFacet {
+        public FloatTestFacet(Region3i targetRegion, Border3D border, int gridSize) {
+            super(targetRegion, border, gridSize);
+        }
     }
 
 }

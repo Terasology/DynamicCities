@@ -1,24 +1,11 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.region.components;
 
 
 import org.terasology.dynamicCities.construction.LSystemRuleContainer;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
-import org.terasology.math.LSystemRule;
+import org.terasology.engine.math.LSystemRule;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.HashMap;
@@ -39,7 +26,8 @@ public final class TreeGeneratorContainer {
     public Map<String, LSystemRuleContainer> ruleSet;
 
     //For standard trees
-    public TreeGeneratorContainer(String leafType, String barkType, String initialAxiom, String className, int maxDepth, float angle, Map<Character, LSystemRule> ruleSet) {
+    public TreeGeneratorContainer(String leafType, String barkType, String initialAxiom, String className,
+                                  int maxDepth, float angle, Map<Character, LSystemRule> ruleSet) {
         this.leafType = leafType;
         this.barkType = barkType;
         this.initialAxiom = initialAxiom;
@@ -51,12 +39,14 @@ public final class TreeGeneratorContainer {
             this.ruleSet.put(entry.getKey().toString(), new LSystemRuleContainer(entry.getValue()));
         }
     }
+
     //For cacti
     public TreeGeneratorContainer(String cactusType) {
         barkType = cactusType;
         className = TreeGeneratorCactus.class.toString();
     }
 
-    public TreeGeneratorContainer(){}
+    public TreeGeneratorContainer() {
+    }
 
 }

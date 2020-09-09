@@ -4,9 +4,9 @@ package org.terasology.dynamicCities.districts;
 
 
 import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.entitySystem.Component;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.engine.entitySystem.Component;
 import org.terasology.nui.Color;
+import org.terasology.reflection.MappedContainer;
 
 import java.util.List;
 
@@ -19,7 +19,8 @@ public class DistrictType implements Component {
     public int color;
     public List<String> zones;
 
-    public DistrictType ( ) { }
+    public DistrictType() {
+    }
 
     public boolean isValidType(DynParcel parcel) {
         String zone = parcel.getZone();

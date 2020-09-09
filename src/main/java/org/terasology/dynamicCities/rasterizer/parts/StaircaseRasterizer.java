@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.dynamicCities.rasterizer.parts;
 
@@ -24,12 +11,12 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.Orientation;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
-import org.terasology.math.Side;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.world.WorldProvider;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.RectIterable;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.world.WorldProvider;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,6 +28,35 @@ public class StaircaseRasterizer extends AbsDynBuildingRasterizer<StaircaseBuild
 
     public StaircaseRasterizer(BlockTheme theme, WorldProvider worldProvider) {
         super(theme, StaircaseBuildingPart.class, worldProvider);
+    }
+
+    private static boolean isCorner(Rect2i rect, BaseVector2i v) {
+        int x = v.getX();
+        int y = v.getY();
+
+        return (x == rect.maxX() || x == rect.minX()) && (y == rect.minY() || y == rect.maxY());
+    }
+
+    private static Side findSide(Rect2i rect, BaseVector2i v, boolean clockwise) {
+        Side side = findSide(rect, v);
+        return clockwise ? side : side.reverse();
+    }
+
+    private static Side findSide(Rect2i rect, BaseVector2i v) {
+        // this method ignores corners
+        if (v.getX() == rect.maxX()) {
+            return Side.RIGHT;
+        }
+        if (v.getX() == rect.minX()) {
+            return Side.LEFT;
+        }
+        if (v.getY() == rect.minY()) {
+            return Side.FRONT;
+        }
+        if (v.getY() == rect.maxY()) {
+            return Side.BACK;
+        }
+        throw new IllegalArgumentException("Not on the outline");
     }
 
     @Override
@@ -80,35 +96,6 @@ public class StaircaseRasterizer extends AbsDynBuildingRasterizer<StaircaseBuild
                 y++;
             }
         }
-    }
-
-    private static boolean isCorner(Rect2i rect, BaseVector2i v) {
-        int x = v.getX();
-        int y = v.getY();
-
-        return (x == rect.maxX() || x == rect.minX()) && (y == rect.minY() || y == rect.maxY());
-    }
-
-    private static Side findSide(Rect2i rect, BaseVector2i v, boolean clockwise) {
-        Side side = findSide(rect, v);
-        return clockwise ? side : side.reverse();
-    }
-
-    private static Side findSide(Rect2i rect, BaseVector2i v) {
-        // this method ignores corners
-        if (v.getX() == rect.maxX()) {
-            return Side.RIGHT;
-        }
-        if (v.getX() == rect.minX()) {
-            return Side.LEFT;
-        }
-        if (v.getY() == rect.minY()) {
-            return Side.FRONT;
-        }
-        if (v.getY() == rect.maxY()) {
-            return Side.BACK;
-        }
-        throw new IllegalArgumentException("Not on the outline");
     }
 }
 

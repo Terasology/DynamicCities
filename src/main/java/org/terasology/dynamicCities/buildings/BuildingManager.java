@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.buildings;
 
 import com.google.common.collect.Multimap;
@@ -25,25 +12,25 @@ import org.terasology.cities.bldg.gen.RectHouseGenerator;
 import org.terasology.cities.bldg.gen.SimpleChurchGenerator;
 import org.terasology.cities.bldg.gen.TownHallGenerator;
 import org.terasology.commonworld.Orientation;
-import org.terasology.context.Context;
 import org.terasology.dynamicCities.gen.GeneratorRegistry;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.context.Context;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.Share;
+import org.terasology.engine.utilities.random.MersenneRandom;
+import org.terasology.engine.world.WorldProvider;
 import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.registry.In;
-import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
-import org.terasology.utilities.random.MersenneRandom;
-import org.terasology.world.WorldProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,14 +51,14 @@ import java.util.stream.Collectors;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class BuildingManager extends BaseComponentSystem {
 
-    private Multimap<String, GenericBuildingComponent> buildings = MultimapBuilder.hashKeys().hashSetValues().build();
-    private Logger logger = LoggerFactory.getLogger(BuildingManager.class);
-    private MersenneRandom rng;
-    private Map<String, EntityRef> templates = new HashMap<>();
-
-    private List<BuildingGenerator> generators = new ArrayList<>();
-    private Map<String, List<Vector2i>> minMaxSizePerZone = new HashMap<>();
+    private final Multimap<String, GenericBuildingComponent> buildings =
+            MultimapBuilder.hashKeys().hashSetValues().build();
+    private final Logger logger = LoggerFactory.getLogger(BuildingManager.class);
+    private final Map<String, EntityRef> templates = new HashMap<>();
+    private final List<BuildingGenerator> generators = new ArrayList<>();
+    private final Map<String, List<Vector2i>> minMaxSizePerZone = new HashMap<>();
     private final int maxIterationsForBuildingSelection = 100;
+    private MersenneRandom rng;
     @In
     private Context context;
 
@@ -124,7 +111,8 @@ public class BuildingManager extends BaseComponentSystem {
 
             }
         }
-        logger.info("Finished loading buildings. Number of building types: " + buildings.values().size() + " | Strings found: " + buildings.keySet().toString());
+        logger.info("Finished loading buildings. Number of building types: " + buildings.values().size() + " | " +
+                "Strings found: " + buildings.keySet().toString());
 
 
         // Initialising minMaxSizes
@@ -132,7 +120,8 @@ public class BuildingManager extends BaseComponentSystem {
             minMaxSizePerZone.put(zone, getMinMaxForZone(zone));
         }
 
-        CommercialBuildingGenerator commercialBuildingGenerator = new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
+        CommercialBuildingGenerator commercialBuildingGenerator =
+                new CommercialBuildingGenerator(worldProvider.getSeed().hashCode() / 10);
         RectHouseGenerator rectHouseGenerator = new RectHouseGenerator();
         SimpleChurchGenerator simpleChurchGenerator = new SimpleChurchGenerator(worldProvider.getSeed().hashCode() / 7);
         TownHallGenerator townHallGenerator = new TownHallGenerator();
@@ -171,7 +160,7 @@ public class BuildingManager extends BaseComponentSystem {
             } while ((building.minSize.x > shape.minX() || building.minSize.y > shape.minY()
                     || building.maxSize.x < shape.maxX() || building.maxSize.y < shape.maxY()) && iter < 100);
             if (iter >= 99) {
-                logger.error("No building types found for " + zone + "because no matching building for parcel " + shape.toString() +  " was found!");
+                logger.error("No building types found for " + zone + "because no matching building for parcel " + shape.toString() + " was found!");
                 return Optional.empty();
             }
             return Optional.of(building);
@@ -180,7 +169,8 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.empty();
     }
 
-    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, CultureComponent cultureComponent) {
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape,
+                                                                                CultureComponent cultureComponent) {
         if (buildings.containsKey(zone)) {
             // TODO: needs to be adapted if buildings have a specific spawn chance
             List<GenericBuildingComponent> availableBuildings =
@@ -211,7 +201,8 @@ public class BuildingManager extends BaseComponentSystem {
             }
 
             if (selectedBuilding != null) {
-                logger.debug("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.width(), shape.height());
+                logger.debug("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone,
+                        shape.width(), shape.height());
                 return Optional.of(entityManager.getComponentLibrary().copy(selectedBuilding));
             }
         }

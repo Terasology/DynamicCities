@@ -16,24 +16,24 @@ import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.utilities.Toolbox;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.console.commandSystem.annotations.Command;
-import org.terasology.logic.console.commandSystem.annotations.Sender;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.logic.nameTags.NameTagComponent;
-import org.terasology.logic.permission.PermissionManager;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.console.commandSystem.annotations.Command;
+import org.terasology.engine.logic.console.commandSystem.annotations.Sender;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.logic.nameTags.NameTagComponent;
+import org.terasology.engine.logic.permission.PermissionManager;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.Share;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.registry.In;
-import org.terasology.registry.Share;
 import org.terasology.nui.Color;
 
 import java.util.ArrayList;
@@ -45,23 +45,20 @@ import java.util.Map;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class RegionEntityManager extends BaseComponentSystem {
 
+    private final int gridSize = 96;
+    private final Logger logger = LoggerFactory.getLogger(RegionEntityManager.class);
     @In
     private EntityManager entityManager;
-
     @In
     private SettlementEntityManager settlementEntities;
-
     private RegionEntitiesComponent regionEntitiesComponent;
     private EntityRef regionStoreEntity;
-
-
-    private final int gridSize = 96;
-    private Logger logger = LoggerFactory.getLogger(RegionEntityManager.class);
     private boolean toggledNameTags = false;
 
     @Override
     public void postBegin() {
-        Iterator<EntityRef> regionEntitiesIterator = entityManager.getEntitiesWith(RegionEntitiesComponent.class).iterator();
+        Iterator<EntityRef> regionEntitiesIterator =
+                entityManager.getEntitiesWith(RegionEntitiesComponent.class).iterator();
         while (regionEntitiesIterator.hasNext()) {
             EntityRef regionStore = regionEntitiesIterator.next();
             if (regionStore.hasComponent(RegionMainStoreComponent.class)) {
@@ -75,7 +72,8 @@ public class RegionEntityManager extends BaseComponentSystem {
         regionStoreEntity.setAlwaysRelevant(true);
     }
 
-    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class, ResourceFacetComponent.class})
+    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class,
+            RoughnessFacetComponent.class, ResourceFacetComponent.class})
     public void registerRegion(OnActivatedComponent event, EntityRef region) {
         add(region);
         region.removeComponent(UnregisteredRegionComponent.class);
@@ -89,7 +87,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         region.removeComponent(UnassignedRegionComponent.class);
     }
 
-    
+
     public RegionEntitiesComponent getRegionEntitiesComponent() {
         return regionEntitiesComponent;
     }
@@ -159,13 +157,13 @@ public class RegionEntityManager extends BaseComponentSystem {
     }
 
     public boolean cellIsLoaded(Vector2i position) {
-        Map<String, Integer> cellGrid =regionEntitiesComponent.cellGrid;
+        Map<String, Integer> cellGrid = regionEntitiesComponent.cellGrid;
         int cellSize = regionEntitiesComponent.cellSize;
         return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
     }
 
     public boolean cellIsLoaded(String posString) {
-        Map<String, Integer> cellGrid =regionEntitiesComponent.cellGrid;
+        Map<String, Integer> cellGrid = regionEntitiesComponent.cellGrid;
         int cellSize = regionEntitiesComponent.cellSize;
         Vector2i position = Toolbox.stringToVector2i(posString);
         return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
@@ -176,7 +174,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         List<EntityRef> regions = new ArrayList<>();
 
         Vector2i cellCenter = getCellVector(position);
-        int edgeLength = Math.round((float)Math.sqrt(cellSize));
+        int edgeLength = Math.round((float) Math.sqrt(cellSize));
         Rect2i cellRegion = Rect2i.createFromMinAndMax(-edgeLength, -edgeLength, edgeLength, edgeLength);
         Vector2i regionWorldPos = new Vector2i();
         for (BaseVector2i pos : cellRegion.contents()) {
@@ -196,12 +194,12 @@ public class RegionEntityManager extends BaseComponentSystem {
     public List<EntityRef> getRegionsInCell(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
         Vector2i pos = new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z());
-        return  getRegionsInCell(pos);
-    }
-    public List<EntityRef> getRegionsInCell(String posString) {
-        return  getRegionsInCell(Toolbox.stringToVector2i(posString));
+        return getRegionsInCell(pos);
     }
 
+    public List<EntityRef> getRegionsInCell(String posString) {
+        return getRegionsInCell(Toolbox.stringToVector2i(posString));
+    }
 
 
     public boolean checkSidesLoadedLong(Vector2i pos) {
@@ -211,7 +209,8 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkSidesLoadedLong(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(),
+                regionLocation.getLocalPosition().z()));
         return checkSidesLoadedLong(pos);
     }
 
@@ -227,14 +226,15 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkSidesLoadedNear(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(),
+                regionLocation.getLocalPosition().z()));
         return checkSidesLoadedNear(pos);
     }
 
     public boolean checkFullLoaded(Vector2i pos) {
         Rect2i cube = Rect2i.createFromMinAndMax(-1, -1, 1, 1);
         Vector2i cellPos = new Vector2i();
-        for(BaseVector2i cubePos : cube.contents()) {
+        for (BaseVector2i cubePos : cube.contents()) {
             cellPos.set(pos.x() + cubePos.x() * gridSize, pos.y() + cubePos.y() * gridSize);
             if (!cellIsLoaded(cellPos)) {
                 return false;
@@ -245,7 +245,8 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkFullLoaded(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(),
+                regionLocation.getLocalPosition().z()));
         return checkFullLoaded(pos);
     }
 

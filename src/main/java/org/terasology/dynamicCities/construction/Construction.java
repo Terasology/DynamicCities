@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.construction;
 
 import org.slf4j.Logger;
@@ -73,18 +60,29 @@ import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
 import org.terasology.dynamicCities.roads.RoadSegment;
 import org.terasology.dynamicCities.settlements.events.CheckBuildingForParcelEvent;
 import org.terasology.economy.components.MultiInvStorageComponent;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.math.Region3i;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.network.NetworkSystem;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.Share;
+import org.terasology.engine.world.BlockEntityRegistry;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.entity.placement.PlaceBlocks;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.facets.SurfaceHeightFacet;
 import org.terasology.gestalt.assets.management.AssetManager;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Region3i;
-import org.terasology.math.Side;
+import org.terasology.inventory.logic.InventoryManager;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.ImmutableVector2i;
@@ -92,21 +90,10 @@ import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.network.NetworkSystem;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
-import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 import org.terasology.structureTemplates.util.BlockRegionUtilities;
-import org.terasology.world.BlockEntityRegistry;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.entity.placement.PlaceBlocks;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,58 +108,44 @@ import java.util.stream.Collectors;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class Construction extends BaseComponentSystem {
 
-    @In
-    private WorldProvider worldProvider;
-
-    @In
-    private BlockManager blockManager;
-
-    @In
-    private BlockEntityRegistry blockEntityRegistry;
-
-    @In
-    private BlockBufferSystem blockBufferSystem;
-
-    @In
-    private PlayerTracker playerTracker;
-
-    @In
-    private NetworkSystem networkSystem;
-
-    @In
-    private BuildingManager buildingManager;
-
-    @In
-    private StructureTemplateProvider templateProviderSystem;
-
-    @In
-    private EntityManager entityManager;
-
-    @In
-    private AssetManager assetManager;
-
-    @In
-    private InventoryManager inventoryManager;
-
-
-    private BlockTheme cityTheme;
-    private BlockTheme roadTheme;
-
-    private Block air;
-    private Block plant;
-    private Block water;
-    private Block defaultBlock;
-    private int maxMinDeviation = 40;
-    private RoadRasterizer roadRasterizer;
+    private final int maxMinDeviation = 40;
     private final List<AbsDynBuildingRasterizer> stdRasterizers = new ArrayList<>();
     private final List<WindowRasterizer> windowRasterizers = new ArrayList<>();
     private final List<DoorRasterizer> doorRasterizers = new ArrayList<>();
     private final List<RoofRasterizer> roofRasterizers = new ArrayList<>();
     private final List<DecorationRasterizer> decorationRasterizers = new ArrayList<>();
     private final List<Block> plantBlocks = new ArrayList<>();
-    private Logger logger = LoggerFactory.getLogger(Construction.class);
-
-    private Map<Integer, Integer> segmentCache = new HashMap<>();
+    private final Logger logger = LoggerFactory.getLogger(Construction.class);
+    private final Map<Integer, Integer> segmentCache = new HashMap<>();
+    @In
+    private WorldProvider worldProvider;
+    @In
+    private BlockManager blockManager;
+    @In
+    private BlockEntityRegistry blockEntityRegistry;
+    @In
+    private BlockBufferSystem blockBufferSystem;
+    @In
+    private PlayerTracker playerTracker;
+    @In
+    private NetworkSystem networkSystem;
+    @In
+    private BuildingManager buildingManager;
+    @In
+    private StructureTemplateProvider templateProviderSystem;
+    @In
+    private EntityManager entityManager;
+    @In
+    private AssetManager assetManager;
+    @In
+    private InventoryManager inventoryManager;
+    private BlockTheme cityTheme;
+    private BlockTheme roadTheme;
+    private Block air;
+    private Block plant;
+    private Block water;
+    private Block defaultBlock;
+    private RoadRasterizer roadRasterizer;
 
     /**
      * Initialises the system and rasterizers with default themes
@@ -256,8 +229,9 @@ public class Construction extends BaseComponentSystem {
 
     /**
      * Setup external rasterizer to be used for the road and it's block theme
+     *
      * @param rasterizer to be used for the road
-     * @param theme      theme that the rasterizer will use
+     * @param theme theme that the rasterizer will use
      */
     public void setRoadRasterizer(RoadRasterizer rasterizer, BlockTheme theme) {
         roadRasterizer = rasterizer;
@@ -267,9 +241,9 @@ public class Construction extends BaseComponentSystem {
     /**
      * Maybe return a structured data with (int or false) as return value
      *
-     * @param area          The area which should be flattened
+     * @param area The area which should be flattened
      * @param defaultHeight A rough estimation of the mean height of the terrain
-     * @param filler        The blocktype which should be used to fill up terrain under the mean height
+     * @param filler The blocktype which should be used to fill up terrain under the mean height
      * @return The height on which it was flattened to
      */
     public int flatten(Rect2i area, int defaultHeight, Block filler) {
@@ -281,7 +255,8 @@ public class Construction extends BaseComponentSystem {
         SurfaceHeightFacet surfaceHeightFacet = sample(area, defaultHeight);
         int meanHeight = 0;
         Vector3i setPos = new Vector3i();
-        Region3i areaRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), defaultHeight - maxMinDeviation, area.minY()),
+        Region3i areaRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), defaultHeight - maxMinDeviation,
+                        area.minY()),
                 new Vector3i(area.maxX(), defaultHeight + maxMinDeviation, area.maxY()));
 
         if (!worldProvider.isRegionRelevant(areaRegion)) {
@@ -317,7 +292,7 @@ public class Construction extends BaseComponentSystem {
     }
 
     /**
-     * @param area   The area which should be sampled
+     * @param area The area which should be sampled
      * @param height A rough estimation of the mean height of the terrain
      * @return
      */
@@ -326,7 +301,8 @@ public class Construction extends BaseComponentSystem {
         BaseVector3i minRegionPos = new Vector3i(area.minX(), height - maxMinDeviation, area.minY());
         BaseVector3i maxRegionPos = new Vector3i(area.maxX(), height + maxMinDeviation, area.maxY());
         Border3D border = new Border3D(0, 0, 0);
-        SurfaceHeightFacet surfaceHeightFacet = new SurfaceHeightFacet(Region3i.createBounded(minRegionPos, maxRegionPos), border);
+        SurfaceHeightFacet surfaceHeightFacet = new SurfaceHeightFacet(Region3i.createBounded(minRegionPos,
+                maxRegionPos), border);
         Vector3i pos = new Vector3i();
 
         for (int x = area.minX(); x <= area.maxX(); x++) {
@@ -345,7 +321,8 @@ public class Construction extends BaseComponentSystem {
     }
 
     /**
-     * Gets a random building according to {@link BuildingManager#getRandomBuildingOfZoneForCulture(String, Rect2i, CultureComponent)}
+     * Gets a random building according to {@link BuildingManager#getRandomBuildingOfZoneForCulture(String, Rect2i,
+     * CultureComponent)}
      *
      * @param event
      * @param settlement
@@ -360,7 +337,8 @@ public class Construction extends BaseComponentSystem {
 
     //the standard strategy used in Cities and StaticCities module
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
-        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
+        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255,
+                        dynParcel.getShape().minY()),
                 new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
@@ -376,8 +354,10 @@ public class Construction extends BaseComponentSystem {
         GenericBuildingComponent building = event.building.get();
         if (building.isScaledDown) {
             Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
-            dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));
-            region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
+            dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference),
+                    dynParcel.shape.max().sub(difference));
+            region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255,
+                            dynParcel.getShape().minY()),
                     new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
         }
 
@@ -404,7 +384,8 @@ public class Construction extends BaseComponentSystem {
         for (EntityRef player : playerCityMap.keySet()) {
             if (playerCityMap.get(player) == settlement) {
                 LocationComponent playerLocation = player.getComponent(LocationComponent.class);
-                if (playerLocation != null && dynParcel.getShape().contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
+                if (playerLocation != null && dynParcel.getShape().contains(playerLocation.getLocalPosition().x(),
+                        playerLocation.getLocalPosition().z())) {
                     return false;
                 }
             }
@@ -419,7 +400,8 @@ public class Construction extends BaseComponentSystem {
                 dynParcel.buildingEntity = entityManager.create(entityPrefab.get());
                 dynParcel.buildingEntity.addComponent(new LocationComponent(new Vector3f(
                         (dynParcel.getShape().minX() + dynParcel.getShape().maxX()) / 2, dynParcel.height,
-                        (dynParcel.getShape().minY() + dynParcel.getShape().maxY()) / 2))); // midpoint of the parcel shape, and the bottom of the building
+                        (dynParcel.getShape().minY() + dynParcel.getShape().maxY()) / 2))); // midpoint of the parcel
+                // shape, and the bottom of the building
                 dynParcel.buildingEntity.addComponent(new SettlementRefComponent(settlement));
                 dynParcel.buildingEntity.addComponent(new DynParcelRefComponent(dynParcel));
                 dynParcel.buildingEntity.send(new BuildingEntitySpawnedEvent());
@@ -453,7 +435,8 @@ public class Construction extends BaseComponentSystem {
         Optional<List<BuildingGenerator>> generatorsOptional = buildingManager.getGeneratorsForBuilding(building);
         if (generatorsOptional.isPresent()) {
             List<BuildingGenerator> generators = generatorsOptional.get();
-            List<Building> compositeBuildings = generators.stream().map(generator -> generator.generate(dynParcel, hm)).collect(Collectors.toList());
+            List<Building> compositeBuildings = generators.stream().map(generator -> generator.generate(dynParcel,
+                    hm)).collect(Collectors.toList());
 
             for (Building compositeBuilding : compositeBuildings) {
                 for (AbsDynBuildingRasterizer rasterizer : stdRasterizers) {
@@ -511,15 +494,18 @@ public class Construction extends BaseComponentSystem {
                 }
 
                 // offset within the parcel, so the template is placed at the centre.
-                BlockRegionTransform localTransform = BlockRegionTransform.createMovingThenRotating(Vector3i.zero(), startSide, endSide);
+                BlockRegionTransform localTransform = BlockRegionTransform.createMovingThenRotating(Vector3i.zero(),
+                        startSide, endSide);
                 Vector3i microOffset = localTransform.transformVector3i(
                         BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))).invert();
 
                 // offset in world space
-                Vector3i worldOffset = new Vector3i(shape.minX() + Math.round((shape.sizeX()) / 2f) - 1, dynParcel.height,
+                Vector3i worldOffset = new Vector3i(shape.minX() + Math.round((shape.sizeX()) / 2f) - 1,
+                        dynParcel.height,
                         shape.minY() + Math.round((shape.sizeY()) / 2f) - 1);
                 Vector3i finalLocation = worldOffset.add(microOffset);
-                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, finalLocation);
+                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide
+                        , endSide, finalLocation);
 
                 template.send(new SpawnStructureBufferedEvent(blockRegionTransform));
                 if (building.isEntity) {
@@ -593,7 +579,8 @@ public class Construction extends BaseComponentSystem {
             for (EntityRef player : playerCityMap.keySet()) {
                 if (playerCityMap.get(player) == settlement) {
                     LocationComponent playerLocation = player.getComponent(LocationComponent.class);
-                    if (playerLocation != null && segment.rect.contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
+                    if (playerLocation != null && segment.rect.contains(playerLocation.getLocalPosition().x(),
+                            playerLocation.getLocalPosition().z())) {
                         segmentFailed = true;
                         shouldRaster = false;
                         break;
