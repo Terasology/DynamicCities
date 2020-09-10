@@ -6,7 +6,7 @@ package org.terasology.dynamicCities.region.components;
 import org.terasology.dynamicCities.construction.LSystemRuleContainer;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.engine.math.LSystemRule;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -4,7 +4,7 @@ package org.terasology.dynamicCities.construction;
 
 import org.terasology.engine.world.block.Block;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 @MappedContainer
 public final class BufferedBlock {

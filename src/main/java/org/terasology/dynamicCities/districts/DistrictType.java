@@ -6,7 +6,7 @@ package org.terasology.dynamicCities.districts;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.engine.entitySystem.Component;
 import org.terasology.nui.Color;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.List;
 

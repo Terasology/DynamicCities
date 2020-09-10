@@ -4,7 +4,7 @@ package org.terasology.dynamicCities.construction;
 
 
 import org.terasology.engine.math.LSystemRule;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 @MappedContainer
 public final class LSystemRuleContainer {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.resource;
 
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 /**
  * This is not to be confused with the economy resource definition, although they can possibly converted into such later

@@ -5,7 +5,7 @@ package org.terasology.dynamicCities.sites;
 
 import org.terasology.engine.entitySystem.Component;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.Objects;
 

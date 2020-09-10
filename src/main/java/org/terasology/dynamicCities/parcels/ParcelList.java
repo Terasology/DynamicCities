@@ -7,7 +7,7 @@ import org.terasology.cities.parcels.Parcel;
 import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.network.Replicate;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;

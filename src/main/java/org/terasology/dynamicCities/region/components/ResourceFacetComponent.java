@@ -10,7 +10,7 @@ import org.terasology.engine.entitySystem.Component;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.HashMap;
 import java.util.List;

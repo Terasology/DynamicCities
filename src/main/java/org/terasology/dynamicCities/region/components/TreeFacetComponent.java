@@ -14,7 +14,7 @@ import org.terasology.engine.math.Region3i;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector3i;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.Map;
 
