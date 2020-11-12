@@ -25,13 +25,13 @@ import org.terasology.world.generation.FacetProvider;
 import org.terasology.world.generation.GeneratingRegion;
 import org.terasology.world.generation.Produces;
 import org.terasology.world.generation.Requires;
+import org.terasology.world.generation.facets.ElevationFacet;
 import org.terasology.world.generation.facets.SeaLevelFacet;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
 import org.terasology.world.generator.plugin.RegisterPlugin;
 
 @RegisterPlugin
 @Produces(RoughnessFacet.class)
-@Requires({@Facet(value = SurfaceHeightFacet.class),
+@Requires({@Facet(value = ElevationFacet.class),
         @Facet(value = SeaLevelFacet.class)})
 /**
  * This facet will be used to store information about the height variations in grid cells with the size a
@@ -52,7 +52,7 @@ public class RoughnessProvider implements FacetProvider {
         RoughnessFacet facet = new RoughnessFacet(region.getRegion(), border, gridSize);
 
         SeaLevelFacet seaLevelFacet = region.getRegionFacet(SeaLevelFacet.class);
-        SurfaceHeightFacet surfaceHeightFacet = region.getRegionFacet(SurfaceHeightFacet.class);
+        ElevationFacet surfaceHeightFacet = region.getRegionFacet(ElevationFacet.class);
         Rect2i processRegion = facet.getGridWorldRegion();
 
         for (BaseVector2i pos : processRegion.contents()) {

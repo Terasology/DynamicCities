@@ -15,16 +15,12 @@ import org.terasology.world.generation.Facet;
 import org.terasology.world.generation.GeneratingRegion;
 import org.terasology.world.generation.Produces;
 import org.terasology.world.generation.Requires;
-import org.terasology.world.generation.facets.SeaLevelFacet;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
 
 /**
  * Marks sites suitable to build settlements on
  */
 @Produces(SiteFacet.class)
-@Requires({ @Facet(RoughnessFacet.class),
-            @Facet(SeaLevelFacet.class),
-            @Facet(SurfaceHeightFacet.class)})
+@Requires(@Facet(RoughnessFacet.class))
 public class SiteFacetProvider implements ConfigurableFacetProvider {
 
     private SiteConfiguration config = new SiteConfiguration();

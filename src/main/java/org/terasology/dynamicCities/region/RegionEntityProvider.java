@@ -34,7 +34,7 @@ import org.terasology.network.NetworkComponent;
 import org.terasology.world.generation.EntityBuffer;
 import org.terasology.world.generation.EntityProvider;
 import org.terasology.world.generation.Region;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
+import org.terasology.world.generation.facets.ElevationFacet;
 import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
 /**
@@ -49,10 +49,10 @@ public class RegionEntityProvider implements EntityProvider {
     @Override
     public void process(Region region, EntityBuffer buffer) {
 
-        SurfaceHeightFacet surfaceHeightFacet = region.getFacet(SurfaceHeightFacet.class);
+        ElevationFacet elevationFacet = region.getFacet(ElevationFacet.class);
         Region3i worldRegion = region.getRegion();
 
-        if (checkCorners(worldRegion, surfaceHeightFacet)) {
+        if (checkCorners(worldRegion, elevationFacet)) {
             RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
             ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
             TreeFacet treeFacet = region.getFacet(TreeFacet.class);
