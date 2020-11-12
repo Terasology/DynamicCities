@@ -71,8 +71,8 @@ import org.terasology.dynamicCities.rasterizer.roofs.SaddleRoofRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.RectWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.SimpleWindowRasterizer;
 import org.terasology.dynamicCities.rasterizer.window.WindowRasterizer;
-import org.terasology.dynamicCities.settlements.events.CheckBuildingForParcelEvent;
 import org.terasology.dynamicCities.roads.RoadSegment;
+import org.terasology.dynamicCities.settlements.events.CheckBuildingForParcelEvent;
 import org.terasology.economy.components.MultiInvStorageComponent;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -96,7 +96,6 @@ import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.structureTemplates.components.CheckBlockRegionConditionComponent;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
@@ -107,7 +106,7 @@ import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.SurfaceHeightFacet;
+import org.terasology.world.generation.facets.ElevationFacet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -279,7 +278,7 @@ public class Construction extends BaseComponentSystem {
             logger.error("The area which should be flattened is empty!");
             return -9999;
         }
-        SurfaceHeightFacet surfaceHeightFacet = sample(area, defaultHeight);
+        ElevationFacet elevationFacet = sample(area, defaultHeight);
         int meanHeight = 0;
         Vector3i setPos = new Vector3i();
         Region3i areaRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), defaultHeight - maxMinDeviation, area.minY()),
@@ -289,12 +288,12 @@ public class Construction extends BaseComponentSystem {
             return -9999;
         }
         for (BaseVector2i pos : area.contents()) {
-            meanHeight += surfaceHeightFacet.getWorld(pos);
+            meanHeight += elevationFacet.getWorld(pos);
         }
         meanHeight /= area.area();
 
         for (BaseVector2i pos : area.contents()) {
-            int y = Math.round(surfaceHeightFacet.getWorld(pos));
+            int y = Math.round(elevationFacet.getWorld(pos));
             if (y <= meanHeight) {
                 for (int i = y; i <= meanHeight; i++) {
                     setPos.set(pos.x(), i, pos.y());
@@ -322,12 +321,12 @@ public class Construction extends BaseComponentSystem {
      * @param height A rough estimation of the mean height of the terrain
      * @return
      */
-    public SurfaceHeightFacet sample(Rect2i area, int height) {
+    public ElevationFacet sample(Rect2i area, int height) {
 
         BaseVector3i minRegionPos = new Vector3i(area.minX(), height - maxMinDeviation, area.minY());
         BaseVector3i maxRegionPos = new Vector3i(area.maxX(), height + maxMinDeviation, area.maxY());
         Border3D border = new Border3D(0, 0, 0);
-        SurfaceHeightFacet surfaceHeightFacet = new SurfaceHeightFacet(Region3i.createBounded(minRegionPos, maxRegionPos), border);
+        ElevationFacet elevationFacet = new ElevationFacet(Region3i.createBounded(minRegionPos, maxRegionPos), border);
         Vector3i pos = new Vector3i();
 
         for (int x = area.minX(); x <= area.maxX(); x++) {
@@ -336,13 +335,13 @@ public class Construction extends BaseComponentSystem {
                     pos.set(x, y, z);
                     if (worldProvider.getBlock(pos) != air && !worldProvider.getBlock(pos).isLiquid()
                             && !plantBlocks.contains(worldProvider.getBlock(pos))) {
-                        surfaceHeightFacet.setWorld(x, z, y);
+                        elevationFacet.setWorld(x, z, y);
                         break;
                     }
                 }
             }
         }
-        return surfaceHeightFacet;
+        return elevationFacet;
     }
 
     /**
