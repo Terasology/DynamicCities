@@ -35,6 +35,7 @@ import org.terasology.dynamicCities.world.trees.DefaultTreeProvider;
 import org.terasology.engine.SimpleUri;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.spawner.FixedSpawner;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.registry.In;
@@ -59,7 +60,7 @@ public class PerlinFacetedWorldGenerator extends BaseFacetedWorldGenerator {
 
     @Override
     public Vector3f getSpawnPosition(EntityRef entity) {
-        return spawner.getSpawnPosition(getWorld(), entity);
+        return JomlUtil.from(spawner.getSpawnPosition(getWorld(), entity));
     }
 
     @Override
