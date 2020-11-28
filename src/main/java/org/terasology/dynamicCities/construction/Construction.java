@@ -15,6 +15,7 @@
  */
 package org.terasology.dynamicCities.construction;
 
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -83,6 +84,7 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
@@ -104,6 +106,8 @@ import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegionIterable;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.ElevationFacet;
@@ -511,15 +515,15 @@ public class Construction extends BaseComponentSystem {
                 }
 
                 // offset within the parcel, so the template is placed at the centre.
-                BlockRegionTransform localTransform = BlockRegionTransform.createMovingThenRotating(Vector3i.zero(), startSide, endSide);
-                Vector3i microOffset = localTransform.transformVector3i(
-                        BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))).invert();
+                BlockRegionTransform localTransform = BlockRegionTransform.createMovingThenRotating(new org.joml.Vector3i(), startSide, endSide);
+                org.joml.Vector3i microOffset = localTransform.transformVector3i(
+                        BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))).negate();
 
                 // offset in world space
                 Vector3i worldOffset = new Vector3i(shape.minX() + Math.round((shape.sizeX()) / 2f) - 1, dynParcel.height,
                         shape.minY() + Math.round((shape.sizeY()) / 2f) - 1);
-                Vector3i finalLocation = worldOffset.add(microOffset);
-                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, finalLocation);
+                Vector3i finalLocation = worldOffset.add(JomlUtil.from(microOffset));
+                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, JomlUtil.from(finalLocation));
 
                 template.send(new SpawnStructureBufferedEvent(blockRegionTransform));
                 if (building.isEntity) {
@@ -632,8 +636,8 @@ public class Construction extends BaseComponentSystem {
         if (entityRef.hasComponent(ChestPositionsComponent.class)) {
             ChestPositionsComponent chestPositionsComponent = entityRef.getComponent(ChestPositionsComponent.class);
             multiInvStorageComponent.chests = new ArrayList<>();
-            for (Vector3i pos : chestPositionsComponent.positions) {
-                Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
+            for (org.joml.Vector3i pos : chestPositionsComponent.positions) {
+                org.joml.Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
                 multiInvStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
             }
         }
@@ -643,8 +647,8 @@ public class Construction extends BaseComponentSystem {
             }
             ProductionChestComponent productionChestComponent = entityRef.getComponent(ProductionChestComponent.class);
 
-            for (Vector3i pos : productionChestComponent.positions) {
-                Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
+            for (org.joml.Vector3i pos : productionChestComponent.positions) {
+                org.joml.Vector3i transformedPos = event.getTransformation().transformVector3i(pos);
                 multiInvStorageComponent.chests.add(blockEntityRegistry.getBlockEntityAt(transformedPos));
             }
         }
@@ -659,16 +663,16 @@ public class Construction extends BaseComponentSystem {
         for (SpawnBlockRegionsComponent.RegionToFill regionToFill : spawnBlockRegionComponent.regionsToFill) {
             Block block = regionToFill.blockType;
 
-            Region3i region = regionToFill.region;
+            BlockRegion region = regionToFill.region;
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
             if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAdvancedAssets:chest")) {
-                for (Vector3i pos : region) {
-                    entity.send(new SetBlockEvent(pos, block));
+                for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
+                    entity.send(new SetBlockEvent(JomlUtil.from(pos), block));
                 }
             } else {
-                for (Vector3i pos : region) {
-                    entity.send(new BufferBlockEvent(pos, block));
+                for (Vector3ic pos : BlockRegionIterable.region(region).build()) {
+                    entity.send(new BufferBlockEvent(JomlUtil.from(pos), block));
                 }
             }
         }
