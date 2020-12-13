@@ -537,9 +537,9 @@ public class Construction extends BaseComponentSystem {
         /**
          * Send block-change event to refresh the minimap
          */
-        Map<Vector3i, Block> blockPos = new HashMap<>();
+        Map<org.joml.Vector3i, Block> blockPos = new HashMap<>();
         for (BaseVector2i rectPos : dynParcel.getShape().contents()) {
-            blockPos.put(new Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
+            blockPos.put(new org.joml.Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
         }
         settlement.send(new PlaceBlocks(blockPos));
         dynParcel.setBuildingTypeName(building.name);
