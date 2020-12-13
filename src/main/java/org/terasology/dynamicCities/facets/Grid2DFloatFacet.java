@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 
 
@@ -30,7 +30,7 @@ public abstract class Grid2DFloatFacet extends Grid2DFacet {
 
     protected float[] data;
 
-    public Grid2DFloatFacet(Region3i targetRegion, Border3D border, int gridSize) {
+    public Grid2DFloatFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
         this.data = new float[gridWorldRegion.area()];
     }

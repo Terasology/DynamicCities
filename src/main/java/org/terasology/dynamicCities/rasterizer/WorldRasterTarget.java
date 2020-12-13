@@ -15,15 +15,16 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
+import org.joml.Vector3i;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.BlockType;
 import org.terasology.cities.raster.RasterTarget;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegions;
 
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class WorldRasterTarget implements RasterTarget {
     private final WorldProvider worldProvider;
     private final BlockTheme blockTheme;
     private final Rect2i affectedArea;
-    private final Region3i affectedRegion;
+    private final BlockRegion affectedRegion;
 
     /**
      * @param worldProvider the chunk to work on
@@ -43,7 +44,7 @@ public class WorldRasterTarget implements RasterTarget {
         this.blockTheme = blockTheme;
         this.worldProvider = worldProvider;
         this.affectedArea = area;
-        affectedRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), -255, area.minY()), new Vector3i(area.maxX(), 255, area.maxY()));
+        affectedRegion = BlockRegions.createFromMinAndMax(new Vector3i(area.minX(), -255, area.minY()), new Vector3i(area.maxX(), 255, area.maxY()));
     }
     /**
      * @param x x in world coords
@@ -80,7 +81,7 @@ public class WorldRasterTarget implements RasterTarget {
     /**
      * @return the region that is drawn by this raster target
      */
-    public Region3i getAffectedRegion() {
+    public BlockRegion getAffectedRegion() {
         return affectedRegion;
     }
 }

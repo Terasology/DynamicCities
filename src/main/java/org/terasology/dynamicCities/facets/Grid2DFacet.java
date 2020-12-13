@@ -15,9 +15,10 @@
  */
 package org.terasology.dynamicCities.facets;
 
-import org.terasology.math.Region3i;
+import org.joml.Vector3f;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFacet2D;
 
@@ -35,18 +36,18 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     protected Rect2i gridWorldRegion;
     protected Rect2i gridRelativeRegion;
 
-    public Grid2DFacet(Region3i targetRegion, Border3D border, int gridSize) {
+    public Grid2DFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border);
         this.gridSize = gridSize;
-        center = new Vector2i(targetRegion.center().x(), targetRegion.center().z());
-        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.sizeX() / (2 * gridSize),
-                center.y() - targetRegion.sizeY() / (2 * gridSize),
-                center.x() + targetRegion.sizeX() / (2 * gridSize),
-                center.y() + targetRegion.sizeY() / (2 * gridSize));
+        center = new Vector2i(targetRegion.center(new Vector3f()).x(), targetRegion.center(new Vector3f()).z());
+        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.getSizeX() / (2 * gridSize),
+                center.y() - targetRegion.getSizeY() / (2 * gridSize),
+                center.x() + targetRegion.getSizeX() / (2 * gridSize),
+                center.y() + targetRegion.getSizeY() / (2 * gridSize));
 
         gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0,
-                targetRegion.sizeX() / gridSize,
-                targetRegion.sizeY() / gridSize);
+                targetRegion.getSizeX() / gridSize,
+                targetRegion.getSizeY() / gridSize);
     }
 
     public Vector2i getWorldPoint(Vector2i gridPoint) {

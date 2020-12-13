@@ -5,6 +5,7 @@ package org.terasology.dynamicCities.settlements;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import org.joml.RoundingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -51,6 +52,7 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Circle;
@@ -68,6 +70,8 @@ import org.terasology.registry.Share;
 import org.terasology.nui.Color;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
+import org.terasology.world.block.BlockRegion;
+import org.terasology.world.block.BlockRegions;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.time.WorldTimeEvent;
 
@@ -294,7 +298,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
 
         //Create the district facet and DistrictTypeMap
-        Region3i region = Region3i.createFromCenterExtents(new Vector3i(locationComponent.getLocalPosition()), SettlementConstants.SETTLEMENT_RADIUS);
+        BlockRegion region = BlockRegions.createFromCenterAndExtents(new org.joml.Vector3i(JomlUtil.from(locationComponent.getLocalPosition()), RoundingMode.FLOOR), new org.joml.Vector3i(SettlementConstants.SETTLEMENT_RADIUS));
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, siteComponent.hashCode(), districtManager, cultureComponent);
         if (districtGrid.districtMap.size() < 1) {

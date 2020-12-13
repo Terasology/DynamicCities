@@ -328,10 +328,10 @@ public class Construction extends BaseComponentSystem {
      */
     public ElevationFacet sample(Rect2i area, int height) {
 
-        BaseVector3i minRegionPos = new Vector3i(area.minX(), height - maxMinDeviation, area.minY());
-        BaseVector3i maxRegionPos = new Vector3i(area.maxX(), height + maxMinDeviation, area.maxY());
+        Vector3ic minRegionPos = new org.joml.Vector3i(area.minX(), height - maxMinDeviation, area.minY());
+        Vector3ic maxRegionPos = new org.joml.Vector3i(area.maxX(), height + maxMinDeviation, area.maxY());
         Border3D border = new Border3D(0, 0, 0);
-        ElevationFacet elevationFacet = new ElevationFacet(Region3i.createBounded(minRegionPos, maxRegionPos), border);
+        ElevationFacet elevationFacet = new ElevationFacet(BlockRegions.createFromMinAndMax(minRegionPos, maxRegionPos), border);
         Vector3i pos = new Vector3i();
 
         for (int x = area.minX(); x <= area.maxX(); x++) {

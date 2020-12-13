@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.world.trees;
 
 
-import org.terasology.math.Region3i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.SparseObjectFacet3D;
 
@@ -25,7 +25,7 @@ import org.terasology.world.generation.facets.base.SparseObjectFacet3D;
  */
 public class TreeFacet extends SparseObjectFacet3D<TreeGenerator> {
 
-    public TreeFacet(Region3i targetRegion, Border3D border) {
+    public TreeFacet(BlockRegion targetRegion, Border3D border) {
         super(targetRegion, border);
     }
 }

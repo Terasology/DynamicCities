@@ -52,7 +52,7 @@ public class SolidRasterizer extends CompatibleRasterizer {
             biomeRegistry.setBiome(biome, chunk, pos.x, pos.y, pos.z);
 
             int posY = pos.y + chunk.getChunkWorldOffsetY();
-            float density = solidityFacet.get(pos);
+            float density = solidityFacet.get(JomlUtil.from(pos));
 
             if (surfaceFacet.get(JomlUtil.from(pos))) {
                 setBlock(chunk, getSurfaceBlock(biome, posY - seaLevel), pos, resourceFacet);
