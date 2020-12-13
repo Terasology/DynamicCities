@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.minimap;
 
-import org.joml.Rectanglef;
-import org.joml.Rectanglei;
+import org.joml.primitives.Rectanglef;
+import org.joml.primitives.Rectanglei;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;

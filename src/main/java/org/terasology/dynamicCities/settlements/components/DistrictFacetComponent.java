@@ -3,7 +3,7 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import org.joml.Rectanglei;
+import org.joml.primitives.Rectanglei;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
