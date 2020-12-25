@@ -107,8 +107,6 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionIterable;
-import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.ElevationFacet;
@@ -668,11 +666,11 @@ public class Construction extends BaseComponentSystem {
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
             if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAdvancedAssets:chest")) {
-                for (Vector3ic pos : BlockRegions.iterableInPlace(region)) {
+                for (Vector3ic pos : region) {
                     entity.send(new SetBlockEvent(JomlUtil.from(pos), block));
                 }
             } else {
-                for (Vector3ic pos : BlockRegions.iterableInPlace(region)) {
+                for (Vector3ic pos : region) {
                     entity.send(new BufferBlockEvent(JomlUtil.from(pos), block));
                 }
             }
