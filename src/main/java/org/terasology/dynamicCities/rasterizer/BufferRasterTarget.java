@@ -19,13 +19,11 @@ import org.terasology.cities.BlockTheme;
 import org.terasology.cities.BlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.dynamicCities.construction.BlockBufferSystem;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegions;
 
 import java.util.Set;
 
@@ -45,7 +43,7 @@ public class BufferRasterTarget implements RasterTarget {
         this.blockTheme = blockTheme;
         this.blockBufferSystem = blockBufferSystem;
         this.affectedArea = area;
-        affectedRegion = BlockRegions.createFromMinAndMax(new org.joml.Vector3i(area.minX(), -255, area.minY()), new org.joml.Vector3i(area.maxX(), 255, area.maxY()));
+        affectedRegion = new BlockRegion(area.minX(), -255, area.minY(), area.maxX(), 255, area.maxY());
     }
     /**
      * @param x x in world coords

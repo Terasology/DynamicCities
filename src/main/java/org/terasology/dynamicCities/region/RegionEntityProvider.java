@@ -106,7 +106,7 @@ public class RegionEntityProvider implements EntityProvider {
 
         for (int i = 0; i < corners.length; i++) {
             corners[i] = facet.getWorld(positions[i]);
-            if (corners[i] > worldRegion.getMaxY() || corners[i] < worldRegion.getMinY()) {
+            if (corners[i] > worldRegion.maxY() || corners[i] < worldRegion.minY()) {
                 counter++;
             }
         }

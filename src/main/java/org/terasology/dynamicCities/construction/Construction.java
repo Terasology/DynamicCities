@@ -88,7 +88,6 @@ import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
@@ -107,8 +106,6 @@ import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionIterable;
-import org.terasology.world.block.BlockRegions;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.ElevationFacet;
@@ -331,7 +328,7 @@ public class Construction extends BaseComponentSystem {
         Vector3ic minRegionPos = new org.joml.Vector3i(area.minX(), height - maxMinDeviation, area.minY());
         Vector3ic maxRegionPos = new org.joml.Vector3i(area.maxX(), height + maxMinDeviation, area.maxY());
         Border3D border = new Border3D(0, 0, 0);
-        ElevationFacet elevationFacet = new ElevationFacet(BlockRegions.createFromMinAndMax(minRegionPos, maxRegionPos), border);
+        ElevationFacet elevationFacet = new ElevationFacet(new BlockRegion(minRegionPos, maxRegionPos), border);
         Vector3i pos = new Vector3i();
 
         for (int x = area.minX(); x <= area.maxX(); x++) {
@@ -668,11 +665,11 @@ public class Construction extends BaseComponentSystem {
             region = transformation.transformRegion(region);
             block = transformation.transformBlock(block);
             if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAdvancedAssets:chest")) {
-                for (Vector3ic pos : BlockRegions.iterableInPlace(region)) {
+                for (Vector3ic pos : region) {
                     entity.send(new SetBlockEvent(JomlUtil.from(pos), block));
                 }
             } else {
-                for (Vector3ic pos : BlockRegions.iterableInPlace(region)) {
+                for (Vector3ic pos : region) {
                     entity.send(new BufferBlockEvent(JomlUtil.from(pos), block));
                 }
             }

@@ -21,7 +21,6 @@ import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.fences.SimpleFence;
 import org.terasology.cities.surface.InfiniteSurfaceHeightFacet;
 import org.terasology.commonworld.Orientation;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Rect2i;
@@ -55,10 +54,10 @@ public class SimpleFenceRasterizer {
         int fright = fenceRc.maxX();
         int fbot = fenceRc.maxY();
 
-        int bleft = brushRc.getMinX();
-        int btop = brushRc.getMinZ();
-        int bright = brushRc.getMaxX();
-        int bbot = brushRc.getMaxZ();
+        int bleft = brushRc.minX();
+        int btop = brushRc.minZ();
+        int bright = brushRc.maxX();
+        int bbot = brushRc.maxZ();
 
         int wallX1 = Math.max(fleft + 1, bleft);
         int wallX2 = Math.min(fright - 1, bright);
@@ -97,15 +96,15 @@ public class SimpleFenceRasterizer {
 
         // insert gate
         Vector2i gatePos = fence.getGate();
-        if (gatePos.x() >= brushRc.getMinX() && gatePos.x() <= brushRc.getMaxX()
-         && gatePos.y() >= brushRc.getMinZ() && gatePos.y() <= brushRc.getMaxZ()) {
+        if (gatePos.x() >= brushRc.minX() && gatePos.x() <= brushRc.maxX()
+         && gatePos.y() >= brushRc.minZ() && gatePos.y() <= brushRc.maxZ()) {
             int y = TeraMath.floorToInt(heightFacet.getWorld(gatePos.x(), gatePos.y())) + 1;
-            if (brushRc.getMinY() <= y && brushRc.getMaxY() >= y) {
+            if (brushRc.minY() <= y && brushRc.maxY() >= y) {
                 Side side = getSide(fence.getGateOrientation());
 
                 if (side != null) {
                     Block gateBlock = theme.apply(DefaultBlockType.FENCE_GATE, EnumSet.of(side));
-                    chunk.setBlock(gatePos.x() - brushRc.getMinX(), y - brushRc.getMinY(), gatePos.y() - brushRc.getMinZ(), gateBlock);
+                    chunk.setBlock(gatePos.x() - brushRc.minX(), y - brushRc.minY(), gatePos.y() - brushRc.minZ(), gateBlock);
                 }
             }
         }
@@ -117,14 +116,14 @@ public class SimpleFenceRasterizer {
         Orientation a = o.getRotated(180 - 45);
         Orientation b = o.getRotated(180 + 45);
         Block cornerPost = theme.apply(DefaultBlockType.FENCE, EnumSet.of(getSide(a), getSide(b)));
-        if (region.containsPoint(x, y, z)) {
-            chunk.setBlock(x - region.getMinX(), y - region.getMinY(), z - region.getMinZ(), cornerPost);
+        if (region.contains(x, y, z)) {
+            chunk.setBlock(x - region.minX(), y - region.minY(), z - region.minZ(), cornerPost);
         }
 
-        if (y + 1 >= region.getMinY() && y + 1 <= region.getMaxY()) {
+        if (y + 1 >= region.minY() && y + 1 <= region.maxY()) {
             if (hm.getWorld(x + a.getDir().getX(), z + a.getDir().getY()) >= y
              || hm.getWorld(x + b.getDir().getX(), z + b.getDir().getY()) >= y) {
-                chunk.setBlock(x - region.getMinX(), y + 1 - region.getMinY(), z - region.getMinZ(), cornerPost);
+                chunk.setBlock(x - region.minX(), y + 1 - region.minY(), z - region.minZ(), cornerPost);
             }
         }
     }
@@ -145,11 +144,11 @@ public class SimpleFenceRasterizer {
     }
 
     private void wallX(CoreChunk chunk, InfiniteSurfaceHeightFacet hm, int x1, int x2, int z, Block block) {
-        int minY = chunk.getRegion().getMinY();
-        int maxY = chunk.getRegion().getMaxY();
+        int minY = chunk.getRegion().minY();
+        int maxY = chunk.getRegion().maxY();
 
-        int minX = chunk.getRegion().getMinX();
-        int minZ = chunk.getRegion().getMinZ();
+        int minX = chunk.getRegion().minX();
+        int minZ = chunk.getRegion().minZ();
 
         for (int x = x1; x <= x2; x++) {
             int y = TeraMath.floorToInt(hm.getWorld(x, z)) + 1;  // one block above surface level
@@ -167,11 +166,11 @@ public class SimpleFenceRasterizer {
     }
 
     private void wallZ(CoreChunk chunk, InfiniteSurfaceHeightFacet hm, int x, int z1, int z2, Block block) {
-        int minY = chunk.getRegion().getMinY();
-        int maxY = chunk.getRegion().getMaxY();
+        int minY = chunk.getRegion().minY();
+        int maxY = chunk.getRegion().maxY();
 
-        int minX = chunk.getRegion().getMinX();
-        int minZ = chunk.getRegion().getMinZ();
+        int minX = chunk.getRegion().minX();
+        int minZ = chunk.getRegion().minZ();
 
         for (int z = z1; z <= z2; z++) {
             int y = TeraMath.floorToInt(hm.getWorld(x, z)) + 1;  // one block above surface level

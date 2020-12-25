@@ -24,9 +24,9 @@ import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.network.Client;
 import org.terasology.network.NetworkSystem;
+import org.terasology.nui.FontColor;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.nui.FontColor;
 import org.terasology.world.WorldComponent;
 import org.terasology.world.chunks.event.PurgeWorldEvent;
 

@@ -66,8 +66,8 @@ public class TreeRasterizer implements WorldRasterizer {
         BlockRegion relativeRegion = facet.getRelativeRegion();
 
         return new Vector3i(
-                pos.x() - relativeRegion.getMinX() + worldRegion.getMinX(),
-                pos.y() - relativeRegion.getMinY() + worldRegion.getMinY(),
-                pos.z() - relativeRegion.getMinZ() + worldRegion.getMinZ());
+                pos.x() - relativeRegion.minX() + worldRegion.minX(),
+                pos.y() - relativeRegion.minY() + worldRegion.minY(),
+                pos.z() - relativeRegion.minZ() + worldRegion.minZ());
     }
 }

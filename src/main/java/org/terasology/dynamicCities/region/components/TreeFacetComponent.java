@@ -42,8 +42,8 @@ public final class TreeFacetComponent implements Component {
     public boolean privateToOwner = true;
 
     public final Map<String, TreeGeneratorContainer> relData = Maps.newLinkedHashMap();
-    public BlockRegion relativeRegion = new BlockRegion();
-    public BlockRegion worldRegion = new BlockRegion();
+    public BlockRegion relativeRegion = new BlockRegion(0,0,0);
+    public BlockRegion worldRegion = new BlockRegion(0,0,0);
     public Vector3i center = new Vector3i();
 
     public TreeFacetComponent() { }
@@ -158,7 +158,7 @@ public final class TreeFacetComponent implements Component {
      * @throws IllegalArgumentException if not within bounds
      */
     protected void checkWorldCoords(int x, int y, int z) {
-        if (!worldRegion.containsPoint(x, y, z)) {
+        if (!worldRegion.contains(x, y, z)) {
             String text = "Out of bounds: (%d, %d, %d) for region %s";
             String msg = String.format(text, x, y, z, worldRegion.toString());
             throw new IllegalArgumentException(msg);
@@ -169,7 +169,7 @@ public final class TreeFacetComponent implements Component {
      * @throws IllegalArgumentException if not within bounds
      */
     protected void checkRelativeCoords(int x, int y, int z) {
-        if (!relativeRegion.containsPoint(x, y, z)) {
+        if (!relativeRegion.contains(x, y, z)) {
             String text = "Out of bounds: (%d, %d, %d) for region %s";
             String msg = String.format(text, x, y, z, relativeRegion.toString());
             throw new IllegalArgumentException(msg);
@@ -179,17 +179,17 @@ public final class TreeFacetComponent implements Component {
     public final Vector3i worldToRelative(int x, int y, int z) {
 
         return new Vector3i(
-                x - worldRegion.getMinX() + relativeRegion.getMinX(),
-                y - worldRegion.getMinY() + relativeRegion.getMinY(),
-                z - worldRegion.getMinZ() + relativeRegion.getMinZ());
+                x - worldRegion.minX() + relativeRegion.minX(),
+                y - worldRegion.minY() + relativeRegion.minY(),
+                z - worldRegion.minZ() + relativeRegion.minZ());
     }
 
     public final Vector3i relativeToWorld(int x, int y, int z) {
 
         return new Vector3i(
-                x - relativeRegion.getMinX() + worldRegion.getMinX(),
-                y - relativeRegion.getMinY() + worldRegion.getMinY(),
-                z - relativeRegion.getMinZ() + worldRegion.getMinZ());
+                x - relativeRegion.minX() + worldRegion.minX(),
+                y - relativeRegion.minY() + worldRegion.minY(),
+                z - relativeRegion.minZ() + worldRegion.minZ());
     }
 
     
