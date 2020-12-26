@@ -64,7 +64,8 @@ public class DistrictFacetComponent implements Component {
         worldRegion = JomlUtil.from(border.expandTo2D(targetRegion));
         relativeRegion = JomlUtil.from(border.expandTo2D(targetRegion.getSize(new Vector3i())));
         this.gridSize = gridSize;
-        center = new Vector2i((int) targetRegion.center(new Vector3f()).x(), (int) targetRegion.center(new Vector3f()).z());
+        Vector3f regionCenter = targetRegion.center(new Vector3f());
+        center = new Vector2i((int) regionCenter.x(), (int) regionCenter.z());
         gridWorldRegion = new Rectanglei(center.x() - targetRegion.getSizeX() / (2 * gridSize),
                 center.y() - targetRegion.getSizeY() / (2 * gridSize),
                 center.x() + targetRegion.getSizeX() / (2 * gridSize),

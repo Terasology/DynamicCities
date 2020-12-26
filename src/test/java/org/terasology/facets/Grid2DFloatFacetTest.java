@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DFloatFacet;
 import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegions;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.FieldFacet3D;
 
@@ -40,7 +39,7 @@ public class Grid2DFloatFacetTest {
         Border3D border = new Border3D(0, 0, 0).extendBy(0, 15, 10);
         Vector3i min = new Vector3i(10, 20, 30);
         Vector3i size = new Vector3i(32, 32, 32);
-        BlockRegion region = BlockRegions.createFromMinAndSize(min, size);
+        BlockRegion region = new BlockRegion(min, size);
         facet = createFacet(region, border, gridSize);
     }
 

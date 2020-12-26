@@ -39,7 +39,8 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     public Grid2DFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border);
         this.gridSize = gridSize;
-        center = new Vector2i(targetRegion.center(new Vector3f()).x(), targetRegion.center(new Vector3f()).z());
+        Vector3f regionCenter = targetRegion.center(new Vector3f());
+        center = new Vector2i(regionCenter.x(), regionCenter.z());
         gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.getSizeX() / (2 * gridSize),
                 center.y() - targetRegion.getSizeY() / (2 * gridSize),
                 center.x() + targetRegion.getSizeX() / (2 * gridSize),
