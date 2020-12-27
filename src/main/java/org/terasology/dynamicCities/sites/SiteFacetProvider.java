@@ -9,6 +9,7 @@ import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.nui.properties.Range;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.ConfigurableFacetProvider;
 import org.terasology.world.generation.Facet;
@@ -35,7 +36,7 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
         RoughnessFacet roughnessFacet = region.getRegionFacet(RoughnessFacet.class);
 
         Border3D border = region.getBorderForFacet(SiteFacet.class);
-        Region3i coreReg = region.getRegion();
+        BlockRegion coreReg = region.getRegion();
         SiteFacet siteFacet = new SiteFacet(coreReg, border);
 
         if (roughnessFacet.getMeanDeviation() < 0.3f && roughnessFacet.getMeanDeviation() > 0) {

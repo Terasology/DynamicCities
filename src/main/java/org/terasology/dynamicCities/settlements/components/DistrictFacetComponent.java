@@ -4,6 +4,9 @@ package org.terasology.dynamicCities.settlements.components;
 
 
 import org.joml.Rectanglei;
+import org.joml.Vector2i;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.dynamicCities.districts.DistrictManager;
 import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
@@ -12,12 +15,11 @@ import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
-import org.joml.Vector2i;
 import org.terasology.network.Replicate;
 import org.terasology.utilities.procedural.WhiteNoise;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 
 import java.util.ArrayList;
@@ -58,16 +60,17 @@ public class DistrictFacetComponent implements Component {
 
     public DistrictFacetComponent() { }
 
-    public DistrictFacetComponent(Region3i targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, CultureComponent cultureComponent) {
+    public DistrictFacetComponent(BlockRegion targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, CultureComponent cultureComponent) {
         worldRegion = JomlUtil.from(border.expandTo2D(targetRegion));
-        relativeRegion = JomlUtil.from(border.expandTo2D(targetRegion.size()));
+        relativeRegion = JomlUtil.from(border.expandTo2D(targetRegion.getSize(new Vector3i())));
         this.gridSize = gridSize;
-        center = new Vector2i((int) targetRegion.center().x(), (int) targetRegion.center().z());
-        gridWorldRegion = new Rectanglei(center.x() - targetRegion.sizeX() / (2 * gridSize),
-                center.y() - targetRegion.sizeY() / (2 * gridSize),
-                center.x() + targetRegion.sizeX() / (2 * gridSize),
-                center.y() + targetRegion.sizeY() / (2 * gridSize));
-        gridRelativeRegion = new Rectanglei(0, 0, targetRegion.sizeX() / gridSize, targetRegion.sizeY() / gridSize);
+        Vector3f regionCenter = targetRegion.center(new Vector3f());
+        center = new Vector2i((int) regionCenter.x(), (int) regionCenter.z());
+        gridWorldRegion = new Rectanglei(center.x() - targetRegion.getSizeX() / (2 * gridSize),
+                center.y() - targetRegion.getSizeY() / (2 * gridSize),
+                center.x() + targetRegion.getSizeX() / (2 * gridSize),
+                center.y() + targetRegion.getSizeY() / (2 * gridSize));
+        gridRelativeRegion = new Rectanglei(0, 0, targetRegion.getSizeX() / gridSize, targetRegion.getSizeY() / gridSize);
         WhiteNoise randNumberGen = new WhiteNoise(seed);
 
         /**

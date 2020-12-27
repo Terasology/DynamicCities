@@ -16,7 +16,7 @@
 
 package org.terasology.dynamicCities.sites;
 
-import org.terasology.math.Region3i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFacet2D;
 
@@ -27,7 +27,7 @@ public class SiteFacet extends BaseFacet2D {
 
     private SiteComponent siteComponent = null;
 
-    public SiteFacet(Region3i targetRegion, Border3D border) {
+    public SiteFacet(BlockRegion targetRegion, Border3D border) {
         super(targetRegion, border);
     }
 

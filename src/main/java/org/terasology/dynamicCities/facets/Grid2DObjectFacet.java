@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 
 import java.lang.reflect.Array;
@@ -34,7 +34,7 @@ public abstract class Grid2DObjectFacet<T> extends Grid2DFacet {
     protected T[] data;
 
     @SuppressWarnings(value = "unchecked")
-    public Grid2DObjectFacet(Region3i targetRegion, Border3D border, int gridSize, Class<T> objectType) {
+    public Grid2DObjectFacet(BlockRegion targetRegion, Border3D border, int gridSize, Class<T> objectType) {
         super(targetRegion, border, gridSize);
         this.data = (T[]) Array.newInstance(objectType, gridWorldRegion.area());
     }

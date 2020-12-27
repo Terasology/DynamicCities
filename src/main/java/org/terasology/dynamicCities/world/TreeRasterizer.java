@@ -15,16 +15,16 @@
  */
 package org.terasology.dynamicCities.world;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.dynamicCities.world.trees.TreeGenerator;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.BaseVector3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.WorldRasterizer;
@@ -50,8 +50,8 @@ public class TreeRasterizer implements WorldRasterizer {
     public void generateChunk(CoreChunk chunk, Region chunkRegion) {
         TreeFacet facet = chunkRegion.getFacet(TreeFacet.class);
         ResourceFacet resourceFacet = chunkRegion.getFacet(ResourceFacet.class);
-        for (Map.Entry<BaseVector3i, TreeGenerator> entry : facet.getRelativeEntries().entrySet()) {
-            BaseVector3i pos = entry.getKey();
+        for (Map.Entry<Vector3ic, TreeGenerator> entry : facet.getRelativeEntries().entrySet()) {
+            Vector3ic pos = entry.getKey();
             TreeGenerator treeGen = entry.getValue();
             int seed = relativeToWorld(facet, pos).hashCode();
             Random random = new FastRandom(0);
@@ -60,10 +60,10 @@ public class TreeRasterizer implements WorldRasterizer {
     }
 
     // TODO: JAVA8 - move the two conversion methods from SparseFacet3D to default methods in WorldFacet3D
-    protected final Vector3i relativeToWorld(SparseFacet3D facet, BaseVector3i pos) {
+    protected final Vector3i relativeToWorld(SparseFacet3D facet, Vector3ic pos) {
 
-        Region3i worldRegion = facet.getWorldRegion();
-        Region3i relativeRegion = facet.getRelativeRegion();
+        BlockRegion worldRegion = facet.getWorldRegion();
+        BlockRegion relativeRegion = facet.getRelativeRegion();
 
         return new Vector3i(
                 pos.x() - relativeRegion.minX() + worldRegion.minX(),

@@ -40,7 +40,7 @@ public class SimpleWindowRasterizer extends WindowRasterizer<SimpleWindow> {
         int y = wnd.getHeight();
         int z = wnd.getPos().y();
 
-        if (target.getAffectedRegion().encompasses(x, y, z)) {
+        if (target.getAffectedRegion().contains(x, y, z)) {
             target.setBlock(x, y, z, DefaultBlockType.WINDOW_GLASS);
         }
     }

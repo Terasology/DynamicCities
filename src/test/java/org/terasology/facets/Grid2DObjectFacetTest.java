@@ -16,13 +16,13 @@
 
 package org.terasology.facets;
 
+import org.joml.Vector3i;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DObjectFacet;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.ObjectFacet3D;
 
@@ -39,17 +39,17 @@ public class Grid2DObjectFacetTest {
         Border3D border = new Border3D(0, 0, 0).extendBy(0, 15, 10);
         Vector3i min = new Vector3i(10, 20, 30);
         Vector3i size = new Vector3i(32, 32, 32);
-        Region3i region = Region3i.createFromMinAndSize(min, size);
+        BlockRegion region = new BlockRegion(min).setSize(size);
         facet = createFacet(region, border, gridSize);
     }
 
     private class IntegerTestFacet extends Grid2DObjectFacet<Integer> {
-        public IntegerTestFacet(Region3i targetRegion, Border3D border, int gridSize) {
+        public IntegerTestFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
             super(targetRegion, border, gridSize, Integer.class);
         }
     }
 
-    protected IntegerTestFacet createFacet(Region3i region, Border3D extendBy, int gridSize) {
+    protected IntegerTestFacet createFacet(BlockRegion region, Border3D extendBy, int gridSize) {
         return new IntegerTestFacet(region, extendBy, gridSize);
     }
 

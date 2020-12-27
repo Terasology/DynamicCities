@@ -88,7 +88,6 @@ import org.terasology.math.JomlUtil;
 import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
@@ -325,11 +324,9 @@ public class Construction extends BaseComponentSystem {
      * @return
      */
     public ElevationFacet sample(Rect2i area, int height) {
-
-        BaseVector3i minRegionPos = new Vector3i(area.minX(), height - maxMinDeviation, area.minY());
-        BaseVector3i maxRegionPos = new Vector3i(area.maxX(), height + maxMinDeviation, area.maxY());
+        BlockRegion region = new BlockRegion(area.minX(), height - maxMinDeviation, area.minY(), area.maxX(), height + maxMinDeviation, area.maxY());
         Border3D border = new Border3D(0, 0, 0);
-        ElevationFacet elevationFacet = new ElevationFacet(Region3i.createBounded(minRegionPos, maxRegionPos), border);
+        ElevationFacet elevationFacet = new ElevationFacet(region, border);
         Vector3i pos = new Vector3i();
 
         for (int x = area.minX(); x <= area.maxX(); x++) {

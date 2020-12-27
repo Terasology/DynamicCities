@@ -17,9 +17,9 @@ package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
 import org.terasology.dynamicCities.resource.Resource;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 
 import java.util.HashMap;
@@ -28,11 +28,11 @@ import java.util.Map;
 public class ResourceFacet extends Grid2DFacet {
 
 
-    private Region3i region;
+    private BlockRegion region;
     private Map<String, Resource>[] data;
 
     @SuppressWarnings(value = "unchecked")
-    public ResourceFacet(Region3i targetRegion, Border3D border, int gridSize) {
+    public ResourceFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
         data = new HashMap[gridWorldRegion.area()];
         for (int i = 0; i < data.length; i++) {

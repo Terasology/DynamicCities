@@ -15,6 +15,7 @@
  */
 package org.terasology.dynamicCities.construction;
 
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.RegionEntityManager;
@@ -30,7 +31,6 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.Region3i;
-import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Rect2i;
@@ -83,7 +83,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         if (trees.getWorldEntries().isEmpty()) {
             return;
         }
-        for (Map.Entry<BaseVector3i, TreeGeneratorContainer> tree : trees.getWorldEntries().entrySet()) {
+        for (Map.Entry<Vector3ic, TreeGeneratorContainer> tree : trees.getWorldEntries().entrySet()) {
                 removeTree(tree.getKey(), tree.getValue());
                 trees.relData.remove(trees.worldToRelative(tree.getKey().x(), tree.getKey().y(), tree.getKey().z()).toString());
 
@@ -99,7 +99,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
             return false;
         }
 
-        for (Map.Entry<BaseVector3i, TreeGeneratorContainer> tree : trees.getWorldEntries().entrySet()) {
+        for (Map.Entry<Vector3ic, TreeGeneratorContainer> tree : trees.getWorldEntries().entrySet()) {
             if (area.contains(tree.getKey().x(), tree.getKey().z())) {
                 removeTree(tree.getKey(), tree.getValue());
                 trees.relData.remove(trees.worldToRelative(tree.getKey().x(), tree.getKey().y(), tree.getKey().z()).toString());
@@ -123,7 +123,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         return true;
     }
 
-    private void removeTree(BaseVector3i pos, TreeGeneratorContainer tree) {
+    private void removeTree(Vector3ic pos, TreeGeneratorContainer tree) {
         int seed = pos.hashCode();
         Random random = new FastRandom(0);
         Vector3f position = new Vector3f(0f, 0f, 0f);
