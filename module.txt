@@ -10,7 +10,7 @@
         { "id": "CommonWorld", "minVersion": "1.0.0" },
         { "id": "CoreAdvancedAssets", "minVersion": "1.1.0" },
         { "id": "CoreAssets", "minVersion": "2.0.1" },
-        { "id": "CoreWorlds", "minVersion": "2.0.0" },
+        { "id": "CoreWorlds", "minVersion": "2.0.0-SNAPSHOT" },
         { "id": "Economy", "minVersion": "1.0.0" },
         { "id": "Inventory", "minVersion": "1.1.0" },
         { "id": "Minimap", "minVersion": "1.0.0" },
