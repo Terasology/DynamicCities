@@ -15,11 +15,11 @@
  */
 package org.terasology.dynamicCities.facets;
 
-import org.terasology.math.Region3i;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
@@ -27,7 +27,7 @@ import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 public class RoughnessFacet extends Grid2DFloatFacet {
 
 
-    public RoughnessFacet(Region3i targetRegion, Border3D border, int gridSize) {
+    public RoughnessFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border, gridSize);
     }
 

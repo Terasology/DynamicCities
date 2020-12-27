@@ -16,6 +16,8 @@
 
 package org.terasology.dynamicCities.region;
 
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.dynamicCities.region.components.ResourceFacetComponent;
@@ -27,10 +29,10 @@ import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Region3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkComponent;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.EntityBuffer;
 import org.terasology.world.generation.EntityProvider;
 import org.terasology.world.generation.Region;
@@ -50,7 +52,7 @@ public class RegionEntityProvider implements EntityProvider {
     public void process(Region region, EntityBuffer buffer) {
 
         ElevationFacet elevationFacet = region.getFacet(ElevationFacet.class);
-        Region3i worldRegion = region.getRegion();
+        BlockRegion worldRegion = region.getRegion();
 
         if (checkCorners(worldRegion, elevationFacet)) {
             RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
@@ -68,7 +70,7 @@ public class RegionEntityProvider implements EntityProvider {
             entityStore.addComponent(resourceFacetComponent);
             entityStore.addComponent(treeFacetComponent);
 
-            LocationComponent locationComponent = new LocationComponent(worldRegion.center());
+            LocationComponent locationComponent = new LocationComponent(JomlUtil.from(worldRegion.center(new Vector3f())));
             entityStore.addComponent(locationComponent);
 
 
@@ -89,18 +91,18 @@ public class RegionEntityProvider implements EntityProvider {
    }
 
     //Checks if the region is on the surface
-    protected boolean checkCorners(Region3i worldRegion, BaseFieldFacet2D facet) {
-        Vector3i max = worldRegion.max();
-        Vector3i min = worldRegion.min();
+    protected boolean checkCorners(BlockRegion worldRegion, BaseFieldFacet2D facet) {
+        Vector3i max = worldRegion.getMax(new Vector3i());
+        Vector3i min = worldRegion.getMin(new Vector3i());
         int counter = 0;
         float[] corners = new float[5];
         Vector2i[] positions = new Vector2i[5];
         
         positions[0] = new Vector2i(max.x(), max.z());
         positions[1] = new Vector2i(min.x(), min.z());
-        positions[2] = new Vector2i(min.x() + worldRegion.sizeX(), min.z());
-        positions[3] = new Vector2i(min.x(), min.z() + worldRegion.sizeZ());
-        positions[4] = new Vector2i(worldRegion.center().x, worldRegion.center().z);
+        positions[2] = new Vector2i(min.x() + worldRegion.getSizeX(), min.z());
+        positions[3] = new Vector2i(min.x(), min.z() + worldRegion.getSizeZ());
+        positions[4] = new Vector2i(worldRegion.center(new Vector3f()).x, worldRegion.center(new Vector3f()).z);
 
         for (int i = 0; i < corners.length; i++) {
             corners[i] = facet.getWorld(positions[i]);

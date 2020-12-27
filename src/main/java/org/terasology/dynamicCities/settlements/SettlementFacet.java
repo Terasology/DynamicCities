@@ -16,13 +16,9 @@
 
 package org.terasology.dynamicCities.settlements;
 
-import org.terasology.math.Region3i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFacet2D;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  *
@@ -31,7 +27,7 @@ public class SettlementFacet extends BaseFacet2D {
 
     private SettlementComponent settlementComponent = null;
 
-    public SettlementFacet(Region3i targetRegion, Border3D border) {
+    public SettlementFacet(BlockRegion targetRegion, Border3D border) {
         super(targetRegion, border);
     }
 

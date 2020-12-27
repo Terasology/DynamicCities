@@ -16,13 +16,13 @@
 
 package org.terasology.facets;
 
+import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DFloatFacet;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.FieldFacet3D;
 
@@ -39,16 +39,16 @@ public class Grid2DFloatFacetTest {
         Border3D border = new Border3D(0, 0, 0).extendBy(0, 15, 10);
         Vector3i min = new Vector3i(10, 20, 30);
         Vector3i size = new Vector3i(32, 32, 32);
-        Region3i region = Region3i.createFromMinAndSize(min, size);
+        BlockRegion region = new BlockRegion(min, size);
         facet = createFacet(region, border, gridSize);
     }
 
-    protected Grid2DFloatFacet createFacet(Region3i region, Border3D extendBy, int gridSize) {
+    protected Grid2DFloatFacet createFacet(BlockRegion region, Border3D extendBy, int gridSize) {
         return new FloatTestFacet(region, extendBy, gridSize);
     }
 
     public class FloatTestFacet extends Grid2DFloatFacet {
-        public FloatTestFacet(Region3i targetRegion, Border3D border, int gridSize) {
+        public FloatTestFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
             super(targetRegion, border, gridSize);
         }
     }

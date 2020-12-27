@@ -16,6 +16,10 @@
 package org.terasology.dynamicCities.region.components;
 
 import com.google.common.collect.Maps;
+import org.joml.RoundingMode;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.dynamicCities.world.trees.RecursiveTreeGeneratorLSystem;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
@@ -23,11 +27,11 @@ import org.terasology.dynamicCities.world.trees.TreeGenerator;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorLSystem;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.Region3i;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.Map;
 
@@ -38,8 +42,8 @@ public final class TreeFacetComponent implements Component {
     public boolean privateToOwner = true;
 
     public final Map<String, TreeGeneratorContainer> relData = Maps.newLinkedHashMap();
-    public Region3i relativeRegion = Region3i.EMPTY;
-    public Region3i worldRegion = Region3i.EMPTY;
+    public BlockRegion relativeRegion = new BlockRegion(0,0,0);
+    public BlockRegion worldRegion = new BlockRegion(0,0,0);
     public Vector3i center = new Vector3i();
 
     public TreeFacetComponent() { }
@@ -48,8 +52,8 @@ public final class TreeFacetComponent implements Component {
 
         relativeRegion = treeFacet.getRelativeRegion();
         worldRegion = treeFacet.getWorldRegion();
-        center = new Vector3i(worldRegion.center());
-        for (Map.Entry<BaseVector3i, TreeGenerator> entry : treeFacet.getRelativeEntries().entrySet()) {
+        center = new Vector3i(worldRegion.center(new Vector3f()), RoundingMode.FLOOR);
+        for (Map.Entry<Vector3ic, TreeGenerator> entry : treeFacet.getRelativeEntries().entrySet()) {
 
             if (entry.getValue().getClass() == TreeGeneratorLSystem.class) {
                 TreeGeneratorLSystem treeGen = (TreeGeneratorLSystem) entry.getValue();
@@ -78,7 +82,7 @@ public final class TreeFacetComponent implements Component {
     }
 
     
-    public TreeGeneratorContainer get(BaseVector3i pos) {
+    public TreeGeneratorContainer get(Vector3ic pos) {
         checkRelativeCoords(pos.x(), pos.y(), pos.z());
 
         return relData.get(pos.toString());
@@ -90,7 +94,7 @@ public final class TreeFacetComponent implements Component {
     }
 
     
-    public void set(BaseVector3i pos, TreeGeneratorContainer value) {
+    public void set(Vector3ic pos, TreeGeneratorContainer value) {
         checkRelativeCoords(pos.x(), pos.y(), pos.z());
 
         relData.put(pos.toString(), value); // TODO: consider using an immutable vector here
@@ -110,7 +114,7 @@ public final class TreeFacetComponent implements Component {
     }
 
     
-    public void setWorld(BaseVector3i pos, TreeGeneratorContainer value) {
+    public void setWorld(Vector3ic pos, TreeGeneratorContainer value) {
         setWorld(pos.x(), pos.y(), pos.z(), value);
     }
 
@@ -125,10 +129,10 @@ public final class TreeFacetComponent implements Component {
     /**
      * @return an unmodifiable view on the relative entries
      */
-    public Map<BaseVector3i, TreeGeneratorContainer> getRelativeEntries() {
-        Map<BaseVector3i, TreeGeneratorContainer> vectorMap = Maps.newLinkedHashMap();
+    public Map<Vector3ic, TreeGeneratorContainer> getRelativeEntries() {
+        Map<Vector3ic, TreeGeneratorContainer> vectorMap = Maps.newLinkedHashMap();
         for (Map.Entry<String, TreeGeneratorContainer> entry : relData.entrySet()) {
-            vectorMap.put(Toolbox.stringToVector3i(entry.getKey()), entry.getValue());
+            vectorMap.put(JomlUtil.from(Toolbox.stringToVector3i(entry.getKey())), entry.getValue());
         }
         return vectorMap;
     }
@@ -136,13 +140,13 @@ public final class TreeFacetComponent implements Component {
     /**
      * @return a <b>new</b> map with world-based position entries
      */
-    public Map<BaseVector3i, TreeGeneratorContainer> getWorldEntries() {
+    public Map<Vector3ic, TreeGeneratorContainer> getWorldEntries() {
 
-        Map<BaseVector3i, TreeGeneratorContainer> result = Maps.newLinkedHashMap();
+        Map<Vector3ic, TreeGeneratorContainer> result = Maps.newLinkedHashMap();
 
-        for (Map.Entry<BaseVector3i, TreeGeneratorContainer> entry : getRelativeEntries().entrySet()) {
-            BaseVector3i relPos = entry.getKey();
-            BaseVector3i worldPos = relativeToWorld(relPos.x(), relPos.y(), relPos.z());
+        for (Map.Entry<Vector3ic, TreeGeneratorContainer> entry : getRelativeEntries().entrySet()) {
+            Vector3ic relPos = entry.getKey();
+            Vector3ic worldPos = relativeToWorld(relPos.x(), relPos.y(), relPos.z());
 
             result.put(worldPos, entry.getValue());
         }
@@ -154,7 +158,7 @@ public final class TreeFacetComponent implements Component {
      * @throws IllegalArgumentException if not within bounds
      */
     protected void checkWorldCoords(int x, int y, int z) {
-        if (!worldRegion.encompasses(x, y, z)) {
+        if (!worldRegion.contains(x, y, z)) {
             String text = "Out of bounds: (%d, %d, %d) for region %s";
             String msg = String.format(text, x, y, z, worldRegion.toString());
             throw new IllegalArgumentException(msg);
@@ -165,7 +169,7 @@ public final class TreeFacetComponent implements Component {
      * @throws IllegalArgumentException if not within bounds
      */
     protected void checkRelativeCoords(int x, int y, int z) {
-        if (!relativeRegion.encompasses(x, y, z)) {
+        if (!relativeRegion.contains(x, y, z)) {
             String text = "Out of bounds: (%d, %d, %d) for region %s";
             String msg = String.format(text, x, y, z, relativeRegion.toString());
             throw new IllegalArgumentException(msg);
@@ -190,9 +194,9 @@ public final class TreeFacetComponent implements Component {
 
     
     public String toString() {
-        Vector3i worldMin = worldRegion.min();
-        Vector3i relMin = relativeRegion.min();
-        Vector3i size = relativeRegion.size();
+        Vector3i worldMin = worldRegion.getMin(new Vector3i());
+        Vector3i relMin = relativeRegion.getMin(new Vector3i());
+        Vector3i size = relativeRegion.getSize(new Vector3i());
         return String.format("TreeFacetComponent [worldMin=%s, relativeMin=%s, size=%s]", worldMin, relMin, size);
     }
 
