@@ -16,7 +16,7 @@
 
 package org.terasology.facets;
 
-import org.joml.Vector2i;
+import org.terasology.math.geom.Vector2i;
 import org.joml.Vector3i;
 import org.junit.Assert;
 import org.junit.Before;
