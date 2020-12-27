@@ -16,7 +16,7 @@
 
 package org.terasology.facets;
 
-import org.joml.Vector2i;
+import org.terasology.math.geom.Vector2i;
 import org.joml.Vector3i;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,7 +39,7 @@ public class Grid2DFloatFacetTest {
         Border3D border = new Border3D(0, 0, 0).extendBy(0, 15, 10);
         Vector3i min = new Vector3i(10, 20, 30);
         Vector3i size = new Vector3i(32, 32, 32);
-        BlockRegion region = new BlockRegion(min, size);
+        BlockRegion region = new BlockRegion(min).setSize(size);
         facet = createFacet(region, border, gridSize);
     }
 
