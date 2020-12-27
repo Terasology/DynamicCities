@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.facets;
 
 import org.joml.Vector3f;
+import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.world.block.BlockRegion;
@@ -40,7 +41,7 @@ public abstract class Grid2DFacet extends BaseFacet2D {
         super(targetRegion, border);
         this.gridSize = gridSize;
         Vector3f regionCenter = targetRegion.center(new Vector3f());
-        center = new Vector2i(regionCenter.x(), regionCenter.z());
+        center = new Vector2i(TeraMath.ceilToInt(regionCenter.x()), TeraMath.ceilToInt(regionCenter.z()));
         gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.getSizeX() / (2 * gridSize),
                 center.y() - targetRegion.getSizeY() / (2 * gridSize),
                 center.x() + targetRegion.getSizeX() / (2 * gridSize),
