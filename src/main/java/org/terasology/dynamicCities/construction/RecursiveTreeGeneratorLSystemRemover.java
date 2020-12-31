@@ -16,13 +16,13 @@
 
 package org.terasology.dynamicCities.construction;
 
+import org.joml.Vector3i;
 import org.terasology.dynamicCities.region.components.TreeGeneratorContainer;
 import org.terasology.math.LSystemRule;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.utilities.collection.CharSequenceIterator;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.block.Block;

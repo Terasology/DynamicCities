@@ -15,13 +15,13 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
+import org.joml.Vector3i;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.BlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.dynamicCities.construction.BlockBufferSystem;
 import org.terasology.math.Side;
 import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockRegion;
 

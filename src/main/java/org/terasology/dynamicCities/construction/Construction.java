@@ -85,7 +85,6 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.ImmutableVector2i;
@@ -283,8 +282,8 @@ public class Construction extends BaseComponentSystem {
         ElevationFacet elevationFacet = sample(area, defaultHeight);
         int meanHeight = 0;
         Vector3i setPos = new Vector3i();
-        Region3i areaRegion = Region3i.createFromMinMax(new Vector3i(area.minX(), defaultHeight - maxMinDeviation, area.minY()),
-                new Vector3i(area.maxX(), defaultHeight + maxMinDeviation, area.maxY()));
+        BlockRegion areaRegion = new BlockRegion(area.minX(), defaultHeight - maxMinDeviation, area.minY(),
+                area.maxX(), defaultHeight + maxMinDeviation, area.maxY());
 
         if (!worldProvider.isRegionRelevant(areaRegion)) {
             return -9999;
@@ -360,8 +359,8 @@ public class Construction extends BaseComponentSystem {
 
     //the standard strategy used in Cities and StaticCities module
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
-        Region3i region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
-                new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
+        BlockRegion region = new BlockRegion(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY(),
+                dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY());
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
         }
@@ -377,8 +376,8 @@ public class Construction extends BaseComponentSystem {
         if (building.isScaledDown) {
             Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
             dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));
-            region = Region3i.createFromMinMax(new Vector3i(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY()),
-                    new Vector3i(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY()));
+            region = new BlockRegion(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY(),
+                    dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY());
         }
 
         //Flatten the parcel area
@@ -563,10 +562,8 @@ public class Construction extends BaseComponentSystem {
             }
 
             // Check if the region is relevant
-            Region3i region = Region3i.createFromMinMax(
-                    new Vector3i(segment.rect.minX(), vertLimit, segment.rect.minY()),
-                    new Vector3i(segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY())
-            );
+            BlockRegion region = new BlockRegion(segment.rect.minX(), vertLimit, segment.rect.minY(),
+                    segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY());
             if (!worldProvider.isRegionRelevant(region)) {
                 continue;
             } else {
@@ -668,7 +665,7 @@ public class Construction extends BaseComponentSystem {
                 }
             } else {
                 for (Vector3ic pos : region) {
-                    entity.send(new BufferBlockEvent(JomlUtil.from(pos), block));
+                    entity.send(new BufferBlockEvent(pos, block));
                 }
             }
         }

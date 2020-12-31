@@ -15,14 +15,15 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.roads.RoadSegment;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3i;
+import org.terasology.world.block.BlockRegion;
 
 /**
  * A default implementation of a rasterizer for roads. Creates simple dirt roads.
@@ -41,12 +42,10 @@ public class RoadRasterizer {
 
         // Clean the region above the rect
         Vector2i rectMin = roadSegment.rect.min();
-        Region3i upper = Region3i.createFromMinAndSize(
-                new Vector3i(rectMin.x(), heightMap.apply(rectMin) + 1, rectMin.y()),
-                new Vector3i(roadSegment.rect.sizeX(), upperHeight, roadSegment.rect.sizeY())
-        );
+        BlockRegion upper = new BlockRegion(rectMin.x(), heightMap.apply(rectMin) + 1, rectMin.y(),
+                roadSegment.rect.sizeX(), upperHeight, roadSegment.rect.sizeY());
 
-        for (Vector3i pos : upper) {
+        for (Vector3ic pos : upper) {
             rasterTarget.setBlock(pos, DefaultBlockType.AIR);
         }
     }

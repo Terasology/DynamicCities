@@ -5,7 +5,6 @@ package org.terasology.dynamicCities.sites;
 
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.nui.properties.Range;
