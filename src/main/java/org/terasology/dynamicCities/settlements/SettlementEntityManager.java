@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements;
 
-
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.joml.RoundingMode;
@@ -81,15 +80,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
 
-
 @Share(value = SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SettlementEntityManager extends BaseComponentSystem {
 
     @In
     private EntityManager entityManager;
-
-//    private EntityRef settlementEntities;
 
     @In
     private RegionEntityManager regionEntityManager;
@@ -696,6 +692,4 @@ public class SettlementEntityManager extends BaseComponentSystem {
         }
         return true;
     }
-
-
 }
