@@ -20,6 +20,6 @@
         { "id": "StructuralResources", "minVersion": "2.1.0" }
     ],
     "serverSideOnly": false,
-    "defaultWorldGenerator": "DynamicCities:DynamicCitiesPerlin",
+    "defaultWorldGenerator": "DynamicCities:DynamicCities",
     "isWorld": true
 }

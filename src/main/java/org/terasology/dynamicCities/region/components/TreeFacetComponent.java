@@ -41,7 +41,7 @@ public final class TreeFacetComponent implements Component {
 
     public boolean privateToOwner = true;
 
-    public final Map<String, TreeGeneratorContainer> relData = Maps.newLinkedHashMap();
+    public final Map<Vector3i, TreeGeneratorContainer> relData = Maps.newHashMap();
     public BlockRegion relativeRegion = new BlockRegion(0,0,0);
     public BlockRegion worldRegion = new BlockRegion(0,0,0);
     public Vector3i center = new Vector3i();
@@ -61,11 +61,11 @@ public final class TreeFacetComponent implements Component {
                 TreeGeneratorContainer container = new TreeGeneratorContainer(treeGen.getLeafType().toString(),
                         treeGen.getBarkType().toString(), treeGen.getInitialAxiom(), TreeGeneratorLSystem.class.toString(), recursiveTreeGeneratorLSystem.getMaxDepth(),
                         recursiveTreeGeneratorLSystem.getAngle(), recursiveTreeGeneratorLSystem.getRuleSet());
-                relData.put(entry.getKey().toString(), container);
+                relData.put(new Vector3i(entry.getKey()), container);
             } else if (entry.getValue().getClass() == TreeGeneratorCactus.class) {
                 TreeGeneratorCactus treeGen = (TreeGeneratorCactus) entry.getValue();
                 TreeGeneratorContainer container = new TreeGeneratorContainer(treeGen.getCactusType().toString());
-                relData.put(entry.getKey().toString(), container);
+                relData.put(new Vector3i(entry.getKey()), container);
             }
 
 
@@ -76,36 +76,36 @@ public final class TreeFacetComponent implements Component {
     private Rect2i copyRect2i(Rect2i value) {
         return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
     }
-    
+
     public TreeGeneratorContainer get(int x, int y, int z) {
         return get(new Vector3i(x, y, z));
     }
 
-    
+
     public TreeGeneratorContainer get(Vector3ic pos) {
         checkRelativeCoords(pos.x(), pos.y(), pos.z());
 
         return relData.get(pos.toString());
     }
 
-    
+
     public void set(int x, int y, int z, TreeGeneratorContainer value) {
         set(new Vector3i(x, y, z), value);
     }
 
-    
+
     public void set(Vector3ic pos, TreeGeneratorContainer value) {
         checkRelativeCoords(pos.x(), pos.y(), pos.z());
 
-        relData.put(pos.toString(), value); // TODO: consider using an immutable vector here
+        relData.put(new Vector3i(pos), value); // TODO: consider using an immutable vector here
     }
 
-    
+
     public TreeGeneratorContainer getWorld(BaseVector3i pos) {
         return getWorld(pos.x(), pos.y(), pos.z());
     }
 
-    
+
     public TreeGeneratorContainer getWorld(int x, int y, int z) {
         checkWorldCoords(x, y, z);
 
@@ -113,17 +113,17 @@ public final class TreeFacetComponent implements Component {
         return relData.get(index.toString());
     }
 
-    
+
     public void setWorld(Vector3ic pos, TreeGeneratorContainer value) {
         setWorld(pos.x(), pos.y(), pos.z(), value);
     }
 
-    
+
     public void setWorld(int x, int y, int z, TreeGeneratorContainer value) {
         checkWorldCoords(x, y, z);
 
         Vector3i index = worldToRelative(x, y, z);
-        relData.put(index.toString(), value);
+        relData.put(index, value);
     }
 
     /**
@@ -131,8 +131,8 @@ public final class TreeFacetComponent implements Component {
      */
     public Map<Vector3ic, TreeGeneratorContainer> getRelativeEntries() {
         Map<Vector3ic, TreeGeneratorContainer> vectorMap = Maps.newLinkedHashMap();
-        for (Map.Entry<String, TreeGeneratorContainer> entry : relData.entrySet()) {
-            vectorMap.put(JomlUtil.from(Toolbox.stringToVector3i(entry.getKey())), entry.getValue());
+        for (Map.Entry<Vector3i, TreeGeneratorContainer> entry : relData.entrySet()) {
+            vectorMap.put(entry.getKey(), entry.getValue());
         }
         return vectorMap;
     }
@@ -192,7 +192,7 @@ public final class TreeFacetComponent implements Component {
                 z - relativeRegion.minZ() + worldRegion.minZ());
     }
 
-    
+
     public String toString() {
         Vector3i worldMin = worldRegion.getMin(new Vector3i());
         Vector3i relMin = relativeRegion.getMin(new Vector3i());
