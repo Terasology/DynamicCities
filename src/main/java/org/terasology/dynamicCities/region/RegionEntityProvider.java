@@ -70,7 +70,7 @@ public class RegionEntityProvider implements EntityProvider {
             entityStore.addComponent(resourceFacetComponent);
             entityStore.addComponent(treeFacetComponent);
 
-            LocationComponent locationComponent = new LocationComponent(JomlUtil.from(worldRegion.center(new Vector3f())));
+            LocationComponent locationComponent = new LocationComponent(worldRegion.center(new Vector3f()));
             entityStore.addComponent(locationComponent);
 
 
@@ -97,7 +97,7 @@ public class RegionEntityProvider implements EntityProvider {
         int counter = 0;
         float[] corners = new float[5];
         Vector2i[] positions = new Vector2i[5];
-        
+
         positions[0] = new Vector2i(max.x(), max.z());
         positions[1] = new Vector2i(min.x(), min.z());
         positions[2] = new Vector2i(min.x() + worldRegion.getSizeX(), min.z());

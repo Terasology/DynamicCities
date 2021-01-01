@@ -89,7 +89,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
     @In
     private EntityManager entityManager;
 
-    private EntityRef settlementEntities;
+//    private EntityRef settlementEntities;
 
     @In
     private RegionEntityManager regionEntityManager;
@@ -131,8 +131,6 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     @Override
     public void postBegin() {
-
-        settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         long seed = regionEntityManager.hashCode() & 0x921233;
         rng = new FastRandom(seed);
 
@@ -142,8 +140,6 @@ public class SettlementEntityManager extends BaseComponentSystem {
     public void onWorldTimeEvent(WorldTimeEvent worldTimeEvent, EntityRef entityRef) {
         if (!settlementCachingSystem.isInitialised()) {
             return;
-        } else if (settlementEntities == null) {
-            settlementEntities = settlementCachingSystem.getSettlementCacheEntity();
         }
 
         cyclesLeft--;
@@ -228,7 +224,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
     public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
         Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
-        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         for (String vector2iString : container.settlementEntities.keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance) {
@@ -243,7 +239,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             return true;
         }
 
-        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         for (String vector2iString : container.settlementEntities.keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
@@ -264,7 +260,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
      * @return True if pos is not inside any settlement
      */
     public boolean checkOutsideAllSettlements(Vector2i pos) {
-        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         for (String vector2iString : container.settlementEntities.keySet()) {
             Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
             EntityRef settlement = container.settlementEntities.get(vector2iString);
@@ -532,7 +528,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         /*
           Create roads between settlements
          */
-        SettlementsCacheComponent container = settlementEntities.getComponent(SettlementsCacheComponent.class);
+        SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
 
         ImmutableVector2f dest = source;

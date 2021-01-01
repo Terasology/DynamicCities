@@ -35,6 +35,7 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.nui.Color;
+import org.terasology.world.chunks.Chunks;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -89,7 +90,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         region.removeComponent(UnassignedRegionComponent.class);
     }
 
-    
+
     public RegionEntitiesComponent getRegionEntitiesComponent() {
         return regionEntitiesComponent;
     }
@@ -120,15 +121,11 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public EntityRef getNearest(Vector2i position) {
         Map<String, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
-        float x = position.x();
-        float y = position.y();
-        Vector2i regionPos = new Vector2i(Math.round((x - Math.signum(x) * 16) / 32) * 32 + Math.signum(x) * 16,
-                Math.round((y - Math.signum(y) * 16) / 32) * 32 + Math.signum(y) * 16);
-        return regionEntities.get(regionPos.toString());
-    }
+        int x = Chunks.toChunkPosX(position.x) * Chunks.SIZE_X + ((Chunks.SIZE_X / 2) - 1);
+        int y = Chunks.toChunkPosZ(position.y) * Chunks.SIZE_Z + ((Chunks.SIZE_Z / 2) - 1);
 
-    public EntityRef getNearest(String posString) {
-        return getNearest(Toolbox.stringToVector2i(posString));
+        Vector2i regionPos = new Vector2i(x, y);
+        return regionEntities.get(regionPos.toString());
     }
 
     public void addCell(Vector2i position) {
@@ -164,13 +161,6 @@ public class RegionEntityManager extends BaseComponentSystem {
         return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
     }
 
-    public boolean cellIsLoaded(String posString) {
-        Map<String, Integer> cellGrid =regionEntitiesComponent.cellGrid;
-        int cellSize = regionEntitiesComponent.cellSize;
-        Vector2i position = Toolbox.stringToVector2i(posString);
-        return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
-    }
-
     public List<EntityRef> getRegionsInCell(Vector2i position) {
         int cellSize = regionEntitiesComponent.cellSize;
         List<EntityRef> regions = new ArrayList<>();
@@ -198,11 +188,6 @@ public class RegionEntityManager extends BaseComponentSystem {
         Vector2i pos = new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z());
         return  getRegionsInCell(pos);
     }
-    public List<EntityRef> getRegionsInCell(String posString) {
-        return  getRegionsInCell(Toolbox.stringToVector2i(posString));
-    }
-
-
 
     public boolean checkSidesLoadedLong(Vector2i pos) {
         return (cellIsLoaded(pos.addX(3 * gridSize)) && cellIsLoaded(pos.addX(-3 * gridSize))
@@ -214,11 +199,6 @@ public class RegionEntityManager extends BaseComponentSystem {
         Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
         return checkSidesLoadedLong(pos);
     }
-
-    public boolean checkSidesLoadedLong(String posString) {
-        return checkSidesLoadedLong(Toolbox.stringToVector2i(posString));
-    }
-
 
     public boolean checkSidesLoadedNear(Vector2i pos) {
         return (cellIsLoaded(pos.addX(gridSize)) && cellIsLoaded(pos.addX(-gridSize))
@@ -258,12 +238,7 @@ public class RegionEntityManager extends BaseComponentSystem {
                 region.destroy();
             }
         }
-
         processed.add(pos.toString());
-    }
-
-    public void clearCell(String posString) {
-        clearCell(Toolbox.stringToVector2i(posString));
     }
 
     public void setNameTagForRegion(EntityRef region) {
