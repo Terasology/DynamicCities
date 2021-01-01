@@ -596,7 +596,6 @@ public class Construction extends BaseComponentSystem {
                     if (playerLocation != null && segment.rect.contains(playerLocation.getLocalPosition().x(), playerLocation.getLocalPosition().z())) {
                         segmentFailed = true;
                         shouldRaster = false;
-
                         break;
                     }
                 }

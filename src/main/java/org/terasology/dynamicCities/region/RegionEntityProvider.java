@@ -29,7 +29,6 @@ import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.world.block.BlockRegion;
@@ -72,7 +71,6 @@ public class RegionEntityProvider implements EntityProvider {
 
             LocationComponent locationComponent = new LocationComponent(worldRegion.center(new Vector3f()));
             entityStore.addComponent(locationComponent);
-
 
             if (siteFacet.getSiteComponent() != null) {
                 entityStore.addComponent(siteFacet.getSiteComponent());

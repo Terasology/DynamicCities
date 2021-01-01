@@ -90,7 +90,6 @@ public class RegionEntityManager extends BaseComponentSystem {
         region.removeComponent(UnassignedRegionComponent.class);
     }
 
-
     public RegionEntitiesComponent getRegionEntitiesComponent() {
         return regionEntitiesComponent;
     }
