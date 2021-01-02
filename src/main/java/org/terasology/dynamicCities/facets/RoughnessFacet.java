@@ -15,6 +15,8 @@
  */
 package org.terasology.dynamicCities.facets;
 
+import org.joml.Vector2ic;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
@@ -39,7 +41,7 @@ public class RoughnessFacet extends Grid2DFloatFacet {
         float deviation = 0;
         float meanValue = meanHeight(gridCell, facet);
         for(BaseVector2i pos : gridCell.contents()) {
-            deviation += Math.pow(facet.getWorld(pos) - meanValue,2);
+            deviation += Math.pow(facet.getWorld(JomlUtil.from(pos)) - meanValue,2);
         }
 
         deviation = TeraMath.sqrt(deviation / (gridCell.area()));
@@ -62,7 +64,7 @@ public class RoughnessFacet extends Grid2DFloatFacet {
         float mean = 0;
 
         for (int i = 0; i < positions.length; i++) {
-            mean += facet.getWorld(positions[i]);
+            mean += facet.getWorld(JomlUtil.from(positions[i]));
         }
 
         return mean / positions.length;
@@ -70,8 +72,8 @@ public class RoughnessFacet extends Grid2DFloatFacet {
 
     public float getMeanDeviation() {
         float mean = 0;
-        for(BaseVector2i pos : getWorldRegion().contents()) {
-            mean += getWorld(pos);
+        for(Vector2ic pos : getWorldArea()) {
+            mean += getWorld(JomlUtil.from(pos));
         }
         mean /= getGridRelativeRegion().area();
 

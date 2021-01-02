@@ -48,7 +48,7 @@ public class SolidRasterizer extends CompatibleRasterizer {
         Vector2i pos2d = new Vector2i();
         for (Vector3i pos : ChunkConstants.CHUNK_REGION) {
             pos2d.set(pos.x, pos.z);
-            Biome biome = biomeFacet.get(pos2d);
+            Biome biome = biomeFacet.get(JomlUtil.from(pos2d));
             biomeRegistry.setBiome(biome, chunk, pos.x, pos.y, pos.z);
 
             int posY = pos.y + chunk.getChunkWorldOffsetY();

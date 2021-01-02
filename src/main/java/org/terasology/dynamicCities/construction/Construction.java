@@ -290,12 +290,12 @@ public class Construction extends BaseComponentSystem {
             return -9999;
         }
         for (BaseVector2i pos : area.contents()) {
-            meanHeight += elevationFacet.getWorld(pos);
+            meanHeight += elevationFacet.getWorld(JomlUtil.from(pos));
         }
         meanHeight /= area.area();
 
         for (BaseVector2i pos : area.contents()) {
-            int y = Math.round(elevationFacet.getWorld(pos));
+            int y = Math.round(elevationFacet.getWorld(JomlUtil.from(pos)));
             if (y <= meanHeight) {
                 for (int i = y; i <= meanHeight; i++) {
                     setPos.set(pos.x(), i, pos.y());

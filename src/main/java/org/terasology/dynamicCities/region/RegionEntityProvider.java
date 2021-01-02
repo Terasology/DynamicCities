@@ -29,6 +29,7 @@ import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.world.block.BlockRegion;
@@ -103,7 +104,7 @@ public class RegionEntityProvider implements EntityProvider {
         positions[4] = new Vector2i(worldRegion.center(new Vector3f()).x, worldRegion.center(new Vector3f()).z);
 
         for (int i = 0; i < corners.length; i++) {
-            corners[i] = facet.getWorld(positions[i]);
+            corners[i] = facet.getWorld(JomlUtil.from(positions[i]));
             if (corners[i] > worldRegion.maxY() || corners[i] < worldRegion.minY()) {
                 counter++;
             }

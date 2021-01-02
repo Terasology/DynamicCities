@@ -23,6 +23,7 @@ import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.List;
 
@@ -42,8 +43,8 @@ public final class RoughnessFacetComponent implements Component {
 
     public RoughnessFacetComponent(RoughnessFacet roughnessFacet) {
 
-        relativeRegion = copyRect2i(roughnessFacet.getRelativeRegion());
-        worldRegion = copyRect2i(roughnessFacet.getWorldRegion());
+        relativeRegion = copyRect2i(roughnessFacet.getRelativeArea());
+        worldRegion = copyRect2i(roughnessFacet.getWorldArea());
         gridWorldRegion = copyRect2i(roughnessFacet.getGridWorldRegion());
         gridRelativeRegion = copyRect2i(roughnessFacet.getGridRelativeRegion());
         gridSize = roughnessFacet.getGridSize();
@@ -54,6 +55,9 @@ public final class RoughnessFacetComponent implements Component {
         meanDeviation = roughnessFacet.getMeanDeviation();
     }
 
+    private Rect2i copyRect2i(BlockAreac value) {
+        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
+    }
 
     private Rect2i copyRect2i(Rect2i value) {
         return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
