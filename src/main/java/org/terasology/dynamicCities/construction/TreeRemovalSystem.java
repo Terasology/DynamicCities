@@ -93,8 +93,8 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         TreeFacetComponent trees = region.getComponent(TreeFacetComponent.class);
         LocationComponent loc = region.getComponent(LocationComponent.class);
         Rect2i relevantArea = area.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
-        BlockRegion treeRegion = new BlockRegion(relevantArea.minX(), (int) loc.getLocalPosition().y(), relevantArea.minY(),
-                relevantArea.sizeX(), 32, relevantArea.sizeY());
+        BlockRegion treeRegion = new BlockRegion(relevantArea.minX(), (int) loc.getLocalPosition().y(), relevantArea.minY())
+                .setSize(relevantArea.sizeX(), 32, relevantArea.sizeY());
         if (!worldProvider.isRegionRelevant(treeRegion)) {
             return false;
         }
