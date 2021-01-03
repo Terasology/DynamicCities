@@ -30,7 +30,6 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.Region3i;
 import org.terasology.math.geom.Matrix4f;
 import org.terasology.math.geom.Quat4f;
 import org.terasology.math.geom.Rect2i;
@@ -45,6 +44,7 @@ import org.terasology.utilities.random.Random;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
+import org.terasology.world.block.BlockRegion;
 
 import java.util.List;
 import java.util.Map;
@@ -93,8 +93,8 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         TreeFacetComponent trees = region.getComponent(TreeFacetComponent.class);
         LocationComponent loc = region.getComponent(LocationComponent.class);
         Rect2i relevantArea = area.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
-        Region3i treeRegion = Region3i.createFromMinAndSize(new Vector3i(relevantArea.minX(), loc.getLocalPosition().y(), relevantArea.minY()),
-                new Vector3i(relevantArea.sizeX(), 32, relevantArea.sizeY()));
+        BlockRegion treeRegion = new BlockRegion(relevantArea.minX(), (int) loc.getLocalPosition().y(), relevantArea.minY())
+                .setSize(relevantArea.sizeX(), 32, relevantArea.sizeY());
         if (!worldProvider.isRegionRelevant(treeRegion)) {
             return false;
         }
