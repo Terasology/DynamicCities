@@ -15,11 +15,7 @@
  */
 package org.terasology.dynamicCities.construction;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.construction.components.BlockBufferComponent;
@@ -34,12 +30,17 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.PeriodicActionTriggeredEvent;
-import org.terasology.math.Region3i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockRegion;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Share(BlockBufferSystem.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
@@ -119,10 +120,10 @@ public class BlockBufferSystem extends BaseComponentSystem {
         }
     }
 
-    public boolean isRegionProcessed(Region3i region3i) {
+    public boolean isRegionProcessed(BlockRegion region) {
         if (!blockBufferComponent.blockBuffer.isEmpty()) {
             for (Vector3i pos : buffer.keySet()) {
-                if (region3i.encompasses(pos)) {
+                if (region.contains(pos)) {
                     return false;
                 }
             }

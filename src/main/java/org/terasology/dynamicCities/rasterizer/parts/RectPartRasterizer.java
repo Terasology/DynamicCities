@@ -47,7 +47,7 @@ public class RectPartRasterizer extends AbsDynBuildingRasterizer<RectBuildingPar
         }
 
 //        int topHeight = part.getBaseHeight() + part.getWallHeight() + part.getRoof().getHeight;
-//        Region3i bbox = Region3i(rc.minX(), part.getBaseHeight(), rc.minY(), rc.maxX(), topHeight, rc.maxY());
+//        BlockRegion bbox = new BlockRegion(rc.minX(), part.getBaseHeight(), rc.minY(), rc.maxX(), topHeight, rc.maxY());
 
 //        if (chunk.getRegion().overlaps(bbox)) {
 
