@@ -359,8 +359,8 @@ public class Construction extends BaseComponentSystem {
 
     //the standard strategy used in Cities and StaticCities module
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
-        BlockRegion region = new BlockRegion(dynParcel.getShape().minX(), -255, dynParcel.getShape().minY())
-                .union(dynParcel.getShape().maxX(), 255, dynParcel.getShape().maxY());
+        BlockRegion region = new BlockRegion(dynParcel.getShape().minX(), 0, dynParcel.getShape().minY(),
+            dynParcel.getShape().maxX(), 0, dynParcel.getShape().maxY());
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
         }
