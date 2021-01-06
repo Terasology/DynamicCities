@@ -289,12 +289,12 @@ public class Construction extends BaseComponentSystem {
             return -9999;
         }
         for (BaseVector2i pos : area.contents()) {
-            meanHeight += elevationFacet.getWorld(pos);
+            meanHeight += elevationFacet.getWorld(JomlUtil.from(pos));
         }
         meanHeight /= area.area();
 
         for (BaseVector2i pos : area.contents()) {
-            int y = Math.round(elevationFacet.getWorld(pos));
+            int y = Math.round(elevationFacet.getWorld(JomlUtil.from(pos)));
             if (y <= meanHeight) {
                 for (int i = y; i <= meanHeight; i++) {
                     setPos.set(pos.x(), i, pos.y());
@@ -359,8 +359,8 @@ public class Construction extends BaseComponentSystem {
 
     //the standard strategy used in Cities and StaticCities module
     public boolean buildParcel(DynParcel dynParcel, EntityRef settlement) {
-        BlockRegion region = new BlockRegion(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY(),
-                dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY());
+        BlockRegion region = new BlockRegion(dynParcel.getShape().minX(), 0, dynParcel.getShape().minY(),
+            dynParcel.getShape().maxX(), 0, dynParcel.getShape().maxY());
         if (!worldProvider.isRegionRelevant(region)) {
             return false;
         }
@@ -376,8 +376,8 @@ public class Construction extends BaseComponentSystem {
         if (building.isScaledDown) {
             Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
             dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));
-            region = new BlockRegion(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY(),
-                    dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY());
+            region = new BlockRegion(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY())
+                    .union(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY());
         }
 
         //Flatten the parcel area
@@ -562,8 +562,8 @@ public class Construction extends BaseComponentSystem {
             }
 
             // Check if the region is relevant
-            BlockRegion region = new BlockRegion(segment.rect.minX(), vertLimit, segment.rect.minY(),
-                    segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY());
+            BlockRegion region = new BlockRegion(segment.rect.minX(), vertLimit, segment.rect.minY())
+                    .union(segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY());
             if (!worldProvider.isRegionRelevant(region)) {
                 continue;
             } else {

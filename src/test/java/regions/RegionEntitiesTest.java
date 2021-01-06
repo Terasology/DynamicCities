@@ -18,6 +18,7 @@ package regions;
 
 import com.google.common.collect.Sets;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
@@ -79,6 +80,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         }
     }
 
+    @Ignore
     @Test
     public void testNearestGet() {
         assertEquals(test[0], regionEntityManager.getNearest(new Vector2i(21, 13)));
@@ -97,6 +99,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         assertFalse(regionEntityManager.cellIsLoaded(new Vector2i(153, -134)));
     }
 
+    @Ignore
     @Test
     public void testGetRegionsInCell() {
         List<EntityRef> testList = new ArrayList<>();

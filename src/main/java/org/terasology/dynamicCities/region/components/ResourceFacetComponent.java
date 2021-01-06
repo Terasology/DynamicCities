@@ -24,6 +24,7 @@ import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ public final class ResourceFacetComponent implements Component {
 
     public boolean privateToOwner = true;
 
-    
+
     public Rect2i relativeRegion = Rect2i.EMPTY;
     public Rect2i worldRegion = Rect2i.EMPTY;
     public Rect2i gridWorldRegion = Rect2i.EMPTY;
@@ -43,7 +44,7 @@ public final class ResourceFacetComponent implements Component {
     public int gridSize;
     public Vector2i center = new Vector2i();
 
-    
+
     public List<Map<String, Resource>> data = Lists.newArrayList();
 
 
@@ -51,8 +52,8 @@ public final class ResourceFacetComponent implements Component {
 
     public ResourceFacetComponent(ResourceFacet resourceFacet) {
 
-        relativeRegion = copyRect2i(resourceFacet.getRelativeRegion());
-        worldRegion = copyRect2i(resourceFacet.getWorldRegion());
+        relativeRegion = copyRect2i(resourceFacet.getRelativeArea());
+        worldRegion = copyRect2i(resourceFacet.getWorldArea());
         gridWorldRegion = copyRect2i(resourceFacet.getGridWorldRegion());
         gridRelativeRegion = copyRect2i(resourceFacet.getGridRelativeRegion());
         gridSize = resourceFacet.getGridSize();
@@ -63,7 +64,9 @@ public final class ResourceFacetComponent implements Component {
             data.add(i, map);
         }
     }
-
+    private Rect2i copyRect2i(BlockAreac value) {
+        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
+    }
 
     private Rect2i copyRect2i(Rect2i value) {
         return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());

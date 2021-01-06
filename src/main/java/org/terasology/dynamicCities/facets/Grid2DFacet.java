@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.facets;
 
 import org.joml.Vector3f;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
@@ -65,8 +66,8 @@ public abstract class Grid2DFacet extends BaseFacet2D {
         int xNew = center.x() + Math.round((float) xRelative * gridSize);
         int yNew = center.y() + Math.round((float) yRelative * gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!getWorldRegion().contains(gridPoint)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, getWorldRegion().toString()));
+        if (!getWorldArea().contains(JomlUtil.from(gridPoint))) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, getWorldArea().toString()));
         }
         return gridPoint;
     }
@@ -94,8 +95,8 @@ public abstract class Grid2DFacet extends BaseFacet2D {
     }
 
     public Vector2i getWorldGridPoint(int x, int y) {
-        if (!getWorldRegion().contains(x, y)) {
-            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, getWorldRegion().toString()));
+        if (!getWorldArea().contains(x, y)) {
+            throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, y, getWorldArea().toString()));
         }
         int xRelative = x - center.x();
         int yRelative = y - center.y();

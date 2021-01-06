@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.region;
 
 import org.terasology.dynamicCities.facets.RoughnessFacet;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
@@ -57,7 +58,7 @@ public class RoughnessProvider implements FacetProvider {
 
         for (BaseVector2i pos : processRegion.contents()) {
 
-            if(surfaceHeightFacet.getWorld(pos) > seaLevelFacet.getSeaLevel()) {
+            if(surfaceHeightFacet.getWorld(JomlUtil.from(pos)) > seaLevelFacet.getSeaLevel()) {
                 facet.calcRoughness(new Vector2i(pos.x(), pos.y()), surfaceHeightFacet);
             } else {
                 facet.setWorld(pos, -1000);
