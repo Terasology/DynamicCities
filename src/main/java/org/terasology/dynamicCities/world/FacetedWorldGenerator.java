@@ -15,6 +15,9 @@
  */
 package org.terasology.dynamicCities.world;
 
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+import org.joml.Vector3fc;
 import org.terasology.core.world.generator.facetProviders.BiomeProvider;
 import org.terasology.core.world.generator.facetProviders.DefaultFloraProvider;
 import org.terasology.core.world.generator.facetProviders.DensityNoiseProvider;
@@ -35,9 +38,6 @@ import org.terasology.dynamicCities.world.trees.DefaultTreeProvider;
 import org.terasology.engine.SimpleUri;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.spawner.FixedSpawner;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.ImmutableVector2i;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.registry.In;
 import org.terasology.world.generation.BaseFacetedWorldGenerator;
 import org.terasology.world.generation.WorldBuilder;
@@ -49,7 +49,7 @@ import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
 @RegisterWorldGenerator(id = "DynamicCities", displayName = "DynCities", description = "Faceted world generator")
 public class FacetedWorldGenerator extends BaseFacetedWorldGenerator {
 
-    private static final ImmutableVector2i SPAWN_POS = new ImmutableVector2i(0, 0);
+    private static final Vector2ic SPAWN_POS = new Vector2i(0, 0);
     private final FixedSpawner spawner = new FixedSpawner(SPAWN_POS.x(), SPAWN_POS.y());
 
     @In
@@ -60,8 +60,8 @@ public class FacetedWorldGenerator extends BaseFacetedWorldGenerator {
     }
 
     @Override
-    public Vector3f getSpawnPosition(EntityRef entity) {
-        return JomlUtil.from(spawner.getSpawnPosition(getWorld(), entity));
+    public Vector3fc getSpawnPosition(EntityRef entity) {
+        return spawner.getSpawnPosition(getWorld(), entity);
     }
 
     @Override
