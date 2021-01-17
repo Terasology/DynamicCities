@@ -19,6 +19,7 @@ import org.terasology.cities.parcels.Parcel;
 import org.terasology.dynamicCities.parcels.RoadParcel;
 import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,10 +44,10 @@ public class RoadQueue implements Component {
         return isNotIntersecting(parcel.getShape());
     }
 
-    public boolean isNotIntersecting(Rect2i rect) {
+    public boolean isNotIntersecting(BlockAreac rect) {
         for (RoadParcel parcel : roadQueue) {
-            for (Rect2i roadRect : parcel.getRects()) {
-                if (rect.overlaps(roadRect)) {
+            for (BlockAreac roadRect : parcel.getRects()) {
+                if (rect.intersectsBlockArea(roadRect)) {
                     return false;
                 }
             }

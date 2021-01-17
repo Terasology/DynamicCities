@@ -43,6 +43,8 @@ import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
 
@@ -89,12 +91,12 @@ public class TreeRemovalSystem extends BaseComponentSystem {
 
         }
     }
-    public boolean removeTreesInRegion(EntityRef region, Rect2i area) {
+    public boolean removeTreesInRegion(EntityRef region, BlockAreac area) {
         TreeFacetComponent trees = region.getComponent(TreeFacetComponent.class);
         LocationComponent loc = region.getComponent(LocationComponent.class);
-        Rect2i relevantArea = area.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+        BlockAreac relevantArea = area.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS, new BlockArea(BlockArea.INVALID));
         BlockRegion treeRegion = new BlockRegion(relevantArea.minX(), (int) loc.getLocalPosition().y(), relevantArea.minY())
-                .setSize(relevantArea.sizeX(), 32, relevantArea.sizeY());
+                .setSize(relevantArea.getSizeX(), 32, relevantArea.getSizeY());
         if (!worldProvider.isRegionRelevant(treeRegion)) {
             return false;
         }
@@ -108,13 +110,13 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         return true;
     }
 
-    public boolean removeTreesInRegions(Rect2i area) {
+    public boolean removeTreesInRegions(BlockAreac area) {
         List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
         for (EntityRef region : regions) {
             if (!region.hasComponent(RoughnessFacetComponent.class)) {
                 return false;
             }
-            if (region.getComponent(RoughnessFacetComponent.class).worldRegion.overlaps(area)) {
+            if (region.getComponent(RoughnessFacetComponent.class).worldRegion.intersectsBlockArea(area)) {
                 if (!removeTreesInRegion(region, area)) {
                     return false;
                 }

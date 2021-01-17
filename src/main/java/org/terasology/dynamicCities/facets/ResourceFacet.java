@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.facets;
 
 import com.google.common.base.Preconditions;
+import org.joml.Vector2ic;
 import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Vector2i;
@@ -60,22 +61,22 @@ public class ResourceFacet extends Grid2DFacet {
     }
 
     public Map<String, Resource> get(int x, int y) {
-        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        Vector2ic gridPos = getRelativeGridPoint(x, y);
         return data[getRelativeGridIndex(gridPos.x(), gridPos.y())];
     }
 
     public Map<String, Resource> get(BaseVector2i pos) {
-        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
+        Vector2ic gridPos = getRelativeGridPoint(pos.x(), pos.y());
         return get(gridPos.x(), gridPos.y());
     }
 
     public Map<String, Resource> getWorld(int x, int y) {
-        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        Vector2ic gridPos = getWorldGridPoint(x, y);
         return data[getWorldGridIndex(gridPos.x(), gridPos.y())];
     }
 
     public Map<String, Resource> getWorld(BaseVector2i pos) {
-        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
+        Vector2ic gridPos = getWorldGridPoint(pos.x(), pos.y());
         return getWorld(gridPos.x(), gridPos.y());
     }
 
@@ -84,22 +85,22 @@ public class ResourceFacet extends Grid2DFacet {
     }
 
     public void set(int x, int y, Map<String, Resource> value) {
-        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        Vector2ic gridPos = getRelativeGridPoint(x, y);
         data[getRelativeGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
     public void set(BaseVector2i pos, Map<String, Resource> value) {
-        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
+        Vector2ic gridPos = getRelativeGridPoint(pos.x(), pos.y());
         set(pos.x(), pos.y(), value);
     }
 
     public void setWorld(int x, int y, Map<String, Resource> value) {
-        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        Vector2ic gridPos = getWorldGridPoint(x, y);
         data[getWorldGridIndex(gridPos.x(), gridPos.y())] = value;
     }
 
     public void setWorld(BaseVector2i pos, Map<String, Resource> value) {
-        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
+        Vector2ic gridPos = getWorldGridPoint(pos.x(), pos.y());
         setWorld(gridPos.x(), gridPos.y(), value);
     }
 

@@ -3,6 +3,7 @@
 package org.terasology.dynamicCities.region;
 
 
+import org.joml.Vector2ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.components.ActiveRegionComponent;
@@ -35,6 +36,7 @@ import org.terasology.math.geom.Vector2i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.nui.Color;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.chunks.Chunks;
 
 import java.util.ArrayList;
@@ -154,10 +156,10 @@ public class RegionEntityManager extends BaseComponentSystem {
         return cellPos;
     }
 
-    public boolean cellIsLoaded(Vector2i position) {
+    public boolean cellIsLoaded(Vector2ic position) {
         Map<String, Integer> cellGrid =regionEntitiesComponent.cellGrid;
         int cellSize = regionEntitiesComponent.cellSize;
-        return cellGrid.containsKey(getCellString(position)) && (cellGrid.get(getCellString(position)) == cellSize);
+        return cellGrid.containsKey(position) && (cellGrid.get(position) == cellSize);
     }
 
     public List<EntityRef> getRegionsInCell(Vector2i position) {
@@ -289,9 +291,9 @@ public class RegionEntityManager extends BaseComponentSystem {
         }
     }
 
-    public List<EntityRef> getRegionsInArea(Rect2i area) {
+    public List<EntityRef> getRegionsInArea(BlockAreac area) {
         List<EntityRef> result = new ArrayList<>();
-        for (BaseVector2i pos : area.contents()) {
+        for (Vector2ic pos : area) {
             EntityRef region = getNearest(new Vector2i(pos.x(), pos.y()));
 
             if (region == null || !region.isActive() || !region.exists()) {

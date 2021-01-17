@@ -20,22 +20,23 @@ import org.terasology.math.geom.ImmutableVector2f;
 import org.terasology.math.geom.ImmutableVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.world.block.BlockAreac;
 
 /**
  * A rectangular piece of the road with a start and an end point
  */
 public class RoadSegment {
-    public Rect2i rect;
+    public BlockAreac rect;
     public int height;
     public ImmutableVector2i start;
     public ImmutableVector2i end;
 
-    public RoadSegment(Rect2i rect, int height) {
+    public RoadSegment(BlockAreac rect, int height) {
         this.rect = rect;
         this.height = height;
     }
 
-    public RoadSegment(Rect2i rect, int height, ImmutableVector2i start, ImmutableVector2i end) {
+    public RoadSegment(BlockAreac rect, int height, ImmutableVector2i start, ImmutableVector2i end) {
         this.rect = rect;
         this.height = height;
         this.start = start;
@@ -46,14 +47,14 @@ public class RoadSegment {
      * @return the length of the road segment in blocks
      */
     public float getLength() {
-        return rect.sizeX();
+        return rect.getSizeX();
     }
 
     /**
      * @return the width of the road in blocks
      */
     public float getWidth() {
-        return rect.sizeY();
+        return rect.getSizeY();
     }
 
     /**

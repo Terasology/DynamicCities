@@ -21,6 +21,8 @@ import org.terasology.entitySystem.Component;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,11 +66,11 @@ public class ParcelList implements Component {
         return isNotIntersecting(parcel.shape);
     }
 
-    public boolean isNotIntersecting(Rect2i rect) {
+    public boolean isNotIntersecting(BlockAreac rect) {
         for (Parcel spawnedParcels : parcels) {
             if (spawnedParcels instanceof RoadParcel) {
                 return ((RoadParcel) spawnedParcels).isNotIntersecting(rect);
-            } else if (spawnedParcels.getShape().overlaps(rect)) {
+            } else if (spawnedParcels.getShape().intersectsBlockArea(rect)) {
                 return false;
             }
         }
