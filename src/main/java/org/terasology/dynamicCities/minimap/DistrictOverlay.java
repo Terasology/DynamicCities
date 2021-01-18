@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.minimap;
 
+import org.terasology.joml.geom.Circlef;
 import org.terasology.joml.geom.Rectanglei;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.joml.Circlef;
 import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.Color;
