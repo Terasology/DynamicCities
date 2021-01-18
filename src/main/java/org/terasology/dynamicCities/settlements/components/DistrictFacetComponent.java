@@ -3,7 +3,7 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import org.joml.Rectanglei;
+import org.terasology.joml.geom.Rectanglei;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
