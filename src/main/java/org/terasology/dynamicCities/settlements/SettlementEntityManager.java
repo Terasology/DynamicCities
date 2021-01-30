@@ -364,7 +364,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
                     LocationComponent location = region.getComponent(LocationComponent.class);
-                    Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
+                    org.joml.Vector3f worldPos = location.getWorldPosition(new org.joml.Vector3f());
+                    Vector2i position = new Vector2i(worldPos.x(), worldPos.z());
                     regionEntitiesComponent.regionEntities.put(position.toString(), region);
                     region.send(new AssignRegionEvent());
                 }

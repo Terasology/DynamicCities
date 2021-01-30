@@ -19,6 +19,7 @@ import org.terasology.logic.characters.events.OnEnterBlockEvent;
 import org.terasology.logic.console.Console;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Circle;
 import org.terasology.math.geom.Vector2f;
 import org.terasology.math.geom.Vector3f;
@@ -65,7 +66,7 @@ public class PlayerTracker extends BaseComponentSystem {
     @ReceiveEvent
     public void onEnterBlock(OnEnterBlockEvent event, EntityRef entity) {
         LocationComponent loc = entity.getComponent(LocationComponent.class);
-        Vector3f worldPos3d = loc.getWorldPosition();
+        Vector3f worldPos3d = JomlUtil.from(loc.getWorldPosition(new org.joml.Vector3f()));
         Vector2f worldPos = new Vector2f(worldPos3d.x, worldPos3d.z);
         SettlementsCacheComponent knownSettlements = settlementCachingSystem.getSettlementEntitiesComponent();
         Client client = networkSystem.getOwner(entity);

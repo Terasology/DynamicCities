@@ -3,6 +3,7 @@
 package org.terasology.dynamicCities.region;
 
 
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.components.ActiveRegionComponent;
@@ -15,7 +16,6 @@ import org.terasology.dynamicCities.region.components.UnregisteredRegionComponen
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.dynamicCities.sites.SiteComponent;
-import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
@@ -32,9 +32,9 @@ import org.terasology.math.TeraMath;
 import org.terasology.math.geom.BaseVector2i;
 import org.terasology.math.geom.Rect2i;
 import org.terasology.math.geom.Vector2i;
+import org.terasology.nui.Color;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.nui.Color;
 import org.terasology.world.chunks.Chunks;
 
 import java.util.ArrayList;
@@ -97,8 +97,8 @@ public class RegionEntityManager extends BaseComponentSystem {
     public void add(EntityRef region) {
         if (region != null) {
             Map<String, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
-            LocationComponent location = region.getComponent(LocationComponent.class);
-            Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
+            Vector3f location = region.getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
+            Vector2i position = new Vector2i(location.x(), location.z());
             addCell(position);
             regionEntities.put(position.toString(), region);
             regionStoreEntity.saveComponent(regionEntitiesComponent);
@@ -107,8 +107,8 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public void addDeleted(EntityRef region) {
         if (region != null) {
-            LocationComponent location = region.getComponent(LocationComponent.class);
-            Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
+            Vector3f location = region.getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
+            Vector2i position = new Vector2i(location.x(), location.z());
             addCell(position);
         }
     }
@@ -252,7 +252,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         SiteComponent siteComponent = region.getComponent(SiteComponent.class);
         nT.text = "Roughness: "
                 + roughnessFacetComponent.meanDeviation + " Grass: " + resourceFacetComponent.getResourceSum("Grass")
-                + locationComponent.getWorldPosition().toString();
+                + locationComponent.getWorldPosition(new Vector3f()).toString();
         nT.yOffset = 10;
         nT.scale = 10;
 
