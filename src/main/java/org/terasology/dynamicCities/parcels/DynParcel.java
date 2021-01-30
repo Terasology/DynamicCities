@@ -20,6 +20,8 @@ import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 
 /**
  * A parcel where buildings can be placed on.
@@ -30,7 +32,7 @@ public class DynParcel implements Parcel {
     public int height;
     public String zone;
 
-    public Rect2i shape;
+    public BlockArea shape = new BlockArea(BlockArea.INVALID);
     public Orientation orientation;
     public String buildingTypeName;
     public EntityRef buildingEntity;
@@ -39,9 +41,9 @@ public class DynParcel implements Parcel {
      * @param shape the shape of the lot
      * @param orientation the orientation of the parcel (e.g. towards the closest street)
      */
-    public DynParcel(Rect2i shape, Orientation orientation, String zone, int height) {
+    public DynParcel(BlockAreac shape, Orientation orientation, String zone, int height) {
         this.zone = zone;
-        this.shape = shape;
+        this.shape.set(shape);
         this.orientation = orientation;
         this.height = height;
     }
@@ -51,7 +53,7 @@ public class DynParcel implements Parcel {
      * @return the layout shape
      */
     @Override
-    public Rect2i getShape() {
+    public BlockAreac getShape() {
         return this.shape;
     }
 

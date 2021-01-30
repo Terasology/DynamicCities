@@ -15,11 +15,12 @@
  */
 package org.terasology.dynamicCities.facets;
 
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.joml.Vector3f;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseFacet2D;
@@ -34,21 +35,21 @@ import org.terasology.world.generation.facets.base.BaseFacet2D;
 public abstract class Grid2DFacet extends BaseFacet2D {
 
     protected int gridSize;
-    protected Vector2i center;
-    protected Rect2i gridWorldRegion;
-    protected Rect2i gridRelativeRegion;
+    protected Vector2i center = new Vector2i();
+    protected BlockArea gridWorldRegion = new BlockArea(BlockArea.INVALID);
+    protected BlockArea gridRelativeRegion = new BlockArea(BlockArea.INVALID);
 
     public Grid2DFacet(BlockRegion targetRegion, Border3D border, int gridSize) {
         super(targetRegion, border);
         this.gridSize = gridSize;
         Vector3f regionCenter = targetRegion.center(new Vector3f());
-        center = new Vector2i(TeraMath.ceilToInt(regionCenter.x()), TeraMath.ceilToInt(regionCenter.z()));
-        gridWorldRegion = Rect2i.createFromMinAndMax(center.x() - targetRegion.getSizeX() / (2 * gridSize),
+        center.set(TeraMath.ceilToInt(regionCenter.x()), TeraMath.ceilToInt(regionCenter.z()));
+        gridWorldRegion.set(center.x() - targetRegion.getSizeX() / (2 * gridSize),
                 center.y() - targetRegion.getSizeY() / (2 * gridSize),
                 center.x() + targetRegion.getSizeX() / (2 * gridSize),
                 center.y() + targetRegion.getSizeY() / (2 * gridSize));
 
-        gridRelativeRegion = Rect2i.createFromMinAndMax(0, 0,
+        gridRelativeRegion.set(0, 0,
                 targetRegion.getSizeX() / gridSize,
                 targetRegion.getSizeY() / gridSize);
     }
@@ -66,7 +67,7 @@ public abstract class Grid2DFacet extends BaseFacet2D {
         int xNew = center.x() + Math.round((float) xRelative * gridSize);
         int yNew = center.y() + Math.round((float) yRelative * gridSize);
         Vector2i gridPoint = new Vector2i(xNew, yNew);
-        if (!getWorldArea().contains(JomlUtil.from(gridPoint))) {
+        if (!getWorldArea().contains(gridPoint)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", xNew, yNew, getWorldArea().toString()));
         }
         return gridPoint;
@@ -113,7 +114,7 @@ public abstract class Grid2DFacet extends BaseFacet2D {
         return gridSize;
     }
 
-    public Vector2i getCenter() {
+    public Vector2ic getCenter() {
         return center;
     }
 
@@ -121,21 +122,21 @@ public abstract class Grid2DFacet extends BaseFacet2D {
         if (!gridRelativeRegion.contains(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
-        return x - gridRelativeRegion.minX() + gridRelativeRegion.sizeX() * (z - gridRelativeRegion.minY());
+        return x - gridRelativeRegion.minX() + gridRelativeRegion.getSizeX() * (z - gridRelativeRegion.minY());
     }
 
     protected final int getWorldGridIndex(int x, int z) {
         if (!gridWorldRegion.contains(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
-        return x - gridWorldRegion.minX() + gridWorldRegion.sizeX() * (z - gridWorldRegion.minY());
+        return x - gridWorldRegion.minX() + gridWorldRegion.getSizeX() * (z - gridWorldRegion.minY());
     }
 
-    public Rect2i getGridWorldRegion() {
+    public BlockAreac getGridWorldRegion() {
         return gridWorldRegion;
     }
 
-    public Rect2i getGridRelativeRegion() {
+    public BlockAreac getGridRelativeRegion() {
         return gridRelativeRegion;
     }
 }

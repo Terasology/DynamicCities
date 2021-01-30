@@ -3,6 +3,10 @@
 package org.terasology.dynamicCities.region;
 
 
+import org.joml.RoundingMode;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.components.ActiveRegionComponent;
@@ -15,7 +19,6 @@ import org.terasology.dynamicCities.region.components.UnregisteredRegionComponen
 import org.terasology.dynamicCities.region.events.AssignRegionEvent;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.dynamicCities.sites.SiteComponent;
-import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
@@ -28,13 +31,13 @@ import org.terasology.logic.console.commandSystem.annotations.Sender;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.permission.PermissionManager;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
+import org.terasology.nui.Color;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
-import org.terasology.nui.Color;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.chunks.Chunks;
 
 import java.util.ArrayList;
@@ -96,11 +99,12 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public void add(EntityRef region) {
         if (region != null) {
-            Map<String, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
+            Map<Vector2i, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
             LocationComponent location = region.getComponent(LocationComponent.class);
-            Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
+            Vector3f pos = location.getWorldPosition(new Vector3f());
+            Vector2i position = new Vector2i(pos.x(), pos.z(), RoundingMode.FLOOR);
             addCell(position);
-            regionEntities.put(position.toString(), region);
+            regionEntities.put(position, region);
             regionStoreEntity.saveComponent(regionEntitiesComponent);
         }
     }
@@ -108,23 +112,24 @@ public class RegionEntityManager extends BaseComponentSystem {
     public void addDeleted(EntityRef region) {
         if (region != null) {
             LocationComponent location = region.getComponent(LocationComponent.class);
-            Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
+            Vector3f loc = location.getWorldPosition(new Vector3f());
+            Vector2i position = new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR);
             addCell(position);
         }
     }
 
     public EntityRef get(Vector2i position) {
-        Map<String, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
-        return regionEntities.get(position.toString());
+        Map<Vector2i, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
+        return regionEntities.get(position);
     }
 
     public EntityRef getNearest(Vector2i position) {
-        Map<String, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
+        Map<Vector2i, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
         int x = Chunks.toChunkPosX(position.x) * Chunks.SIZE_X + ((Chunks.SIZE_X / 2) - 1);
         int y = Chunks.toChunkPosZ(position.y) * Chunks.SIZE_Z + ((Chunks.SIZE_Z / 2) - 1);
 
         Vector2i regionPos = new Vector2i(x, y);
-        return regionEntities.get(regionPos.toString());
+        return regionEntities.get(regionPos);
     }
 
     public void addCell(Vector2i position) {
@@ -166,9 +171,9 @@ public class RegionEntityManager extends BaseComponentSystem {
 
         Vector2i cellCenter = getCellVector(position);
         int edgeLength = Math.round((float)Math.sqrt(cellSize));
-        Rect2i cellRegion = Rect2i.createFromMinAndMax(-edgeLength, -edgeLength, edgeLength, edgeLength);
+        BlockArea cellRegion = new BlockArea(-edgeLength, -edgeLength, edgeLength, edgeLength);
         Vector2i regionWorldPos = new Vector2i();
-        for (BaseVector2i pos : cellRegion.contents()) {
+        for (Vector2ic pos : cellRegion) {
 
             regionWorldPos.set(cellCenter.x() + (int) Math.signum(pos.x()) * ((TeraMath.fastAbs(pos.x()) - 1) * 32 + 16),
                     cellCenter.y() + (int) Math.signum(pos.y()) * ((TeraMath.fastAbs(pos.y()) - 1) * 32 + 16));
@@ -184,36 +189,39 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public List<EntityRef> getRegionsInCell(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z());
+        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector2i pos = new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR);
         return  getRegionsInCell(pos);
     }
 
     public boolean checkSidesLoadedLong(Vector2i pos) {
-        return (cellIsLoaded(pos.addX(3 * gridSize)) && cellIsLoaded(pos.addX(-3 * gridSize))
-                && cellIsLoaded(pos.addY(3 * gridSize)) && cellIsLoaded(pos.addY(-3 * gridSize)));
+        return (cellIsLoaded(pos.add(3 * gridSize, 0, new Vector2i())) && cellIsLoaded(pos.add(-3 * gridSize, 0, new Vector2i()))
+            && cellIsLoaded(pos.add(0, 3 * gridSize, new Vector2i())) && cellIsLoaded(pos.add(0, -3 * gridSize, new Vector2i())));
     }
 
     public boolean checkSidesLoadedLong(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector2i pos = getCellVector(new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR));
         return checkSidesLoadedLong(pos);
     }
 
     public boolean checkSidesLoadedNear(Vector2i pos) {
-        return (cellIsLoaded(pos.addX(gridSize)) && cellIsLoaded(pos.addX(-gridSize))
-                && cellIsLoaded(pos.addY(gridSize)) && cellIsLoaded(pos.addY(-gridSize)));
+        return (cellIsLoaded(pos.add(gridSize,0, new Vector2i())) && cellIsLoaded(pos.add(-gridSize, 0, new Vector2i()))
+                && cellIsLoaded(pos.add(0,gridSize,new Vector2i())) && cellIsLoaded(pos.add(0,-gridSize, new Vector2i())));
     }
 
     public boolean checkSidesLoadedNear(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector2i pos = getCellVector(new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR));
         return checkSidesLoadedNear(pos);
     }
 
     public boolean checkFullLoaded(Vector2i pos) {
-        Rect2i cube = Rect2i.createFromMinAndMax(-1, -1, 1, 1);
+        BlockArea cube = new BlockArea(-1, -1, 1, 1);
         Vector2i cellPos = new Vector2i();
-        for(BaseVector2i cubePos : cube.contents()) {
+        for(Vector2ic cubePos : cube) {
             cellPos.set(pos.x() + cubePos.x() * gridSize, pos.y() + cubePos.y() * gridSize);
             if (!cellIsLoaded(cellPos)) {
                 return false;
@@ -224,7 +232,8 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkFullLoaded(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector2i pos = getCellVector(new Vector2i(regionLocation.getLocalPosition().x(), regionLocation.getLocalPosition().z()));
+        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector2i pos = getCellVector(new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR));
         return checkFullLoaded(pos);
     }
 
@@ -289,9 +298,9 @@ public class RegionEntityManager extends BaseComponentSystem {
         }
     }
 
-    public List<EntityRef> getRegionsInArea(Rect2i area) {
+    public List<EntityRef> getRegionsInArea(BlockAreac area) {
         List<EntityRef> result = new ArrayList<>();
-        for (BaseVector2i pos : area.contents()) {
+        for (Vector2ic pos : area) {
             EntityRef region = getNearest(new Vector2i(pos.x(), pos.y()));
 
             if (region == null || !region.isActive() || !region.exists()) {

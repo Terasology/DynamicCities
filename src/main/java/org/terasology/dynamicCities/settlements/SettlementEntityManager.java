@@ -5,6 +5,12 @@ package org.terasology.dynamicCities.settlements;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.joml.RoundingMode;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -48,19 +54,11 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.joml.geom.Circlef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Circle;
-import org.terasology.math.geom.ImmutableVector2f;
-import org.terasology.math.geom.ImmutableVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2f;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.nui.Color;
@@ -68,6 +66,8 @@ import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.utilities.random.FastRandom;
 import org.terasology.utilities.random.Random;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.time.WorldTimeEvent;
@@ -218,12 +218,11 @@ public class SettlementEntityManager extends BaseComponentSystem {
     }
 
     public boolean checkMinDistance(EntityRef siteRegion) {
-        Vector3f sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
-        Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
+        Vector3f sitePos = JomlUtil.from(siteRegion.getComponent(LocationComponent.class).getLocalPosition());
+        Vector2i pos = new Vector2i(sitePos.x(), sitePos.z(), RoundingMode.FLOOR);
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
-        for (String vector2iString : container.settlementEntities.keySet()) {
-            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
-            if (pos.distance(activePosition) < minDistance) {
+        for (Vector2i loc : container.settlementEntities.keySet()) {
+            if (pos.distance(loc) < minDistance) {
                 return false;
             }
         }
@@ -236,18 +235,17 @@ public class SettlementEntityManager extends BaseComponentSystem {
         }
 
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
-        for (String vector2iString : container.settlementEntities.keySet()) {
-            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
-            if (pos.distance(activePosition) < minDistance - settlementMaxRadius) {
+        for (Vector2ic activePos : container.settlementEntities.keySet()) {
+            if (pos.distance(activePos) < minDistance - settlementMaxRadius) {
                 return false;
             }
         }
         return true;
     }
-
-    public boolean checkMinDistanceCell(String posString) {
-        return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
-    }
+//
+//    public boolean checkMinDistanceCell(String posString) {
+//        return checkMinDistanceCell(Toolbox.stringToVector2i(posString));
+//    }
 
     /**
      * Check if a point lies in any settlement
@@ -257,12 +255,11 @@ public class SettlementEntityManager extends BaseComponentSystem {
      */
     public boolean checkOutsideAllSettlements(Vector2i pos) {
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
-        for (String vector2iString : container.settlementEntities.keySet()) {
-            Vector2i activePosition = Toolbox.stringToVector2i(vector2iString);
-            EntityRef settlement = container.settlementEntities.get(vector2iString);
+        for (Vector2ic activePos : container.settlementEntities.keySet()) {
+            EntityRef settlement = container.settlementEntities.get(new Vector2i(activePos));
             ParcelList parcels = settlement.getComponent(ParcelList.class);
 
-            if (pos.distance(activePosition) < parcels.builtUpRadius) {
+            if (pos.distance(activePos) < parcels.builtUpRadius) {
                 return false;
             }
         }
@@ -349,23 +346,24 @@ public class SettlementEntityManager extends BaseComponentSystem {
         RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
         LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
-        Vector2i pos = new Vector2i(locationComponent.getLocalPosition().x(),
-                locationComponent.getLocalPosition().z());
+        Vector3f loc = JomlUtil.from(locationComponent.getLocalPosition());
+        Vector2i pos = new Vector2i(loc.x(),loc.z(), RoundingMode.FLOOR);
         float radius = parcelList.cityRadius;
         int size = (Math.round(radius / 32) >= 1) ? Math.round(radius / 32) : 1;
-        Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-size, -size, size, size);
-        Circle settlementCircle = new Circle(pos.toVector2f(), radius);
+        BlockArea settlementRectArea = new BlockArea(-size, -size, size, size);
+        Circlef settlementCircle = new Circlef(pos.x,pos.y, radius);
         Vector2i regionWorldPos = new Vector2i();
 
-        for (BaseVector2i regionPos : settlementRectArea.contents()) {
+        for (Vector2ic regionPos : settlementRectArea) {
             regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
 
-            if (settlementCircle.contains(regionWorldPos)) {
+            if (new Vector2f(settlementCircle.x,settlementCircle.y).distance(regionWorldPos.x,regionWorldPos.y) < settlementCircle.r) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
                     LocationComponent location = region.getComponent(LocationComponent.class);
-                    Vector2i position = new Vector2i(location.getWorldPosition().x(), location.getWorldPosition().z());
-                    regionEntitiesComponent.regionEntities.put(position.toString(), region);
+                    Vector3f worldPos = location.getWorldPosition(new Vector3f());
+                    Vector2i position = new Vector2i(worldPos.x(), worldPos.z(), RoundingMode.FLOOR);
+                    regionEntitiesComponent.regionEntities.put(position, region);
                     region.send(new AssignRegionEvent());
                 }
             }
@@ -378,15 +376,14 @@ public class SettlementEntityManager extends BaseComponentSystem {
      */
     private boolean checkBuildArea(EntityRef siteRegion) {
         LocationComponent siteLocation = siteRegion.getComponent(LocationComponent.class);
-        Vector2i pos = new Vector2i(siteLocation.getLocalPosition().x(), siteLocation.getLocalPosition().z());
+        Vector2i pos = new Vector2i(siteLocation.getLocalPosition().x(), siteLocation.getLocalPosition().z(), RoundingMode.FLOOR);
         int unusableRegionsCount = 0;
-        Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-3, -3, 3, 3);
-        Circle settlementCircle = new Circle(pos.toVector2f(), settlementMaxRadius);
+        BlockArea settlementRectArea = new BlockArea(-3, -3, 3, 3);
+        Circlef settlementCircle = new Circlef(pos.x,pos.y, settlementMaxRadius);
 
-        for (BaseVector2i regionPos : settlementRectArea.contents()) {
+        for (Vector2ic regionPos : settlementRectArea) {
             Vector2i regionWorldPos = new Vector2i(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
-
-            if (settlementCircle.contains(regionWorldPos)) {
+            if (new Vector2f(settlementCircle.x, settlementCircle.y).distance(regionWorldPos.x, regionWorldPos.y) < settlementCircle.r) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(RoughnessFacetComponent.class)) {
                     if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > SettlementConstants.MAX_BUILDABLE_ROUGHNESS) {
@@ -407,7 +404,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         Set<DynParcel> parcelsInQueue = buildingQueue.buildingQueue;
 
         for (DynParcel dynParcel : parcelsInQueue) {
-            Rect2i expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+            BlockArea expandedParcel = dynParcel.shape.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS, new BlockArea(BlockArea.INVALID));
             if (!treeRemovalSystem.removeTreesInRegions(expandedParcel)) {
                 continue;
             }
@@ -484,7 +481,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             return;
         }
 
-        Vector3i center = new Vector3i(locationComponent.getLocalPosition());
+        Vector3i center = new Vector3i(JomlUtil.from(locationComponent.getLocalPosition()), RoundingMode.FLOOR);
 
         for (String zone : zones) {
             //Checks if the demand for a building of that zone is enough
@@ -525,14 +522,14 @@ public class SettlementEntityManager extends BaseComponentSystem {
           Create roads between settlements
          */
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
-        ImmutableVector2f source = new ImmutableVector2f(center.x, center.z);
+        Vector2f source = new Vector2f(center.x, center.z);
 
-        ImmutableVector2f dest = source;
+        Vector2f dest = source;
         float min = Float.MAX_VALUE;
         for (EntityRef entity : container.settlementEntities.values()) {
             if (!settlement.equals(entity)) {
-                Vector3f location = entity.getComponent(LocationComponent.class).getLocalPosition();
-                ImmutableVector2f location2D = new ImmutableVector2f(location.x, location.z);
+                Vector3f location = JomlUtil.from(entity.getComponent(LocationComponent.class).getLocalPosition());
+                Vector2f location2D = new Vector2f(location.x, location.z);
                 if (!roadCache.containsEntry(source.toString(), location2D.toString()) && source.distance(location2D) <= min) {
                     dest = location2D;
                     min = source.distance(location2D);
@@ -556,40 +553,37 @@ public class SettlementEntityManager extends BaseComponentSystem {
         settlement.send(new SettlementGrowthEvent());
     }
 
-    private RoadParcel calculateRoadParcel(ImmutableVector2f source, ImmutableVector2f dest, int height) {
+    private RoadParcel calculateRoadParcel(Vector2fc source, Vector2f dest, int height) {
         Vector<RoadSegment> segments = new Vector<>();
 
         Vector2f diff = new Vector2f(dest.sub(source));
-        ImmutableVector2f direction = new ImmutableVector2f(diff.normalize());
+        Vector2f direction = new Vector2f(diff.normalize());
 
-        ImmutableVector2f roadStart = source.add(direction.scale(settlementMaxRadius + RoadParcel.MARGIN));
-        ImmutableVector2f roadEnd = dest.sub(direction.scale(settlementMaxRadius + RoadParcel.MARGIN));
+        Vector2f roadStart = source.add(direction.mul(settlementMaxRadius + RoadParcel.MARGIN, new Vector2f()), new Vector2f());
+        Vector2f roadEnd = dest.sub(direction.mul(settlementMaxRadius + RoadParcel.MARGIN, new Vector2f()), new Vector2f());
 
         Vector2f i = new Vector2f(roadStart);
 
         boolean shouldContinue;
         do {
-            ImmutableVector2i a = new ImmutableVector2i((int) i.x, (int) i.y);
-            i.add(direction.scale(RoadParcel.RECT_SIZE));
-            ImmutableVector2i b = new ImmutableVector2i((int) i.x, (int) i.y);
-            i.sub(direction.scale(RoadParcel.OVERLAP));
+            Vector2i a = new Vector2i((int) i.x, (int) i.y);
+            i.add(direction.mul(RoadParcel.RECT_SIZE, new Vector2f()));
+            Vector2i b = new Vector2i((int) i.x, (int) i.y);
+            i.sub(direction.mul(RoadParcel.OVERLAP, new Vector2f()));
 
             // Must calculate actual min and max for the rect
             // Ensure 'a' has lower x
-            Rect2i rect;
-            if (a.getX() > b.getX()) {
-                ImmutableVector2i tmp = b;
+            BlockArea rect = new BlockArea(BlockArea.INVALID);
+            if (a.x() > b.x()) {
+                Vector2i tmp = b;
                 b = a;
                 a = tmp;
             }
 
-            if (a.getY() < b.getY()) {
-                rect = Rect2i.createFromMinAndMax(a, b);
+            if (a.y() < b.y()) {
+                rect = new BlockArea(a, b);
             } else {
-                rect = Rect2i.createFromMinAndMax(
-                        new ImmutableVector2i(a.getX(), b.getY()),
-                        new ImmutableVector2i(b.getX(), a.getY())
-                );
+                rect = new BlockArea(a.x(), b.y(),b.x(), a.y());
             }
 
             segments.add(new RoadSegment(rect, height, a, b));
@@ -599,7 +593,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             float threshold = 0.0001f;
             Vector2f remaining = new Vector2f(roadEnd.sub(i));
             remaining.normalize();
-            shouldContinue = (new ImmutableVector2f(remaining)).sub(direction).length() < threshold;
+            shouldContinue = (new Vector2f(remaining)).sub(direction).length() < threshold;
         } while (shouldContinue);
 
         return new RoadParcel(segments);
@@ -613,8 +607,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
 
         for (RoadParcel parcel : parcelsInQueue) {
-            Set<Rect2i> expandedParcels = parcel.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
-            for (Rect2i region : expandedParcels) {
+            Set<BlockArea> expandedParcels = parcel.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS);
+            for (BlockArea region : expandedParcels) {
                 treeRemovalSystem.removeTreesInRegions(region);
             }
 
@@ -638,13 +632,13 @@ public class SettlementEntityManager extends BaseComponentSystem {
                                             BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
         int iter = 0;
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
-        int minSize = (minMaxSizes.get(zone).get(0).getX() < minMaxSizes.get(zone).get(0).getY())
-                ? minMaxSizes.get(zone).get(0).getX() : minMaxSizes.get(zone).get(0).getY();
-        int maxSize = (minMaxSizes.get(zone).get(1).getX() < minMaxSizes.get(zone).get(1).getY())
-                ? minMaxSizes.get(zone).get(1).getX() : minMaxSizes.get(zone).get(1).getY();
+        int minSize = (minMaxSizes.get(zone).get(0).x() < minMaxSizes.get(zone).get(0).y())
+                ? minMaxSizes.get(zone).get(0).x() : minMaxSizes.get(zone).get(0).y();
+        int maxSize = (minMaxSizes.get(zone).get(1).x() < minMaxSizes.get(zone).get(1).y())
+                ? minMaxSizes.get(zone).get(1).x() : minMaxSizes.get(zone).get(1).y();
         int sizeX = rng.nextInt(minSize, maxSize);
         int sizeY = rng.nextInt(minSize, maxSize);
-        Rect2i shape;
+        BlockArea shape;
         Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(5));
         Vector2i rectPosition = new Vector2i();
         float radius;
@@ -655,7 +649,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             radius = rng.nextFloat(0, parcels.cityRadius - 32);
             rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
                     (int) Math.round(radius * Math.cos((double) angle)) + center.z());
-            shape = Rect2i.createFromMinAndSize(rectPosition.x(), rectPosition.y(), sizeX, sizeY);
+            shape = new BlockArea(rectPosition.x(), rectPosition.y()).setSize(sizeX, sizeY);
         } while ((!parcels.isNotIntersecting(shape) || !buildingQueue.isNotIntersecting(shape)
                 || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)) || !checkIfTerrainIsBuildable(shape))
                 && iter != maxIterations);
@@ -670,7 +664,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         }
     }
 
-    private boolean checkIfTerrainIsBuildable(Rect2i area) {
+    private boolean checkIfTerrainIsBuildable(BlockAreac area) {
         List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
         if (regions.isEmpty()) {
             //logger.debug("No regions found in area " + area.toString());

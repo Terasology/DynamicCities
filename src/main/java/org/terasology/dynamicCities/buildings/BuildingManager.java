@@ -17,6 +17,7 @@ package org.terasology.dynamicCities.buildings;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.management.AssetManager;
@@ -37,13 +38,12 @@ import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.utilities.random.MersenneRandom;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -159,7 +159,7 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.empty();
     }
 
-    public Optional<GenericBuildingComponent> getRandomBuildingOfZone(String zone, Rect2i shape) {
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZone(String zone, BlockAreac shape) {
         if (buildings.containsKey(zone)) {
             int max = buildings.get(zone).size();
             GenericBuildingComponent building;
@@ -180,7 +180,7 @@ public class BuildingManager extends BaseComponentSystem {
         return Optional.empty();
     }
 
-    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, Rect2i shape, CultureComponent cultureComponent) {
+    public Optional<GenericBuildingComponent> getRandomBuildingOfZoneForCulture(String zone, BlockAreac shape, CultureComponent cultureComponent) {
         if (buildings.containsKey(zone)) {
             // TODO: needs to be adapted if buildings have a specific spawn chance
             List<GenericBuildingComponent> availableBuildings =
@@ -211,11 +211,11 @@ public class BuildingManager extends BaseComponentSystem {
             }
 
             if (selectedBuilding != null) {
-                logger.debug("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.width(), shape.height());
+                logger.debug("Found building \"{}\" for zone \"{}\" and size ({}, {})", selectedBuilding.name, zone, shape.getSizeX(), shape.getSizeY());
                 return Optional.of(entityManager.getComponentLibrary().copy(selectedBuilding));
             }
         }
-        logger.warn("No building types found for zone \"{}\" with size ({}, {})", zone, shape.width(), shape.height());
+        logger.warn("No building types found for zone \"{}\" with size ({}, {})", zone, shape.getSizeX(), shape.getSizeY());
         return Optional.empty();
     }
 
@@ -308,7 +308,7 @@ public class BuildingManager extends BaseComponentSystem {
         return buildings.keySet();
     }
 
-    private GenericBuildingComponent findBiggestFittingBuilding(Rect2i shape, String zone) {
+    private GenericBuildingComponent findBiggestFittingBuilding(BlockAreac shape, String zone) {
         int maxX = 0;
         int maxY = 0;
         GenericBuildingComponent fittingBuilding = null;
@@ -316,7 +316,7 @@ public class BuildingManager extends BaseComponentSystem {
             int tempX = buildingComponent.minSize.x;
             int tempY = buildingComponent.minSize.y;
 
-            if (tempY <= shape.sizeY() && tempX <= shape.sizeX()) {
+            if (tempY <= shape.getSizeY() && tempX <= shape.getSizeX()) {
                 if (maxX < tempX && maxY < tempY) {
                     maxX = tempX;
                     maxY = tempY;
@@ -328,24 +328,24 @@ public class BuildingManager extends BaseComponentSystem {
         return fittingBuilding;
     }
 
-    private boolean isFitting(Rect2i shape, GenericBuildingComponent building) {
-        boolean checkNorthSouth = building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
-                && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY();
-        boolean checkEastWest = building.minSize.x < shape.sizeY() && building.minSize.y < shape.sizeX()
-                && building.maxSize.x > shape.sizeY() && building.maxSize.y > shape.sizeX();
+    private boolean isFitting(BlockAreac shape, GenericBuildingComponent building) {
+        boolean checkNorthSouth = building.minSize.x < shape.getSizeX() && building.minSize.y < shape.getSizeY()
+                && building.maxSize.x > shape.getSizeX() && building.maxSize.y > shape.getSizeY();
+        boolean checkEastWest = building.minSize.x < shape.getSizeY() && building.minSize.y < shape.getSizeX()
+                && building.maxSize.x > shape.getSizeY() && building.maxSize.y > shape.getSizeX();
         return checkEastWest || checkNorthSouth;
     }
 
     //Checks whether the building needs to be rotated in order to fit on the parcel
     public boolean needsRotation(DynParcel parcel, GenericBuildingComponent building) {
-        Rect2i shape = parcel.shape;
+        BlockAreac shape = parcel.shape;
         Orientation orientation = parcel.orientation;
         if (orientation == Orientation.NORTH || orientation == Orientation.SOUTH) {
-            return !(building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
-                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY());
+            return !(building.minSize.x < shape.getSizeX() && building.minSize.y < shape.getSizeY()
+                    && building.maxSize.x > shape.getSizeX() && building.maxSize.y > shape.getSizeY());
         } else {
-            return building.minSize.x < shape.sizeX() && building.minSize.y < shape.sizeY()
-                    && building.maxSize.x > shape.sizeX() && building.maxSize.y > shape.sizeY();
+            return building.minSize.x < shape.getSizeX() && building.minSize.y < shape.getSizeY()
+                    && building.maxSize.x > shape.getSizeX() && building.maxSize.y > shape.getSizeY();
         }
     }
 }

@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.region.components;
 
 
+import org.joml.Vector2i;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.reflection.MappedContainer;
@@ -28,7 +29,7 @@ import java.util.Map;
 @MappedContainer
 public class RegionEntitiesComponent implements Component {
 
-    public Map<String, EntityRef> regionEntities;
+    public Map<Vector2i, EntityRef> regionEntities;
     public int gridSize;
     //This stores information about the loaded state of several regions packed into a cell
     public Map<String, Integer> cellGrid;

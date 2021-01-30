@@ -16,52 +16,60 @@
 
 package org.terasology.dynamicCities.roads;
 
-import org.terasology.math.geom.ImmutableVector2f;
-import org.terasology.math.geom.ImmutableVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 
 /**
  * A rectangular piece of the road with a start and an end point
  */
 public class RoadSegment {
-    public Rect2i rect;
-    public int height;
-    public ImmutableVector2i start;
-    public ImmutableVector2i end;
+    private BlockArea rect = new BlockArea(BlockArea.INVALID);
+    private int height;
+    private Vector2i start = new Vector2i();
+    private Vector2i end = new Vector2i();
 
-    public RoadSegment(Rect2i rect, int height) {
-        this.rect = rect;
+    public RoadSegment(BlockAreac rect, int height) {
+        this.rect.set(rect);
         this.height = height;
     }
 
-    public RoadSegment(Rect2i rect, int height, ImmutableVector2i start, ImmutableVector2i end) {
-        this.rect = rect;
+    public RoadSegment(BlockAreac rect, int height, Vector2ic start, Vector2ic end) {
+        this.rect.set(rect);
         this.height = height;
-        this.start = start;
-        this.end = end;
+        this.start.set(start);
+        this.end.set(end);
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public Vector2ic getStart() {
+        return start;
+    }
+
+    public Vector2ic getEnd() {
+        return end;
+    }
+
+    public BlockAreac getRect() {
+        return rect;
     }
 
     /**
      * @return the length of the road segment in blocks
      */
     public float getLength() {
-        return rect.sizeX();
+        return rect.getSizeX();
     }
 
     /**
      * @return the width of the road in blocks
      */
     public float getWidth() {
-        return rect.sizeY();
+        return rect.getSizeY();
     }
 
-    /**
-     * @return a unit vector from start to end
-     */
-    public ImmutableVector2f getRoadDirection() {
-        return new ImmutableVector2f(
-                new Vector2i(end.sub(start)).toVector2f().normalize()
-        );
-    }
 }

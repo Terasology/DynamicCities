@@ -15,7 +15,6 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
-
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.bldg.Building;
 import org.terasology.cities.bldg.BuildingPart;

@@ -16,11 +16,12 @@
 package org.terasology.dynamicCities.settlements;
 
 
+import org.joml.RoundingMode;
+import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.network.Replicate;
 
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.Map;
 
 public final class SettlementsCacheComponent implements Component {
     @Replicate
-    public Map<String, EntityRef> settlementEntities;
+    public Map<Vector2i, EntityRef> settlementEntities;
 
     @Replicate
     public List<EntityRef> networkCache;
@@ -37,14 +38,14 @@ public final class SettlementsCacheComponent implements Component {
     public SettlementsCacheComponent() { }
 
     public void add(EntityRef settlement) {
-        Vector3f pos3f = settlement.getComponent(LocationComponent.class).getWorldPosition();
-        Vector2i pos = new Vector2i(pos3f.x(), pos3f.z());
-        settlementEntities.put(pos.toString(), settlement);
+        Vector3f pos3f = settlement.getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
+        Vector2i pos = new Vector2i(pos3f.x(), pos3f.z(), RoundingMode.FLOOR);
+        settlementEntities.put(pos, settlement);
 
     }
 
     public EntityRef get(Vector2i position) {
-        return settlementEntities.get(position.toString());
+        return settlementEntities.get(position);
     }
 
 
