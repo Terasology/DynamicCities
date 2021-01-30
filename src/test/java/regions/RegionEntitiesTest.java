@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.math.geom.Vector2i;
 import org.terasology.math.geom.Vector3f;
 import org.terasology.moduletestingenvironment.ModuleTestingEnvironment;
@@ -67,7 +68,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         LocationComponent[] loc = new LocationComponent[test.length];
         for (int i = 0; i < test.length; i++) {
             test[i] = Mockito.mock(EntityRef.class);
-            loc[i] = new LocationComponent(pos[i]);
+            loc[i] = new LocationComponent(JomlUtil.from(pos[i]));
             Mockito.when(test[i].getComponent(LocationComponent.class)).thenReturn(loc[i]);
             regionEntityManager.add(test[i]);
         }
