@@ -3,10 +3,10 @@
 
 package org.terasology.dynamicCities.sites;
 
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.nui.properties.Range;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
@@ -39,19 +39,19 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
         SiteFacet siteFacet = new SiteFacet(coreReg, border);
 
         if (roughnessFacet.getMeanDeviation() < 0.3f && roughnessFacet.getMeanDeviation() > 0) {
-            BaseVector2i minPos = new Vector2i();
+            Vector2i minPos = new Vector2i();
             float minDev = 10;
-            for (BaseVector2i pos : roughnessFacet.getGridWorldRegion().contents()) {
+            for (Vector2ic pos : roughnessFacet.getGridWorldRegion()) {
                 float currentDev = roughnessFacet.getWorld(pos);
                 if (currentDev < minDev && currentDev > 0) {
                     minDev = currentDev;
-                    minPos = pos;
+                    minPos.set(pos);
                 }
             }
 
             // Removes sites that are too close to spawn. Spawn is assumed to be at (0, 0, 0).
             if (minPos.length() > config.minSpawnGap) {
-                SiteComponent siteComponent = new SiteComponent(minPos.getX(), minPos.getY());
+                SiteComponent siteComponent = new SiteComponent(minPos.x(), minPos.y());
                 siteFacet.setSiteComponent(siteComponent);
             }
         }

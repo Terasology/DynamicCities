@@ -16,11 +16,11 @@
 
 package org.terasology.dynamicCities.world.trees;
 
+import org.joml.Vector3i;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
-import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.Chunks;
 import org.terasology.world.chunks.CoreChunk;
 
 /**
@@ -30,7 +30,7 @@ import org.terasology.world.chunks.CoreChunk;
 public abstract class AbstractTreeGenerator extends CompatibleRasterizer implements TreeGenerator {
 
     protected void safelySetBlock(CoreChunk chunk, int x, int y, int z, Block block, ResourceFacet resourceFacet) {
-        if (ChunkConstants.CHUNK_REGION.encompasses(x, y, z)) {
+        if (Chunks.CHUNK_REGION.contains(x, y, z)) {
             setBlock(chunk, block, new Vector3i(x, y, z), resourceFacet);
         }
     }

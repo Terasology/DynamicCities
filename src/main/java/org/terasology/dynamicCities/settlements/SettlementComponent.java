@@ -16,9 +16,9 @@
 
 package org.terasology.dynamicCities.settlements;
 
+import org.joml.Vector2i;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.reflection.MappedContainer;
 
 /**

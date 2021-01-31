@@ -16,8 +16,8 @@
 
 package org.terasology.dynamicCities.sites;
 
+import org.joml.Vector2i;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.Objects;

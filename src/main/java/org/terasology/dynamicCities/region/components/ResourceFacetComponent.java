@@ -17,13 +17,13 @@ package org.terasology.dynamicCities.region.components;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.BlockArea;
 import org.terasology.world.block.BlockAreac;
 
 import java.util.HashMap;
@@ -33,29 +33,25 @@ import java.util.Map;
 @MappedContainer
 public final class ResourceFacetComponent implements Component {
 
-
     public boolean privateToOwner = true;
 
-
-    public Rect2i relativeRegion = Rect2i.EMPTY;
-    public Rect2i worldRegion = Rect2i.EMPTY;
-    public Rect2i gridWorldRegion = Rect2i.EMPTY;
-    public Rect2i gridRelativeRegion = Rect2i.EMPTY;
+    public BlockArea relativeRegion = new BlockArea(BlockArea.INVALID);
+    public BlockArea worldRegion = new BlockArea(BlockArea.INVALID);
+    public BlockArea gridWorldRegion = new BlockArea(BlockArea.INVALID);
+    public BlockArea gridRelativeRegion = new BlockArea(BlockArea.INVALID);
     public int gridSize;
     public Vector2i center = new Vector2i();
 
-
     public List<Map<String, Resource>> data = Lists.newArrayList();
-
 
     public ResourceFacetComponent() { }
 
     public ResourceFacetComponent(ResourceFacet resourceFacet) {
 
-        relativeRegion = copyRect2i(resourceFacet.getRelativeArea());
-        worldRegion = copyRect2i(resourceFacet.getWorldArea());
-        gridWorldRegion = copyRect2i(resourceFacet.getGridWorldRegion());
-        gridRelativeRegion = copyRect2i(resourceFacet.getGridRelativeRegion());
+        relativeRegion.set(resourceFacet.getRelativeArea());
+        worldRegion.set(resourceFacet.getWorldArea());
+        gridWorldRegion.set(resourceFacet.getGridWorldRegion());
+        gridRelativeRegion.set(resourceFacet.getGridRelativeRegion());
         gridSize = resourceFacet.getGridSize();
         center = new Vector2i(resourceFacet.getCenter());
         for (int i = 0; i < resourceFacet.getInternal().length; i++) {
@@ -63,13 +59,6 @@ public final class ResourceFacetComponent implements Component {
             map.putAll(resourceFacet.getInternal()[i]);
             data.add(i, map);
         }
-    }
-    private Rect2i copyRect2i(BlockAreac value) {
-        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
-    }
-
-    private Rect2i copyRect2i(Rect2i value) {
-        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
     }
 
     public int getResourceSum(String resourceType) {
@@ -155,41 +144,41 @@ public final class ResourceFacetComponent implements Component {
         if (!gridRelativeRegion.contains(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
-        return x - gridRelativeRegion.minX() + gridRelativeRegion.sizeX() * (z - gridRelativeRegion.minY());
+        return x - gridRelativeRegion.minX() + gridRelativeRegion.getSizeX() * (z - gridRelativeRegion.minY());
     }
 
     protected int getWorldGridIndex(int x, int z) {
         if (!gridWorldRegion.contains(x, z)) {
             throw new IllegalArgumentException(String.format("Out of bounds: (%d, %d) for region %s", x, z, gridWorldRegion.toString()));
         }
-        return x - gridWorldRegion.minX() + gridWorldRegion.sizeX() * (z - gridWorldRegion.minY());
+        return x - gridWorldRegion.minX() + gridWorldRegion.getSizeX() * (z - gridWorldRegion.minY());
     }
 
-    public Rect2i getGridWorldRegion() {
+    public BlockAreac getGridWorldRegion() {
         return gridWorldRegion;
     }
 
-    public Rect2i getGridRelativeRegion() {
+    public BlockAreac getGridRelativeRegion() {
         return gridRelativeRegion;
     }
 
     public Map<String, Resource> get(int x, int y) {
-        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        Vector2ic gridPos = getRelativeGridPoint(x, y);
         return data.get(getRelativeGridIndex(gridPos.x(), gridPos.y()));
     }
 
-    public Map<String, Resource> get(BaseVector2i pos) {
-        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
+    public Map<String, Resource> get(Vector2ic pos) {
+        Vector2ic gridPos = getRelativeGridPoint(pos.x(), pos.y());
         return get(gridPos.x(), gridPos.y());
     }
 
     public Map<String, Resource> getWorld(int x, int y) {
-        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        Vector2ic gridPos = getWorldGridPoint(x, y);
         return data.get(getWorldGridIndex(gridPos.x(), gridPos.y()));
     }
 
-    public Map<String, Resource> getWorld(BaseVector2i pos) {
-        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
+    public Map<String, Resource> getWorld(Vector2ic pos) {
+        Vector2ic gridPos = getWorldGridPoint(pos.x(), pos.y());
         return getWorld(gridPos.x(), gridPos.y());
     }
 
@@ -198,22 +187,22 @@ public final class ResourceFacetComponent implements Component {
     }
 
     public void set(int x, int y, Map<String, Resource> value) {
-        BaseVector2i gridPos = getRelativeGridPoint(x, y);
+        Vector2ic gridPos = getRelativeGridPoint(x, y);
         data.set(getRelativeGridIndex(gridPos.x(), gridPos.y()), value);
     }
 
-    public void set(BaseVector2i pos, Map<String, Resource> value) {
-        BaseVector2i gridPos = getRelativeGridPoint(pos.x(), pos.y());
+    public void set(Vector2ic pos, Map<String, Resource> value) {
+        Vector2ic gridPos = getRelativeGridPoint(pos.x(), pos.y());
         set(pos.x(), pos.y(), value);
     }
 
     public void setWorld(int x, int y, Map<String, Resource> value) {
-        BaseVector2i gridPos = getWorldGridPoint(x, y);
+        Vector2ic gridPos = getWorldGridPoint(x, y);
         data.set(getWorldGridIndex(gridPos.x(), gridPos.y()), value);
     }
 
-    public void setWorld(BaseVector2i pos, Map<String, Resource> value) {
-        BaseVector2i gridPos = getWorldGridPoint(pos.x(), pos.y());
+    public void setWorld(Vector2ic pos, Map<String, Resource> value) {
+        Vector2ic gridPos = getWorldGridPoint(pos.x(), pos.y());
         setWorld(gridPos.x(), gridPos.y(), value);
     }
 

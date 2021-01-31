@@ -3,8 +3,11 @@
 
 package org.terasology.dynamicCities.playerTracking;
 
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.commonworld.geom.CircleUtility;
 import org.terasology.dynamicCities.buildings.components.SettlementRefComponent;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.settlements.SettlementCachingSystem;
@@ -15,13 +18,11 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.joml.geom.Circlef;
 import org.terasology.logic.characters.events.OnEnterBlockEvent;
 import org.terasology.logic.console.Console;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
-import org.terasology.math.geom.Circle;
-import org.terasology.math.geom.Vector2f;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.network.Client;
 import org.terasology.network.NetworkSystem;
 import org.terasology.nui.FontColor;
@@ -59,13 +60,14 @@ public class PlayerTracker extends BaseComponentSystem {
 
     /**
      * Called whenever a block is entered
+     *
      * @param event the event
      * @param entity the character entity reference "player:engine"
      */
     @ReceiveEvent
     public void onEnterBlock(OnEnterBlockEvent event, EntityRef entity) {
         LocationComponent loc = entity.getComponent(LocationComponent.class);
-        Vector3f worldPos3d = loc.getWorldPosition();
+        Vector3f worldPos3d = loc.getWorldPosition(new Vector3f());
         Vector2f worldPos = new Vector2f(worldPos3d.x, worldPos3d.z);
         SettlementsCacheComponent knownSettlements = settlementCachingSystem.getSettlementEntitiesComponent();
         Client client = networkSystem.getOwner(entity);
@@ -93,11 +95,11 @@ public class PlayerTracker extends BaseComponentSystem {
                 return;
             }
 
-            Circle circle = new Circle(site.getLocalPosition().x(), site.getLocalPosition().z(), radius);
-            if (circle.contains(worldPos)) {
+            Circlef circle = new Circlef(site.getLocalPosition().x(), site.getLocalPosition().z(), radius);
+            if (CircleUtility.contains(circle, worldPos.x, worldPos.y)) {
                 if (newSettlement != null) {
                     logger.warn("{} appears to be in {} and {} at the same time!", name, newSettlement.getComponent(NameTagComponent.class).text,
-                            settlement.getComponent(NameTagComponent.class).text);
+                        settlement.getComponent(NameTagComponent.class).text);
                 }
 
                 newSettlement = settlement;
@@ -117,8 +119,8 @@ public class PlayerTracker extends BaseComponentSystem {
 
     /**
      * Called whenever a named area is entered
+     *
      * @param event the event
-
      * @param entity the character entity reference "player:engine"
      */
 
@@ -138,6 +140,7 @@ public class PlayerTracker extends BaseComponentSystem {
 
     /**
      * Called whenever a named area is entered
+     *
      * @param event the event
      * @param entity the character entity reference "player:engine"
      */

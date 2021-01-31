@@ -15,11 +15,10 @@
  */
 package org.terasology.dynamicCities.region;
 
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.Facet;
 import org.terasology.world.generation.FacetProvider;
@@ -54,11 +53,10 @@ public class RoughnessProvider implements FacetProvider {
 
         SeaLevelFacet seaLevelFacet = region.getRegionFacet(SeaLevelFacet.class);
         ElevationFacet surfaceHeightFacet = region.getRegionFacet(ElevationFacet.class);
-        Rect2i processRegion = facet.getGridWorldRegion();
+        BlockAreac processRegion = facet.getGridWorldRegion();
 
-        for (BaseVector2i pos : processRegion.contents()) {
-
-            if(surfaceHeightFacet.getWorld(JomlUtil.from(pos)) > seaLevelFacet.getSeaLevel()) {
+        for (Vector2ic pos : processRegion) {
+            if(surfaceHeightFacet.getWorld(pos) > seaLevelFacet.getSeaLevel()) {
                 facet.calcRoughness(new Vector2i(pos.x(), pos.y()), surfaceHeightFacet);
             } else {
                 facet.setWorld(pos, -1000);

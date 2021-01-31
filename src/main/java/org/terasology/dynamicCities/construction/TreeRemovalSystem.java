@@ -15,6 +15,10 @@
  */
 package org.terasology.dynamicCities.construction;
 
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +34,6 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.geom.Matrix4f;
-import org.terasology.math.geom.Quat4f;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -86,17 +85,18 @@ public class TreeRemovalSystem extends BaseComponentSystem {
             return;
         }
         for (Map.Entry<Vector3ic, TreeGeneratorContainer> tree : trees.getWorldEntries().entrySet()) {
-                removeTree(tree.getKey(), tree.getValue());
-                trees.relData.remove(trees.worldToRelative(tree.getKey().x(), tree.getKey().y(), tree.getKey().z()));
+            removeTree(tree.getKey(), tree.getValue());
+            trees.relData.remove(trees.worldToRelative(tree.getKey().x(), tree.getKey().y(), tree.getKey().z()));
 
         }
     }
+
     public boolean removeTreesInRegion(EntityRef region, BlockAreac area) {
         TreeFacetComponent trees = region.getComponent(TreeFacetComponent.class);
         LocationComponent loc = region.getComponent(LocationComponent.class);
         BlockArea relevantArea = area.expand(SettlementConstants.MAX_TREE_RADIUS, SettlementConstants.MAX_TREE_RADIUS, new BlockArea(BlockArea.INVALID));
         BlockRegion treeRegion = new BlockRegion(relevantArea.minX(), (int) loc.getLocalPosition().y(), relevantArea.minY())
-                .setSize(relevantArea.getSizeX(), 32, relevantArea.getSizeY());
+            .setSize(relevantArea.getSizeX(), 32, relevantArea.getSizeY());
         if (!worldProvider.isRegionRelevant(treeRegion)) {
             return false;
         }
@@ -130,7 +130,9 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         Random random = new FastRandom(0);
         Vector3f position = new Vector3f(0f, 0f, 0f);
 
-        Matrix4f rotation = new Matrix4f(new Quat4f(new Vector3f(0f, 0f, 1f), (float) Math.PI / 2f), Vector3f.ZERO, 1.0f);
+        Matrix4f rotation = new Matrix4f().rotate(new Quaternionf().setAngleAxis((float) Math.PI / 2f, 0, 0, 1));
+
+//        Matrix4f rotation = new Matrix4f(new Quat4f(new Vector3f(0f, 0f, 1f), (float) Math.PI / 2f), Vector3f.ZERO, 1.0f);
 
         float angleOffset = random.nextFloat(-TreeGeneratorLSystem.MAX_ANGLE_OFFSET, TreeGeneratorLSystem.MAX_ANGLE_OFFSET);
 
@@ -146,7 +148,5 @@ public class TreeRemovalSystem extends BaseComponentSystem {
             logger.error("Failed to remove tree due to an unknown TreeGenerator.class " + tree.className);
         }
     }
-
-
 
 }

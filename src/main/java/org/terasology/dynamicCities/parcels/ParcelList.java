@@ -18,7 +18,6 @@ package org.terasology.dynamicCities.parcels;
 
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.world.block.BlockAreac;

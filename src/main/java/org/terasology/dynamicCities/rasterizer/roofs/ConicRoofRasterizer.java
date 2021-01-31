@@ -16,6 +16,8 @@
 
 package org.terasology.dynamicCities.rasterizer.roofs;
 
+import org.joml.RoundingMode;
+import org.joml.Vector2i;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.model.roof.ConicRoof;
@@ -24,13 +26,13 @@ import org.terasology.cities.raster.Pen;
 import org.terasology.cities.raster.Pens;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
+import org.terasology.commonworld.geom.CircleUtility;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
+import org.terasology.joml.geom.Circlef;
+import org.terasology.joml.geom.Rectanglef;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.Circle;
-import org.terasology.math.geom.Vector2i;
 
-import java.math.RoundingMode;
 
 /**
  * Converts a {@link ConicRoof} into blocks
@@ -46,21 +48,21 @@ public class ConicRoofRasterizer extends RoofRasterizer<ConicRoof> {
 
     @Override
     public void raster(RasterTarget target, ConicRoof roof, HeightMap hm) {
-        final Circle area = roof.getArea();
+        final Circlef area = roof.getArea();
 
-        if (!area.intersects(target.getAffectedArea())) {
+        if (!CircleUtility.intersect(area, target.getAffectedArea().getBounds(new Rectanglef()))) {
             return;
         }
 
-        Vector2i center = new Vector2i(area.getCenter(), RoundingMode.HALF_UP);
-        int radius = TeraMath.floorToInt(area.getRadius());
+        Vector2i center = new Vector2i(area.x, area.y, RoundingMode.HALF_UP);
+        int radius = TeraMath.floorToInt(area.r);
 
         HeightMap hmBottom = new HeightMap() {
 
             @Override
             public int apply(int x, int z) {
-                int rx = x - center.getX();
-                int rz = z - center.getY();
+                int rx = x - center.x();
+                int rz = z - center.y();
 
                 // relative distance to border of the roof
                 double dist = radius - Math.sqrt(rx * rx + rz * rz);
@@ -71,7 +73,6 @@ public class ConicRoofRasterizer extends RoofRasterizer<ConicRoof> {
         };
 
         Pen pen = Pens.fill(target, hmBottom, HeightMaps.offset(hmBottom, 1), DefaultBlockType.ROOF_HIP);
-        RasterUtil.fillCircle(new CheckedPen(pen), center.getX(), center.getY(), radius);
+        RasterUtil.fillCircle(new CheckedPen(pen), center.x(), center.y(), radius);
     }
-
 }

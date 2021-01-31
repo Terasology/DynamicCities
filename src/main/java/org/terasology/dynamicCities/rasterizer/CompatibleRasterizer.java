@@ -15,12 +15,12 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
+import org.joml.Vector2i;
+import org.joml.Vector3ic;
 import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.dynamicCities.resource.ResourceType;
-import org.terasology.math.geom.BaseVector3i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
@@ -70,7 +70,7 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
     public void generateChunk(CoreChunk chunk, Region chunkRegion) {
     }
 
-    public void setBlock(CoreChunk chunk, Block block, BaseVector3i pos, ResourceFacet resourceFacet) {
+    public void setBlock(CoreChunk chunk, Block block, Vector3ic pos, ResourceFacet resourceFacet) {
         chunk.setBlock(pos, block);
         Resource resource = getResourceType(block);
         if (resource.getType() != ResourceType.NULL) {
@@ -94,5 +94,4 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
 
         return new Resource(ResourceType.NULL);
     }
-
 }

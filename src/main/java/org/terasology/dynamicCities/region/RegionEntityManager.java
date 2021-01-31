@@ -261,7 +261,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         SiteComponent siteComponent = region.getComponent(SiteComponent.class);
         nT.text = "Roughness: "
                 + roughnessFacetComponent.meanDeviation + " Grass: " + resourceFacetComponent.getResourceSum("Grass")
-                + locationComponent.getWorldPosition().toString();
+                + locationComponent.getWorldPosition(new Vector3f()).toString();
         nT.yOffset = 10;
         nT.scale = 10;
 

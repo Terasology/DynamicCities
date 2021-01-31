@@ -25,10 +25,10 @@ import org.terasology.world.block.BlockAreac;
  * A rectangular piece of the road with a start and an end point
  */
 public class RoadSegment {
-    private BlockArea rect = new BlockArea(BlockArea.INVALID);
-    private int height;
-    private Vector2i start = new Vector2i();
-    private Vector2i end = new Vector2i();
+    public BlockArea rect = new BlockArea(BlockArea.INVALID);
+    public int height;
+    public Vector2i start = new Vector2i();
+    public Vector2i end = new Vector2i();
 
     public RoadSegment(BlockAreac rect, int height) {
         this.rect.set(rect);

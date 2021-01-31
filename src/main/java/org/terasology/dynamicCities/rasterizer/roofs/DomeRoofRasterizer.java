@@ -24,7 +24,7 @@ import org.terasology.cities.raster.Pens;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockAreac;
 
 /**
  * Converts a {@link DomeRoof} into blocks
@@ -40,9 +40,9 @@ public class DomeRoofRasterizer extends RoofRasterizer<DomeRoof> {
 
     @Override
     public void raster(RasterTarget target, DomeRoof roof, HeightMap hm) {
-        final Rect2i area = roof.getArea();
+        final BlockAreac area = roof.getArea();
 
-        if (!area.overlaps(target.getAffectedArea())) {
+        if (!area.intersectsBlockArea(target.getAffectedArea())) {
             return;
         }
 
@@ -94,14 +94,14 @@ public class DomeRoofRasterizer extends RoofRasterizer<DomeRoof> {
         RasterUtil.fillRect(pen, area);
     }
 
-    private float getY(Rect2i area, int height, float rx, float rz) {
+    private float getY(BlockAreac area, int height, float rx, float rz) {
 
-        float x = rx - area.minX() - area.width() * 0.5f;   // distance from the center
-        float z = rz - area.minY() - area.height() * 0.5f;
+        float x = rx - area.minX() - area.getSizeX() * 0.5f;   // distance from the center
+        float z = rz - area.minY() - area.getSizeY() * 0.5f;
 
-        float a = area.width() * 0.5f;
+        float a = area.getSizeX() * 0.5f;
         float b = height;
-        float c = area.height() * 0.5f;
+        float c = area.getSizeY() * 0.5f;
 
         float y2 = b * b * (1 - (x * x) / (a * a) - (z * z) / (c * c));
 

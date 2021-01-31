@@ -25,7 +25,7 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockAreac;
 
 /**
  * Converts a {@link FlatRoof} into blocks
@@ -41,9 +41,9 @@ public class FlatRoofRasterizer extends RoofRasterizer<FlatRoof> {
 
     @Override
     public void raster(RasterTarget target, FlatRoof roof, HeightMap hm) {
-        Rect2i area = roof.getArea();
+        BlockAreac area = roof.getArea();
 
-        if (!area.overlaps(target.getAffectedArea())) {
+        if (!area.intersectsBlockArea(target.getAffectedArea())) {
             return;
         }
 
@@ -57,8 +57,8 @@ public class FlatRoofRasterizer extends RoofRasterizer<FlatRoof> {
                 int y = roof.getBaseHeight() + 1;       // at least one block thick
 
                 // distance to border of the roof
-                int borderDistX = Math.min(rx, area.width() - 1 - rx);
-                int borderDistZ = Math.min(rz, area.height() - 1 - rz);
+                int borderDistX = Math.min(rx, area.getSizeX() - 1 - rx);
+                int borderDistZ = Math.min(rz, area.getSizeY() - 1 - rz);
 
                 int dist = Math.min(borderDistX, borderDistZ);
 

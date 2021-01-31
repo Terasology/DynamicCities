@@ -19,7 +19,6 @@ package org.terasology.dynamicCities.parcels;
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.world.block.BlockArea;
 import org.terasology.world.block.BlockAreac;
 

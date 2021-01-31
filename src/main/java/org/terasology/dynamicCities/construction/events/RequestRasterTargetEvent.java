@@ -18,7 +18,8 @@ package org.terasology.dynamicCities.construction.events;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.entitySystem.event.ConsumableEvent;
-import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 
 /**
  * Emitted when DynamicCities needs a {@link org.terasology.cities.raster.RasterTarget} for rasterizing buildings
@@ -26,11 +27,11 @@ import org.terasology.math.geom.Rect2i;
 public class RequestRasterTargetEvent implements ConsumableEvent {
     public RasterTarget rasterTarget;
     public BlockTheme theme;
-    public Rect2i shape;
+    public BlockArea shape;
     private boolean consumed;
 
-    public RequestRasterTargetEvent(BlockTheme theme, Rect2i shape) {
-        this.shape = shape;
+    public RequestRasterTargetEvent(BlockTheme theme, BlockAreac shape) {
+        this.shape = new BlockArea(shape);
         this.theme = theme;
     }
 

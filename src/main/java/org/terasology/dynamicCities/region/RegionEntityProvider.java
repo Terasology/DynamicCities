@@ -16,6 +16,8 @@
 
 package org.terasology.dynamicCities.region;
 
+import org.joml.RoundingMode;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.terasology.dynamicCities.facets.ResourceFacet;
@@ -30,7 +32,6 @@ import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.network.NetworkComponent;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.EntityBuffer;
@@ -101,10 +102,11 @@ public class RegionEntityProvider implements EntityProvider {
         positions[1] = new Vector2i(min.x(), min.z());
         positions[2] = new Vector2i(min.x() + worldRegion.getSizeX(), min.z());
         positions[3] = new Vector2i(min.x(), min.z() + worldRegion.getSizeZ());
-        positions[4] = new Vector2i(worldRegion.center(new Vector3f()).x, worldRegion.center(new Vector3f()).z);
+        positions[4] = new Vector2i(worldRegion.center(new Vector3f()).x, worldRegion.center(new Vector3f()).z,
+            RoundingMode.FLOOR);
 
         for (int i = 0; i < corners.length; i++) {
-            corners[i] = facet.getWorld(JomlUtil.from(positions[i]));
+            corners[i] = facet.getWorld(positions[i]);
             if (corners[i] > worldRegion.maxY() || corners[i] < worldRegion.minY()) {
                 counter++;
             }

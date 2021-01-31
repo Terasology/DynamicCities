@@ -16,6 +16,8 @@
 
 package org.terasology.dynamicCities.rasterizer.parts;
 
+import org.joml.RoundingMode;
+import org.joml.Vector2i;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.bldg.RoundBuildingPart;
@@ -25,14 +27,14 @@ import org.terasology.cities.raster.Pen;
 import org.terasology.cities.raster.Pens;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
+import org.terasology.commonworld.geom.CircleUtility;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
+import org.terasology.joml.geom.Circlef;
+import org.terasology.joml.geom.Rectanglef;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.Circle;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.world.WorldProvider;
 
-import java.math.RoundingMode;
 
 /**
  * Converts a {@link RoundBuildingPart} into blocks
@@ -49,14 +51,14 @@ public class RoundPartRasterizer extends AbsDynBuildingRasterizer<RoundBuildingP
     @Override
     protected void raster(RasterTarget brush, RoundBuildingPart element, HeightMap heightMap) {
 
-        Circle area = element.getShape();
+        Circlef area = element.getShape();
 
-        if (!area.intersects(brush.getAffectedArea())) {
+        if (!CircleUtility.intersect(area,brush.getAffectedArea().getBounds(new Rectanglef()))) {
             return;
         }
 
-        Vector2i center = new Vector2i(area.getCenter(), RoundingMode.HALF_UP);
-        int radius = TeraMath.floorToInt(area.getRadius());
+        Vector2i center = new Vector2i(area.x, area.y, RoundingMode.HALF_UP);
+        int radius = TeraMath.floorToInt(area.r);
 
         int baseHeight = element.getBaseHeight();
         int wallHeight = element.getWallHeight();

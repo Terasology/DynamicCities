@@ -15,6 +15,10 @@
  */
 package org.terasology.dynamicCities.construction;
 
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,12 +90,6 @@ import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.ImmutableVector2i;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3f;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
@@ -103,6 +101,8 @@ import org.terasology.structureTemplates.util.BlockRegionUtilities;
 import org.terasology.world.BlockEntityRegistry;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.block.entity.placement.PlaceBlocks;
@@ -273,7 +273,7 @@ public class Construction extends BaseComponentSystem {
      * @param filler        The blocktype which should be used to fill up terrain under the mean height
      * @return The height on which it was flattened to
      */
-    public int flatten(Rect2i area, int defaultHeight, Block filler) {
+    public int flatten(BlockAreac area, int defaultHeight, Block filler) {
 
         if (area.area() == 0) {
             logger.error("The area which should be flattened is empty!");
@@ -288,13 +288,13 @@ public class Construction extends BaseComponentSystem {
         if (!worldProvider.isRegionRelevant(areaRegion)) {
             return -9999;
         }
-        for (BaseVector2i pos : area.contents()) {
-            meanHeight += elevationFacet.getWorld(JomlUtil.from(pos));
+        for (Vector2ic pos : area) {
+            meanHeight += elevationFacet.getWorld(pos);
         }
         meanHeight /= area.area();
 
-        for (BaseVector2i pos : area.contents()) {
-            int y = Math.round(elevationFacet.getWorld(JomlUtil.from(pos)));
+        for (Vector2ic pos : area) {
+            int y = Math.round(elevationFacet.getWorld(pos));
             if (y <= meanHeight) {
                 for (int i = y; i <= meanHeight; i++) {
                     setPos.set(pos.x(), i, pos.y());
@@ -313,7 +313,7 @@ public class Construction extends BaseComponentSystem {
         return meanHeight;
     }
 
-    public int flatten(Rect2i area, int defaultHeight) {
+    public int flatten(BlockAreac area, int defaultHeight) {
         return flatten(area, defaultHeight, defaultBlock);
     }
 
@@ -322,7 +322,7 @@ public class Construction extends BaseComponentSystem {
      * @param height A rough estimation of the mean height of the terrain
      * @return
      */
-    public ElevationFacet sample(Rect2i area, int height) {
+    public ElevationFacet sample(BlockAreac area, int height) {
         BlockRegion region = new BlockRegion(area.minX(), height - maxMinDeviation, area.minY(), area.maxX(), height + maxMinDeviation, area.maxY());
         Border3D border = new Border3D(0, 0, 0);
         ElevationFacet elevationFacet = new ElevationFacet(region, border);
@@ -353,7 +353,7 @@ public class Construction extends BaseComponentSystem {
     public void checkBuildingForParcel(CheckBuildingForParcelEvent event, EntityRef settlement, CultureComponent
             cultureComponent) {
         String zone = event.dynParcel.getZone();
-        Rect2i shape = event.dynParcel.getShape();
+        BlockAreac shape = event.dynParcel.getShape();
         event.building = buildingManager.getRandomBuildingOfZoneForCulture(zone, shape, cultureComponent);
     }
 
@@ -374,8 +374,8 @@ public class Construction extends BaseComponentSystem {
 
         GenericBuildingComponent building = event.building.get();
         if (building.isScaledDown) {
-            Vector2i difference = dynParcel.shape.size().sub(building.minSize).div(2);
-            dynParcel.shape = Rect2i.createFromMinAndMax(dynParcel.shape.min().add(difference), dynParcel.shape.max().sub(difference));
+            Vector2i difference = dynParcel.shape.getSize(new Vector2i()).sub(building.minSize).div(2);
+            dynParcel.shape = new BlockArea(dynParcel.shape.getMin(new Vector2i()).add(difference), dynParcel.shape.getMax(new Vector2i()).sub(difference));
             region = new BlockRegion(dynParcel.getShape().minX(), 255, dynParcel.getShape().minY())
                     .union(dynParcel.getShape().maxX(), -255, dynParcel.getShape().maxY());
         }
@@ -386,14 +386,13 @@ public class Construction extends BaseComponentSystem {
         RequestRasterTargetEvent requestRasterTargetEvent = new RequestRasterTargetEvent(cityTheme, dynParcel.shape);
         settlement.send(requestRasterTargetEvent);
         RasterTarget rasterTarget = requestRasterTargetEvent.rasterTarget;
-        Rect2i shape = dynParcel.shape;
+        BlockAreac shape = dynParcel.shape;
         HeightMap hm = HeightMaps.constant(dynParcel.height);
 
 
         if (dynParcel.height == -9999) {
             return false;
         }
-
 
         /**
          * Check for player collision
@@ -515,10 +514,10 @@ public class Construction extends BaseComponentSystem {
                         BlockRegionUtilities.determineBottomCenter(template.getComponent(SpawnBlockRegionsComponent.class))).negate();
 
                 // offset in world space
-                Vector3i worldOffset = new Vector3i(shape.minX() + Math.round((shape.sizeX()) / 2f) - 1, dynParcel.height,
-                        shape.minY() + Math.round((shape.sizeY()) / 2f) - 1);
-                Vector3i finalLocation = worldOffset.add(JomlUtil.from(microOffset));
-                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, JomlUtil.from(finalLocation));
+                Vector3i worldOffset = new Vector3i(shape.minX() + Math.round((shape.getSizeX()) / 2f) - 1, dynParcel.height,
+                        shape.minY() + Math.round((shape.getSizeY()) / 2f) - 1);
+                Vector3i finalLocation = worldOffset.add(microOffset);
+                BlockRegionTransform blockRegionTransform = BlockRegionTransform.createRotationThenMovement(startSide, endSide, finalLocation);
 
                 template.send(new SpawnStructureBufferedEvent(blockRegionTransform));
                 if (building.isEntity) {
@@ -532,7 +531,7 @@ public class Construction extends BaseComponentSystem {
          * Send block-change event to refresh the minimap
          */
         Map<org.joml.Vector3i, Block> blockPos = new HashMap<>();
-        for (BaseVector2i rectPos : dynParcel.getShape().contents()) {
+        for (Vector2ic rectPos : dynParcel.getShape()) {
             blockPos.put(new org.joml.Vector3i(rectPos.x(), dynParcel.getHeight(), rectPos.y()), defaultBlock);
         }
         settlement.send(new PlaceBlocks(blockPos));
@@ -552,7 +551,7 @@ public class Construction extends BaseComponentSystem {
         // Factor by which the rect will be expanded while flattening
         final int expWidth = 1;
         final int expHeight = 1;
-        final ImmutableVector2i rectExpansionFactor = new ImmutableVector2i(expWidth, expHeight);
+        final Vector2i rectExpansionFactor = new Vector2i(expWidth, expHeight);
 
         for (int i = 0; i < parcel.rects.size(); i++) {
             RoadSegment segment = parcel.rects.elementAt(i);
@@ -562,8 +561,8 @@ public class Construction extends BaseComponentSystem {
             }
 
             // Check if the region is relevant
-            BlockRegion region = new BlockRegion(segment.rect.minX(), vertLimit, segment.rect.minY())
-                    .union(segment.rect.maxX(), -1 * vertLimit, segment.rect.maxY());
+            BlockRegion region = new BlockRegion(segment.getRect().minX(), vertLimit, segment.getRect().minY())
+                    .union(segment.getRect().maxX(), -1 * vertLimit, segment.getRect().maxY());
             if (!worldProvider.isRegionRelevant(region)) {
                 continue;
             } else {
@@ -572,7 +571,7 @@ public class Construction extends BaseComponentSystem {
 
             // Flatten the rect
             // TODO: Find a way to store the surface height at that point to the segment here.
-            segment.height = flatten(segment.rect.expand(rectExpansionFactor), segmentHeight);
+            segment.height = flatten(segment.getRect().expand(rectExpansionFactor,new BlockArea(BlockArea.INVALID)), segmentHeight);
 
             // Create raster targets
             RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, roadTheme, segment.rect);
@@ -661,7 +660,7 @@ public class Construction extends BaseComponentSystem {
             block = transformation.transformBlock(block);
             if (block.getBlockFamily() == blockManager.getBlockFamily("CoreAdvancedAssets:chest")) {
                 for (Vector3ic pos : region) {
-                    entity.send(new SetBlockEvent(JomlUtil.from(pos), block));
+                    entity.send(new SetBlockEvent(pos, block));
                 }
             } else {
                 for (Vector3ic pos : region) {
