@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.region;
 
-
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;

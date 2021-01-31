@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
+import org.terasology.math.JomlUtil;
 import org.terasology.moduletestingenvironment.ModuleTestingEnvironment;
 
 import java.util.ArrayList;

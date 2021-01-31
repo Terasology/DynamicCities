@@ -15,7 +15,6 @@
  */
 package org.terasology.dynamicCities.settlements;
 
-
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -26,7 +25,6 @@ import org.terasology.network.Replicate;
 
 import java.util.List;
 import java.util.Map;
-
 
 public final class SettlementsCacheComponent implements Component {
     @Replicate
@@ -41,12 +39,9 @@ public final class SettlementsCacheComponent implements Component {
         Vector3f pos3f = settlement.getComponent(LocationComponent.class).getWorldPosition(new Vector3f());
         Vector2i pos = new Vector2i(pos3f.x(), pos3f.z(), RoundingMode.FLOOR);
         settlementEntities.put(pos, settlement);
-
     }
 
     public EntityRef get(Vector2i position) {
         return settlementEntities.get(position);
     }
-
-
 }
