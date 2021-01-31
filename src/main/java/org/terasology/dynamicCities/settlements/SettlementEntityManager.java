@@ -14,6 +14,7 @@ import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
+import org.terasology.commonworld.geom.CircleUtility;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.construction.BlockBufferSystem;
@@ -378,11 +379,11 @@ public class SettlementEntityManager extends BaseComponentSystem {
         Vector2i pos = new Vector2i(siteLocation.getLocalPosition().x(), siteLocation.getLocalPosition().z(), RoundingMode.FLOOR);
         int unusableRegionsCount = 0;
         BlockArea settlementRectArea = new BlockArea(-3, -3, 3, 3);
-        Circlef settlementCircle = new Circlef(pos.x,pos.y, settlementMaxRadius);
+        Circlef settlementCircle = new Circlef(pos.x, pos.y, settlementMaxRadius);
 
         for (Vector2ic regionPos : settlementRectArea) {
             Vector2i regionWorldPos = new Vector2i(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
-            if (new Vector2f(settlementCircle.x, settlementCircle.y).distance(regionWorldPos.x, regionWorldPos.y) < settlementCircle.r) {
+            if (CircleUtility.contains(settlementCircle, regionWorldPos.x, regionWorldPos.y)) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(RoughnessFacetComponent.class)) {
                     if (region.getComponent(RoughnessFacetComponent.class).meanDeviation > SettlementConstants.MAX_BUILDABLE_ROUGHNESS) {

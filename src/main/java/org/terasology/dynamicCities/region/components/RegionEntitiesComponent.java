@@ -32,7 +32,7 @@ public class RegionEntitiesComponent implements Component {
     public Map<Vector2i, EntityRef> regionEntities;
     public int gridSize;
     //This stores information about the loaded state of several regions packed into a cell
-    public Map<String, Integer> cellGrid;
+    public Map<Vector2i, Integer> cellGrid;
     public List<String> processed;
     public int cellSize;
 
