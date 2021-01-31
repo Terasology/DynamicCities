@@ -16,6 +16,7 @@
 
 package org.terasology.dynamicCities.roads;
 
+import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.terasology.world.block.BlockArea;
@@ -71,5 +72,10 @@ public class RoadSegment {
     public float getWidth() {
         return rect.getSizeY();
     }
-
+    /**
+     * @return a unit vector from start to end
+     */
+    public Vector2f getRoadDirection() {
+            return new Vector2f(end.sub(start, new Vector2i())).normalize();
+    }
 }
