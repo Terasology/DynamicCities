@@ -12,6 +12,7 @@ import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.commonworld.Orientation;
@@ -230,7 +231,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         return true;
     }
 
-    public boolean checkMinDistanceCell(Vector2i pos) {
+    public boolean checkMinDistanceCell(Vector2ic pos) {
         if (!regionEntityManager.cellIsLoaded(pos)) {
             return true;
         }
@@ -254,7 +255,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
      * @param pos Point to be tested
      * @return True if pos is not inside any settlement
      */
-    public boolean checkOutsideAllSettlements(Vector2i pos) {
+    public boolean checkOutsideAllSettlements(Vector2ic pos) {
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         for (Vector2ic activePos : container.settlementEntities.keySet()) {
             EntityRef settlement = container.settlementEntities.get(new Vector2i(activePos));
@@ -628,7 +629,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         sourceSettlement.saveComponent(parcelList);
     }
 
-    private Optional<DynParcel> placeParcel(Vector3i center, String zone, ParcelList parcels,
+    private Optional<DynParcel> placeParcel(Vector3ic center, String zone, ParcelList parcels,
                                             BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
         int iter = 0;
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();

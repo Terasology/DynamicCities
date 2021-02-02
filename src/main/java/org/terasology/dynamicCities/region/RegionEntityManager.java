@@ -116,15 +116,15 @@ public class RegionEntityManager extends BaseComponentSystem {
         }
     }
 
-    public EntityRef get(Vector2i position) {
+    public EntityRef get(Vector2ic position) {
         Map<Vector2i, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
         return regionEntities.get(position);
     }
 
-    public EntityRef getNearest(Vector2i position) {
+    public EntityRef getNearest(Vector2ic position) {
         Map<Vector2i, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
-        int x = Chunks.toChunkPosX(position.x) * Chunks.SIZE_X + ((Chunks.SIZE_X / 2) - 1);
-        int y = Chunks.toChunkPosZ(position.y) * Chunks.SIZE_Z + ((Chunks.SIZE_Z / 2) - 1);
+        int x = Chunks.toChunkPosX(position.x()) * Chunks.SIZE_X + ((Chunks.SIZE_X / 2) - 1);
+        int y = Chunks.toChunkPosZ(position.y()) * Chunks.SIZE_Z + ((Chunks.SIZE_Z / 2) - 1);
 
         Vector2i regionPos = new Vector2i(x, y);
         return regionEntities.get(regionPos);
@@ -146,13 +146,13 @@ public class RegionEntityManager extends BaseComponentSystem {
     }
 
 
-    public boolean cellIsLoaded(Vector2i position) {
+    public boolean cellIsLoaded(Vector2ic position) {
         Map<Vector2i, Integer> cellGrid = regionEntitiesComponent.cellGrid;
         int cellSize = regionEntitiesComponent.cellSize;
         return cellGrid.containsKey(toCellPos(position)) && (cellGrid.get(toCellPos(position)) == cellSize);
     }
 
-    public List<EntityRef> getRegionsInCell(Vector2i position) {
+    public List<EntityRef> getRegionsInCell(Vector2ic position) {
         int cellSize = regionEntitiesComponent.cellSize;
         List<EntityRef> regions = new ArrayList<>();
 
@@ -181,7 +181,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         return  getRegionsInCell(pos);
     }
 
-    public boolean checkSidesLoadedLong(Vector2i pos) {
+    public boolean checkSidesLoadedLong(Vector2ic pos) {
         Vector2i temp = new Vector2i();
         return (cellIsLoaded(pos.add(3 * gridSize, 0, temp)) && cellIsLoaded(pos.add(-3 * gridSize, 0,temp))
             && cellIsLoaded(pos.add(0, 3 * gridSize, temp)) && cellIsLoaded(pos.add(0, -3 * gridSize, temp)));
@@ -194,7 +194,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         return checkSidesLoadedLong(pos);
     }
 
-    public boolean checkSidesLoadedNear(Vector2i pos) {
+    public boolean checkSidesLoadedNear(Vector2ic pos) {
         Vector2i temp = new Vector2i();
         //FIXME: the old logic did in-place mutation of the vector, and just checked the following cells:
         //          (pos.x, pos.y), (pos.x + gridSize, pos.y), (pos.x, pos.y), (pos.x, pos.y + gridSize)
@@ -212,7 +212,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         return checkSidesLoadedNear(pos);
     }
 
-    public boolean checkFullLoaded(Vector2i pos) {
+    public boolean checkFullLoaded(Vector2ic pos) {
         BlockArea cube = new BlockArea(-1, -1, 1, 1);
         Vector2i cellPos = new Vector2i();
         for(Vector2ic cubePos : cube) {
@@ -233,7 +233,7 @@ public class RegionEntityManager extends BaseComponentSystem {
 
 
     //maybe add variable component filters here
-    public void clearCell(Vector2i pos) {
+    public void clearCell(Vector2ic pos) {
         List<String> processed = regionEntitiesComponent.processed;
         for (EntityRef region : getRegionsInCell(pos)) {
             if (!region.hasComponent(ActiveRegionComponent.class)) {
