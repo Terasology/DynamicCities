@@ -10,6 +10,7 @@ import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +220,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
 
     public boolean checkMinDistance(EntityRef siteRegion) {
         Vector3fc sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
-        Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
+        Vector2i pos = new Vector2i(sitePos.x(), sitePos.z(), RoundingMode.FLOOR);
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         for (Vector2i loc : container.settlementEntities.keySet()) {
             if (pos.distance(loc) < minDistance) {
@@ -346,10 +347,10 @@ public class SettlementEntityManager extends BaseComponentSystem {
         RegionEntitiesComponent regionEntitiesComponent = settlement.getComponent(RegionEntitiesComponent.class);
         ParcelList parcelList = settlement.getComponent(ParcelList.class);
         LocationComponent locationComponent = settlement.getComponent(LocationComponent.class);
-        Vector3f loc = JomlUtil.from(locationComponent.getLocalPosition());
-        Vector2i pos = new Vector2i(loc.x(),loc.z(), RoundingMode.FLOOR);
+        Vector3fc loc = locationComponent.getLocalPosition();
+        Vector2i pos = new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR);
         float radius = parcelList.cityRadius;
-        int size = (Math.round(radius / 32) >= 1) ? Math.round(radius / 32) : 1;
+        int size = Math.max(Math.round(radius / 32), 1);
         BlockArea settlementRectArea = new BlockArea(-size, -size, size, size);
         Circlef settlementCircle = new Circlef(pos.x,pos.y, radius);
         Vector2i regionWorldPos = new Vector2i();
@@ -357,7 +358,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         for (Vector2ic regionPos : settlementRectArea) {
             regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
 
-            if (new Vector2f(settlementCircle.x,settlementCircle.y).distance(regionWorldPos.x,regionWorldPos.y) < settlementCircle.r) {
+            if (new Vector2f(settlementCircle.x, settlementCircle.y).distance(regionWorldPos.x, regionWorldPos.y) < settlementCircle.r) {
                 EntityRef region = regionEntityManager.getNearest(regionWorldPos);
                 if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
                     LocationComponent location = region.getComponent(LocationComponent.class);
@@ -481,7 +482,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
             return;
         }
 
-        Vector3i center = new Vector3i(JomlUtil.from(locationComponent.getLocalPosition()), RoundingMode.FLOOR);
+        Vector3i center = new Vector3i(locationComponent.getLocalPosition(), RoundingMode.FLOOR);
 
         for (String zone : zones) {
             //Checks if the demand for a building of that zone is enough
@@ -523,15 +524,14 @@ public class SettlementEntityManager extends BaseComponentSystem {
          */
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         Vector2f source = new Vector2f(center.x, center.z);
-
-        Vector2f dest = source;
+        Vector2f dest = new Vector2f(source);
         float min = Float.MAX_VALUE;
         for (EntityRef entity : container.settlementEntities.values()) {
             if (!settlement.equals(entity)) {
                 Vector3fc location = entity.getComponent(LocationComponent.class).getLocalPosition();
                 Vector2fc location2D = new Vector2f(location.x(), location.z());
                 if (!roadCache.containsEntry(source.toString(), location2D.toString()) && source.distance(location2D) <= min) {
-                    dest = location2D;
+                    dest.set(location2D);
                     min = source.distance(location2D);
                 }
             }

@@ -6,6 +6,7 @@ import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.region.components.ActiveRegionComponent;
@@ -176,7 +177,7 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public List<EntityRef> getRegionsInCell(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector3fc loc = regionLocation.getLocalPosition();
         Vector2i pos = new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR);
         return  getRegionsInCell(pos);
     }
@@ -189,7 +190,7 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkSidesLoadedLong(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector3fc loc = regionLocation.getLocalPosition();
         Vector2i pos = toCellPos(new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR));
         return checkSidesLoadedLong(pos);
     }
@@ -202,7 +203,7 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkSidesLoadedNear(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector3fc loc = regionLocation.getLocalPosition();
         Vector2i pos = toCellPos(new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR));
         return checkSidesLoadedNear(pos);
     }
@@ -221,7 +222,7 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkFullLoaded(EntityRef region) {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
-        Vector3f loc = JomlUtil.from(regionLocation.getLocalPosition());
+        Vector3fc loc = regionLocation.getLocalPosition();
         Vector2i pos = toCellPos(new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR));
         return checkFullLoaded(pos);
     }
