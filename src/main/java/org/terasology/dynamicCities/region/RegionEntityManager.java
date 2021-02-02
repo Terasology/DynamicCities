@@ -31,7 +31,6 @@ import org.terasology.logic.console.commandSystem.annotations.Sender;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.permission.PermissionManager;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.TeraMath;
 import org.terasology.nui.Color;
 import org.terasology.registry.In;
@@ -197,8 +196,13 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean checkSidesLoadedNear(Vector2i pos) {
         Vector2i temp = new Vector2i();
-        return (cellIsLoaded(pos.add(gridSize,0, temp)) && cellIsLoaded(pos.add(-gridSize, 0, temp))
-                && cellIsLoaded(pos.add(0, gridSize, temp)) && cellIsLoaded(pos.add(0, -gridSize, temp))); // horribly hacky logic but ok?
+        //FIXME: the old logic did in-place mutation of the vector, and just checked the following cells:
+        //          (pos.x, pos.y), (pos.x + gridSize, pos.y), (pos.x, pos.y), (pos.x, pos.y + gridSize)
+        //       the code looked like it should check the four adjacent cells, but this will result in too many restrictions,
+        //       not finding any suitable location at all (in MetalRenegades)
+//        return (cellIsLoaded(pos.add(gridSize,0, temp)) && cellIsLoaded(pos.add(-gridSize, 0, temp))
+//                && cellIsLoaded(pos.add(0, gridSize, temp)) && cellIsLoaded(pos.add(0, -gridSize, temp))); // horribly hacky logic but ok?
+        return cellIsLoaded(pos) && cellIsLoaded(pos.add(gridSize,0, temp)) && cellIsLoaded(pos.add(0, gridSize, temp));
     }
 
     public boolean checkSidesLoadedNear(EntityRef region) {

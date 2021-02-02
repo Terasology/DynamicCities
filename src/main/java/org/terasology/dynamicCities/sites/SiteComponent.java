@@ -17,6 +17,7 @@
 package org.terasology.dynamicCities.sites;
 
 import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.terasology.entitySystem.Component;
 import org.terasology.reflection.MappedContainer;
 
@@ -45,7 +46,7 @@ public class SiteComponent implements Component {
     /**
      * @return the city center in block world coordinates
      */
-    public Vector2i getPos() {
+    public Vector2ic getPos() {
         return coords;
     }
 
