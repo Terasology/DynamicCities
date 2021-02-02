@@ -218,8 +218,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
     }
 
     public boolean checkMinDistance(EntityRef siteRegion) {
-        Vector3f sitePos = JomlUtil.from(siteRegion.getComponent(LocationComponent.class).getLocalPosition());
-        Vector2i pos = new Vector2i(sitePos.x(), sitePos.z(), RoundingMode.FLOOR);
+        Vector3fc sitePos = siteRegion.getComponent(LocationComponent.class).getLocalPosition();
+        Vector2i pos = new Vector2i(sitePos.x(), sitePos.z());
         SettlementsCacheComponent container = settlementCachingSystem.getSettlementCacheEntity().getComponent(SettlementsCacheComponent.class);
         for (Vector2i loc : container.settlementEntities.keySet()) {
             if (pos.distance(loc) < minDistance) {
@@ -285,7 +285,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
 
         //Create the district facet and DistrictTypeMap
-        BlockRegion region = new BlockRegion(new org.joml.Vector3i(JomlUtil.from(locationComponent.getLocalPosition()), RoundingMode.FLOOR)).expand(new org.joml.Vector3i(SettlementConstants.SETTLEMENT_RADIUS));
+        BlockRegion region = new BlockRegion(new org.joml.Vector3i(locationComponent.getLocalPosition(), RoundingMode.FLOOR)).expand(new org.joml.Vector3i(SettlementConstants.SETTLEMENT_RADIUS));
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, siteComponent.hashCode(), districtManager, cultureComponent);
         if (districtGrid.districtMap.size() < 1) {
@@ -528,8 +528,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         float min = Float.MAX_VALUE;
         for (EntityRef entity : container.settlementEntities.values()) {
             if (!settlement.equals(entity)) {
-                Vector3f location = JomlUtil.from(entity.getComponent(LocationComponent.class).getLocalPosition());
-                Vector2f location2D = new Vector2f(location.x, location.z);
+                Vector3fc location = entity.getComponent(LocationComponent.class).getLocalPosition();
+                Vector2fc location2D = new Vector2f(location.x(), location.z());
                 if (!roadCache.containsEntry(source.toString(), location2D.toString()) && source.distance(location2D) <= min) {
                     dest = location2D;
                     min = source.distance(location2D);
