@@ -18,7 +18,8 @@ package org.terasology.dynamicCities.parcels;
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.roads.RoadSegment;
-import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,23 +41,23 @@ public class RoadParcel implements Parcel {
         this.rects = rects;
     }
 
-    public Set<Rect2i> expand(int dx, int dy) {
-        Set<Rect2i> expandedRects = new HashSet<>();
+    public Set<BlockArea> expand(int dx, int dy) {
+        Set<BlockArea> expandedRects = new HashSet<>();
         if (!rects.isEmpty()) {
             for (RoadSegment roadRect : rects) {
-                expandedRects.add(roadRect.rect.expand(dx, dy));
+                expandedRects.add(roadRect.getRect().expand(dx, dy, new BlockArea(BlockArea.INVALID)));
             }
         }
         return expandedRects;
     }
 
-    public Set<Rect2i> getRects() {
-        return rects.stream().map(roadRect -> roadRect.rect).collect(Collectors.toSet());
+    public Set<BlockAreac> getRects() {
+        return rects.stream().map(roadRect -> roadRect.getRect()).collect(Collectors.toSet());
     }
 
-    public boolean isNotIntersecting(Rect2i rect) {
+    public boolean isNotIntersecting(BlockAreac rect) {
         for (RoadSegment segment : rects) {
-            if (segment.rect.overlaps(rect)) {
+            if (segment.getRect().intersectsBlockArea(rect)) {
                 return false;
             }
         }
@@ -64,8 +65,8 @@ public class RoadParcel implements Parcel {
     }
 
     @Override
-    public Rect2i getShape() {
-        return rects.iterator().next().rect;
+    public BlockAreac getShape() {
+        return rects.iterator().next().getRect();
     }
 
     @Override

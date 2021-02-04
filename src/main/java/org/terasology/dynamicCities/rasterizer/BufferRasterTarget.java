@@ -21,8 +21,9 @@ import org.terasology.cities.BlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.dynamicCities.construction.BlockBufferSystem;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockRegion;
 
 import java.util.Set;
@@ -32,18 +33,18 @@ public class BufferRasterTarget implements RasterTarget {
 
     private final BlockBufferSystem blockBufferSystem;
     private final BlockTheme blockTheme;
-    private final Rect2i affectedArea;
+    private final BlockArea affectedArea = new BlockArea(BlockArea.INVALID);
     private final BlockRegion affectedRegion;
 
     /**
      * @param blockBufferSystem the chunk to work on
      * @param blockTheme a mapping String type to block
      */
-    public BufferRasterTarget(BlockBufferSystem blockBufferSystem, BlockTheme blockTheme, Rect2i area) {
+    public BufferRasterTarget(BlockBufferSystem blockBufferSystem, BlockTheme blockTheme, BlockAreac area) {
         this.blockTheme = blockTheme;
         this.blockBufferSystem = blockBufferSystem;
-        this.affectedArea = area;
-        affectedRegion = new BlockRegion(area.minX(), -255, area.minY(), area.maxX(), 255, area.maxY());
+        this.affectedArea.set(area);
+        this.affectedRegion = new BlockRegion(area.minX(), -255, area.minY(), area.maxX(), 255, area.maxY());
     }
     /**
      * @param x x in world coords
@@ -73,7 +74,7 @@ public class BufferRasterTarget implements RasterTarget {
     /**
      * @return the XZ area that is drawn by this raster target
      */
-    public Rect2i getAffectedArea() {
+    public BlockAreac getAffectedArea() {
         return affectedArea;
     }
 

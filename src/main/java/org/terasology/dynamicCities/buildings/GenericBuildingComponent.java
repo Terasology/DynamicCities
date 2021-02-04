@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.buildings;
 
 
+import org.joml.Vector2i;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Vector2i;
 
 import java.util.List;
 

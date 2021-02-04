@@ -16,6 +16,7 @@
 
 package org.terasology.dynamicCities.rasterizer.decoration;
 
+import org.joml.Vector2ic;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.fences.SimpleFence;
@@ -23,9 +24,8 @@ import org.terasology.cities.surface.InfiniteSurfaceHeightFacet;
 import org.terasology.commonworld.Orientation;
 import org.terasology.math.Side;
 import org.terasology.math.TeraMath;
-import org.terasology.math.geom.Rect2i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.chunks.CoreChunk;
 
@@ -46,7 +46,7 @@ public class SimpleFenceRasterizer {
     }
 
     private void raster(CoreChunk chunk, SimpleFence fence, InfiniteSurfaceHeightFacet heightFacet) {
-        Rect2i fenceRc = fence.getRect();
+        BlockAreac fenceRc = fence.getRect();
         BlockRegion brushRc = chunk.getRegion();
 
         int fleft = fenceRc.minX();
@@ -95,7 +95,7 @@ public class SimpleFenceRasterizer {
         post(chunk, heightFacet, fright, ftop, Orientation.NORTHEAST);  // -1/1 - BACK/LEFT
 
         // insert gate
-        Vector2i gatePos = fence.getGate();
+        Vector2ic gatePos = fence.getGate();
         if (gatePos.x() >= brushRc.minX() && gatePos.x() <= brushRc.maxX()
          && gatePos.y() >= brushRc.minZ() && gatePos.y() <= brushRc.maxZ()) {
             int y = TeraMath.floorToInt(heightFacet.getWorld(gatePos.x(), gatePos.y())) + 1;
@@ -121,8 +121,8 @@ public class SimpleFenceRasterizer {
         }
 
         if (y + 1 >= region.minY() && y + 1 <= region.maxY()) {
-            if (hm.getWorld(x + a.getDir().getX(), z + a.getDir().getY()) >= y
-             || hm.getWorld(x + b.getDir().getX(), z + b.getDir().getY()) >= y) {
+            if (hm.getWorld(x + a.direction().x(), z + a.direction().y()) >= y
+             || hm.getWorld(x + b.direction().x(), z + b.direction().y()) >= y) {
                 chunk.setBlock(x - region.minX(), y + 1 - region.minY(), z - region.minZ(), cornerPost);
             }
         }

@@ -15,8 +15,9 @@
  */
 package org.terasology.dynamicCities.construction.events;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
 import org.terasology.entitySystem.event.ConsumableEvent;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
 
 /**
@@ -27,7 +28,7 @@ public class SetBlockEvent implements ConsumableEvent {
     public Block block;
     private Vector3i pos;
 
-    public SetBlockEvent(Vector3i pos, Block block) {
+    public SetBlockEvent(Vector3ic pos, Block block) {
         this.pos = new Vector3i(pos);
         this.block = block;
     }
@@ -42,11 +43,11 @@ public class SetBlockEvent implements ConsumableEvent {
         consumed = true;
     }
 
-    public Vector3i getPos() {
-        return new Vector3i(pos);
+    public Vector3ic getPos() {
+        return pos;
     }
 
-    public void setPos(Vector3i pos) {
+    public void setPos(Vector3ic pos) {
         this.pos.set(pos);
     }
 }

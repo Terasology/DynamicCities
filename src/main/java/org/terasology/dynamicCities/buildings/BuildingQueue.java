@@ -18,7 +18,7 @@ package org.terasology.dynamicCities.buildings;
 
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockAreac;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -41,9 +41,9 @@ public class BuildingQueue implements Component {
         return isNotIntersecting(parcel.shape);
     }
 
-    public boolean isNotIntersecting(Rect2i rect) {
+    public boolean isNotIntersecting(BlockAreac rect) {
         for (DynParcel spawnedParcels : buildingQueue) {
-            if (spawnedParcels.getShape().overlaps(rect)) {
+            if (spawnedParcels.getShape().intersectsBlockArea(rect)) {
                 return false;
             }
         }

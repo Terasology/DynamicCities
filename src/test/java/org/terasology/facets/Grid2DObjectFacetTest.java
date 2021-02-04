@@ -16,12 +16,12 @@
 
 package org.terasology.facets;
 
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.terasology.dynamicCities.facets.Grid2DObjectFacet;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.ObjectFacet3D;
@@ -52,7 +52,6 @@ public class Grid2DObjectFacetTest {
     protected IntegerTestFacet createFacet(BlockRegion region, Border3D extendBy, int gridSize) {
         return new IntegerTestFacet(region, extendBy, gridSize);
     }
-
 
     @Test
     public void testRelativeGridPoints() {
@@ -130,6 +129,4 @@ public class Grid2DObjectFacetTest {
         facet.setWorld(24, 46, 32);
         Assert.assertEquals(Integer.valueOf(32), facet.get(14, 16), 0.0);
     }
-
-
 }

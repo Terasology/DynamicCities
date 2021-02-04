@@ -17,6 +17,9 @@
 package regions;
 
 import com.google.common.collect.Sets;
+import org.joml.RoundingMode;
+import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,8 +28,6 @@ import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3f;
 import org.terasology.moduletestingenvironment.ModuleTestingEnvironment;
 
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         LocationComponent[] loc = new LocationComponent[test.length];
         for (int i = 0; i < test.length; i++) {
             test[i] = Mockito.mock(EntityRef.class);
-            loc[i] = new LocationComponent(JomlUtil.from(pos[i]));
+            loc[i] = new LocationComponent(pos[i]);
             Mockito.when(test[i].getComponent(LocationComponent.class)).thenReturn(loc[i]);
             regionEntityManager.add(test[i]);
         }
@@ -77,7 +78,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
     @Test
     public void testSimpleGet() {
         for (int i = 0; i < test.length; i++) {
-            assertEquals(test[i], regionEntityManager.get(new Vector2i(pos[i].x(), pos[i].z())));
+            assertEquals(test[i], regionEntityManager.get(new Vector2i(pos[i].x(), pos[i].z(), RoundingMode.FLOOR)));
         }
     }
 

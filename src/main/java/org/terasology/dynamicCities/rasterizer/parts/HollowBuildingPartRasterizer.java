@@ -29,8 +29,8 @@ import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.block.BlockAreac;
 
 import java.math.RoundingMode;
 
@@ -45,9 +45,9 @@ public class HollowBuildingPartRasterizer extends AbsDynBuildingRasterizer<Hollo
 
     @Override
     protected void raster(RasterTarget brush, HollowBuildingPart part, HeightMap heightMap) {
-        Rect2i rc = part.getShape();
+        BlockAreac rc = part.getShape();
 
-        if (!rc.overlaps(brush.getAffectedArea())) {
+        if (!rc.intersectsBlockArea(brush.getAffectedArea())) {
             return;
         }
 

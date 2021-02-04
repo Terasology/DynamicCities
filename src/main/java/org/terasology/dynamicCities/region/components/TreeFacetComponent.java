@@ -27,9 +27,6 @@ import org.terasology.dynamicCities.world.trees.TreeGenerator;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorLSystem;
 import org.terasology.entitySystem.Component;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.BaseVector3i;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.world.block.BlockRegion;
 
@@ -72,11 +69,6 @@ public final class TreeFacetComponent implements Component {
         }
     }
 
-
-    private Rect2i copyRect2i(Rect2i value) {
-        return Rect2i.createFromMinAndMax(value.minX(), value.minY(), value.maxX(), value.maxY());
-    }
-
     public TreeGeneratorContainer get(int x, int y, int z) {
         return get(new Vector3i(x, y, z));
     }
@@ -101,7 +93,7 @@ public final class TreeFacetComponent implements Component {
     }
 
 
-    public TreeGeneratorContainer getWorld(BaseVector3i pos) {
+    public TreeGeneratorContainer getWorld(Vector3ic pos) {
         return getWorld(pos.x(), pos.y(), pos.z());
     }
 

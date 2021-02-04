@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
-import org.terasology.math.geom.Rect2i;
+import org.terasology.world.block.BlockArea;
 
 import java.util.Map;
 
@@ -30,21 +30,21 @@ import static org.junit.Assert.assertTrue;
 
 public class ParcelListTest {
     public ParcelList parcels;
-    public Rect2i[] shapes;
+    public BlockArea[] shapes;
 
-    final String CLERICAL = "CLERICAL";
-    final String RESIDENTIAL = "RESIDENTIAL";
-    final String GOVERNMENTAL = "GOVERNMENTAL";
+    public static final String CLERICAL = "CLERICAL";
+    public static final String RESIDENTIAL = "RESIDENTIAL";
+    public static final String GOVERNMENTAL = "GOVERNMENTAL";
 
     @Before
     public void setup() {
         parcels = new ParcelList(1);
-        shapes = new Rect2i[5];
-        shapes[0] = Rect2i.createFromMinAndSize(0, 0, 10, 10);
-        shapes[1] = Rect2i.createFromMinAndSize(13, 13, 10, 10);
-        shapes[2] = Rect2i.createFromMinAndSize(-13, -13, 10, 10);
-        shapes[3] = Rect2i.createFromMinAndSize(-5, -5, 100, 100);
-        shapes[4] = Rect2i.createFromMinAndSize(-100, -100, 10, 10);
+        shapes = new BlockArea[5];
+        shapes[0] = new BlockArea(0, 0).setSize(10, 10);
+        shapes[1] = new BlockArea(13, 13).setSize(10, 10);
+        shapes[2] = new BlockArea(-13, -13).setSize(10, 10);
+        shapes[3] = new BlockArea(-5, -5).setSize(100, 100);
+        shapes[4] = new BlockArea(-100, -100).setSize(10, 10);
         parcels.addParcel(new DynParcel(shapes[0], Orientation.EAST, CLERICAL, 0));
         parcels.addParcel(new DynParcel(shapes[1], Orientation.EAST, RESIDENTIAL, 0));
         parcels.addParcel(new DynParcel(shapes[2], Orientation.EAST, GOVERNMENTAL, 0));

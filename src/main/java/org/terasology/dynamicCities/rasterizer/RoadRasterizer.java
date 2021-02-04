@@ -15,14 +15,14 @@
  */
 package org.terasology.dynamicCities.rasterizer;
 
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.roads.RoadSegment;
-import org.terasology.math.geom.BaseVector2i;
-import org.terasology.math.geom.Vector2i;
 import org.terasology.world.block.BlockRegion;
 
 /**
@@ -36,14 +36,14 @@ public class RoadRasterizer {
     public void raster(RasterTarget rasterTarget, RoadSegment roadSegment, HeightMap heightMap) {
         int upperHeight = 255;  // Height to which the region above the segment would be cleared
 
-        for (BaseVector2i pos : roadSegment.rect.contents()) {
+        for (Vector2ic pos : roadSegment.getRect()) {
             rasterTarget.setBlock(new Vector3i(pos.x(), heightMap.apply(pos), pos.y()), DefaultBlockType.ROAD_SURFACE);
         }
 
         // Clean the region above the rect
-        Vector2i rectMin = roadSegment.rect.min();
+        Vector2i rectMin = roadSegment.getRect().getMin(new Vector2i());
         BlockRegion upper = new BlockRegion(rectMin.x(), heightMap.apply(rectMin) + 1, rectMin.y(),
-                roadSegment.rect.sizeX(), upperHeight, roadSegment.rect.sizeY());
+                roadSegment.getRect().getSizeX(), upperHeight, roadSegment.getRect().getSizeY());
 
         for (Vector3ic pos : upper) {
             rasterTarget.setBlock(pos, DefaultBlockType.AIR);

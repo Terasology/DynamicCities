@@ -20,9 +20,10 @@ import org.terasology.cities.BlockTheme;
 import org.terasology.cities.BlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.math.Side;
-import org.terasology.math.geom.Rect2i;
 import org.terasology.world.WorldProvider;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockArea;
+import org.terasology.world.block.BlockAreac;
 import org.terasology.world.block.BlockRegion;
 
 import java.util.Set;
@@ -32,18 +33,18 @@ public class WorldRasterTarget implements RasterTarget {
 
     private final WorldProvider worldProvider;
     private final BlockTheme blockTheme;
-    private final Rect2i affectedArea;
+    private final BlockArea affectedArea;
     private final BlockRegion affectedRegion;
 
     /**
      * @param worldProvider the chunk to work on
      * @param blockTheme a mapping String type to block
      */
-    public WorldRasterTarget(WorldProvider worldProvider, BlockTheme blockTheme, Rect2i area) {
+    public WorldRasterTarget(WorldProvider worldProvider, BlockTheme blockTheme, BlockAreac area) {
         this.blockTheme = blockTheme;
         this.worldProvider = worldProvider;
-        this.affectedArea = area;
-        affectedRegion = new BlockRegion(area.minX(), -255, area.minY(), area.maxX(), 255, area.maxY());
+        this.affectedArea = new BlockArea(area);
+        this.affectedRegion = new BlockRegion(area.minX(), -255, area.minY(), area.maxX(), 255, area.maxY());
     }
     /**
      * @param x x in world coords
@@ -73,7 +74,7 @@ public class WorldRasterTarget implements RasterTarget {
     /**
      * @return the XZ area that is drawn by this raster target
      */
-    public Rect2i getAffectedArea() {
+    public BlockAreac getAffectedArea() {
         return affectedArea;
     }
 

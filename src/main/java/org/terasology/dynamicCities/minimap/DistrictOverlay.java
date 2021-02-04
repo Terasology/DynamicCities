@@ -19,6 +19,7 @@ import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.Color;
 import org.terasology.nui.util.RectUtility;
+import org.terasology.world.block.BlockAreac;
 
 public class DistrictOverlay implements MinimapOverlay {
 
@@ -68,9 +69,9 @@ public class DistrictOverlay implements MinimapOverlay {
             Rectanglei worldRectExpanded = RectUtility.expand(worldRect, districtFacet.getGridSize(), districtFacet.getGridSize());
             if (new Vector2f(worldRect.minX, worldRect.minY).distance(pos) <= settlement.getComponent(ParcelList.class).builtUpRadius + new Vector2i(worldRect.maxX - worldRect.minX, worldRect.maxY - worldRect.minY).length()) {
 
-                Rectanglei gridWorldRegion = districtFacet.getGridWorldRegion();
-                for (int x = gridWorldRegion.minX; x < gridWorldRegion.maxX; x++) {
-                    for (int y = gridWorldRegion.minY; y < gridWorldRegion.maxY; y++) {
+                BlockAreac gridWorldRegion = districtFacet.getGridWorldRegion();
+                for (int x = gridWorldRegion.minX(); x < gridWorldRegion.maxX(); x++) {
+                    for (int y = gridWorldRegion.minY(); y < gridWorldRegion.maxY(); y++) {
                         Vector2i worldPoint = districtFacet.getWorldPoint(x, y);
 
                         if (worldRectExpanded.containsPoint(worldPoint) && new Vector2f(worldPoint).distance(cityRadius.x, cityRadius.y) < cityRadius.r) {

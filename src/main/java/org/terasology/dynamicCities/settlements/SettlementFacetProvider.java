@@ -51,7 +51,7 @@ public class SettlementFacetProvider implements FacetProvider {
         SettlementFacet settlementFacet = new SettlementFacet(region.getRegion(), border);
 
         if (siteComponent != null) {
-            float populationNoise = noiseGen.noise(siteComponent.getPos().x, siteComponent.getPos().y);
+            float populationNoise = noiseGen.noise(siteComponent.getPos().x(), siteComponent.getPos().y());
             float scaleFactor = SettlementConstants.MAX_POPULATIONSIZE - SettlementConstants.MIN_POPULATIONSIZE;
             int population = TeraMath.fastAbs(Math.round(populationNoise * (scaleFactor))) + SettlementConstants.MIN_POPULATIONSIZE;
 

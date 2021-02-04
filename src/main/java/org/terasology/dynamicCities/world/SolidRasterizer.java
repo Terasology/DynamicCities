@@ -15,16 +15,15 @@
  */
 package org.terasology.dynamicCities.world;
 
+import org.joml.Vector2i;
+import org.joml.Vector3ic;
 import org.terasology.biomesAPI.Biome;
 import org.terasology.core.world.CoreBiome;
 import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
-import org.terasology.math.JomlUtil;
-import org.terasology.math.geom.Vector2i;
-import org.terasology.math.geom.Vector3i;
 import org.terasology.world.block.Block;
-import org.terasology.world.chunks.ChunkConstants;
+import org.terasology.world.chunks.Chunks;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.facets.DensityFacet;
@@ -46,15 +45,15 @@ public class SolidRasterizer extends CompatibleRasterizer {
         int seaLevel = seaLevelFacet.getSeaLevel();
 
         Vector2i pos2d = new Vector2i();
-        for (Vector3i pos : ChunkConstants.CHUNK_REGION) {
-            pos2d.set(pos.x, pos.z);
-            Biome biome = biomeFacet.get(JomlUtil.from(pos2d));
-            biomeRegistry.setBiome(biome, chunk, pos.x, pos.y, pos.z);
+        for (Vector3ic pos : Chunks.CHUNK_REGION) {
+            pos2d.set(pos.x(), pos.z());
+            Biome biome = biomeFacet.get(pos2d);
+            biomeRegistry.setBiome(biome, chunk, pos.x(), pos.y(), pos.z());
 
-            int posY = pos.y + chunk.getChunkWorldOffsetY();
-            float density = solidityFacet.get(JomlUtil.from(pos));
+            int posY = pos.y() + chunk.getChunkWorldOffsetY();
+            float density = solidityFacet.get(pos);
 
-            if (surfaceFacet.get(JomlUtil.from(pos))) {
+            if (surfaceFacet.get(pos)) {
                 setBlock(chunk, getSurfaceBlock(biome, posY - seaLevel), pos, resourceFacet);
             } else if (density > 0) {
                 setBlock(chunk, getBelowSurfaceBlock(density, biome), pos, resourceFacet);
