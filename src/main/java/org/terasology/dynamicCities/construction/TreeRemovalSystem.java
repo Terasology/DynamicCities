@@ -130,9 +130,7 @@ public class TreeRemovalSystem extends BaseComponentSystem {
         Random random = new FastRandom(0);
         Vector3f position = new Vector3f(0f, 0f, 0f);
 
-        Matrix4f rotation = new Matrix4f().rotate(new Quaternionf().setAngleAxis((float) Math.PI / 2f, 0, 0, 1));
-
-//        Matrix4f rotation = new Matrix4f(new Quat4f(new Vector3f(0f, 0f, 1f), (float) Math.PI / 2f), Vector3f.ZERO, 1.0f);
+        Quaternionf rotation = new Quaternionf().setAngleAxis((float) Math.PI / 2f, 0, 0, 1);
 
         float angleOffset = random.nextFloat(-TreeGeneratorLSystem.MAX_ANGLE_OFFSET, TreeGeneratorLSystem.MAX_ANGLE_OFFSET);
 

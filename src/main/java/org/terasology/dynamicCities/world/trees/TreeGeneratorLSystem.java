@@ -64,9 +64,7 @@ public class TreeGeneratorLSystem extends AbstractTreeGenerator {
     public void generate(BlockManager blockManager, CoreChunk view, Random rand, int posX, int posY, int posZ, ResourceFacet resourceFacet) {
         Vector3f position = new Vector3f(0f, 0f, 0f);
 
-        Matrix4f rotation = new Matrix4f().rotate(new Quaternionf().setAngleAxis((float) Math.PI / 2f, 0f, 0f,0f));
-
-//        Matrix4f rotation = new Matrix4f(new Quat4f(new Vector3f(0f, 0f, 1f), (float) Math.PI / 2f), Vector3f.ZERO, 1.0f);
+        final Quaternionf rotation = new Quaternionf().setAngleAxis(Math.PI / 2f, 0, 0, 1);
 
         float angleOffset = rand.nextFloat(-MAX_ANGLE_OFFSET, MAX_ANGLE_OFFSET);
 
