@@ -17,7 +17,6 @@ package org.terasology.dynamicCities.construction;
 
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
-import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
@@ -88,7 +87,6 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.math.Side;
 import org.terasology.network.NetworkSystem;
 import org.terasology.registry.CoreRegistry;

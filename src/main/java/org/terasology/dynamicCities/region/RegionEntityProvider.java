@@ -31,7 +31,6 @@ import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.entitySystem.entity.EntityStore;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
 import org.terasology.network.NetworkComponent;
 import org.terasology.world.block.BlockRegion;
 import org.terasology.world.generation.EntityBuffer;

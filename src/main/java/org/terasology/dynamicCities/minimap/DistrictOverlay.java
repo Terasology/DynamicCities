@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.minimap;
 
-import org.terasology.joml.geom.Circlef;
-import org.terasology.joml.geom.Rectanglei;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.districts.DistrictType;
@@ -11,10 +11,9 @@ import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.joml.geom.Circlef;
+import org.terasology.joml.geom.Rectanglei;
 import org.terasology.logic.location.LocationComponent;
-import org.terasology.math.JomlUtil;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
 import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.Color;
@@ -79,8 +78,8 @@ public class DistrictOverlay implements MinimapOverlay {
                             int sizeX = Math.round(districtFacet.getGridSize() * (float) canvas.getRegion().lengthX() /  (float) worldRect.lengthX());
                             int sizeY = Math.round(districtFacet.getGridSize() * (float) canvas.getRegion().lengthY() /  (float) worldRect.lengthY());
                             DistrictType districtType = districtFacet.getDistrict(worldPoint.x(), worldPoint.y());
-                            Color districtColor = districtType.getColor().alterAlpha(130);
-                            Rectanglei gridRect = JomlUtil.rectangleiFromMinAndSize(gridPos.x, gridPos.y, sizeX, sizeY);
+                            Color districtColor = districtType.getColor().setAlpha(130);
+                            Rectanglei gridRect = new Rectanglei(gridPos.x, gridPos.y).setSize(sizeX, sizeY);
                             canvas.drawFilledRectangle(gridRect, districtColor);
                         }
                     }
