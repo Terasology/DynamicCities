@@ -23,7 +23,6 @@ import org.terasology.cities.deco.ColumnDecoration;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.math.Side;
-import org.terasology.math.geom.ImmutableVector3i;
 
 import java.util.EnumSet;
 import java.util.Set;
