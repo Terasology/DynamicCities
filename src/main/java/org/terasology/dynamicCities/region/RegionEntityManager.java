@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.region;
 
@@ -305,36 +305,4 @@ public class RegionEntityManager extends BaseComponentSystem {
         }
         return result;
     }
- /*
-    public List<EntityRef> getRegionsInArea(Rect2i area) {
-        List<EntityRef> result = new ArrayList<>();
-        Vector2i regionWorldPos = new Vector2i();
-        for (BaseVector2i regionPos : area.contents()) {
-            regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
-
-            EntityRef region = getNearest(regionWorldPos);
-            if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
-                result.add(region);
-            }
-        }
-        return result;
-    }*/
-    /* Unused and buggy
-
-
-    public List<EntityRef> getSurroundingRegions(Vector2i pos, int size) {
-        Rect2i settlementRectArea = Rect2i.createFromMinAndMax(-size, -size, size, size);
-        Vector2i regionWorldPos = new Vector2i();
-        List<EntityRef> result = new ArrayList<>();
-        for (BaseVector2i regionPos : settlementRectArea.contents()) {
-            regionWorldPos.set(pos.x() + regionPos.x() * 32, pos.y() + regionPos.y() * 32);
-
-            EntityRef region = getNearest(regionWorldPos);
-            if (region != null && region.hasComponent(UnassignedRegionComponent.class)) {
-                result.add(region);
-            }
-        }
-        return result;
-    }
-    */
 }
