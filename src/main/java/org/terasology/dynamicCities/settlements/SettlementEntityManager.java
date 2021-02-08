@@ -60,7 +60,6 @@ import org.terasology.joml.geom.Circlef;
 import org.terasology.logic.location.LocationComponent;
 import org.terasology.logic.nameTags.NameTagComponent;
 import org.terasology.logic.players.MinimapSystem;
-import org.terasology.math.JomlUtil;
 import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.network.NetworkComponent;
 import org.terasology.nui.Color;
@@ -287,7 +286,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         RegionEntitiesComponent regionEntitiesComponent = new RegionEntitiesComponent();
 
         //Create the district facet and DistrictTypeMap
-        BlockRegion region = new BlockRegion(new org.joml.Vector3i(locationComponent.getLocalPosition(), RoundingMode.FLOOR)).expand(new org.joml.Vector3i(SettlementConstants.SETTLEMENT_RADIUS));
+        BlockRegion region = new BlockRegion(new Vector3i(locationComponent.getLocalPosition(), RoundingMode.FLOOR)).expand(new Vector3i(SettlementConstants.SETTLEMENT_RADIUS));
         Border3D border = new Border3D(0, 0, 0);
         DistrictFacetComponent districtGrid = new DistrictFacetComponent(region, border, SettlementConstants.DISTRICT_GRIDSIZE, siteComponent.hashCode(), districtManager, cultureComponent);
         if (districtGrid.districtMap.size() < 1) {

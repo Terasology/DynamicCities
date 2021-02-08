@@ -20,7 +20,6 @@ import org.terasology.cities.BlockTheme;
 import org.terasology.cities.deco.SingleBlockDecoration;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.math.JomlUtil;
 
 import java.util.Collections;
 
