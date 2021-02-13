@@ -15,8 +15,8 @@
  */
 package parcels;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
@@ -24,9 +24,10 @@ import org.terasology.world.block.BlockArea;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ParcelListTest {
     public ParcelList parcels;
@@ -36,7 +37,7 @@ public class ParcelListTest {
     public static final String RESIDENTIAL = "RESIDENTIAL";
     public static final String GOVERNMENTAL = "GOVERNMENTAL";
 
-    @Before
+    @BeforeAll
     public void setup() {
         parcels = new ParcelList(1);
         shapes = new BlockArea[5];

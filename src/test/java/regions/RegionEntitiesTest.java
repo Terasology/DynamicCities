@@ -20,9 +20,9 @@ import com.google.common.collect.Sets;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -34,9 +34,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class RegionEntitiesTest extends ModuleTestingEnvironment {
     private RegionEntityManager regionEntityManager;
@@ -49,7 +49,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         return Sets.newHashSet("engine", "DynamicCities", "ModuleTestingEnvironment");
     }
 
-    @Before
+    @BeforeAll
     public void setupEntityRefs() {
         pos[0] = new Vector3f(16, 0, 16);
         pos[1] = new Vector3f(16, 0, -16);
@@ -81,7 +81,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testNearestGet() {
         assertEquals(test[0], regionEntityManager.getNearest(new Vector2i(21, 13)));
@@ -100,7 +100,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         assertFalse(regionEntityManager.cellIsLoaded(new Vector2i(153, -134)));
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testGetRegionsInCell() {
         List<EntityRef> testList = new ArrayList<>();
