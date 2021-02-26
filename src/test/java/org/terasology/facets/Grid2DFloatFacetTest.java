@@ -18,7 +18,7 @@ package org.terasology.facets;
 
 import org.joml.Vector2i;
 import org.joml.Vector3i;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.terasology.dynamicCities.facets.Grid2DFloatFacet;
 import org.terasology.world.block.BlockRegion;
@@ -35,7 +35,7 @@ public class Grid2DFloatFacetTest {
 
     private Grid2DFloatFacet facet;
 
-    @BeforeAll
+    @BeforeEach
     public void setup() {
         int gridSize = 4;
         Border3D border = new Border3D(0, 0, 0).extendBy(0, 15, 10);

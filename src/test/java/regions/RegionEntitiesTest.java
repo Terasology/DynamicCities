@@ -20,7 +20,7 @@ import com.google.common.collect.Sets;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RegionEntitiesTest extends ModuleTestingEnvironment {
     private RegionEntityManager regionEntityManager;
@@ -49,7 +49,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         return Sets.newHashSet("engine", "DynamicCities", "ModuleTestingEnvironment");
     }
 
-    @BeforeAll
+    @BeforeEach
     public void setupEntityRefs() {
         pos[0] = new Vector3f(16, 0, 16);
         pos[1] = new Vector3f(16, 0, -16);
