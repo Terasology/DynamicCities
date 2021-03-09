@@ -20,10 +20,10 @@ import com.google.common.collect.Lists;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
 
 import java.util.List;
 

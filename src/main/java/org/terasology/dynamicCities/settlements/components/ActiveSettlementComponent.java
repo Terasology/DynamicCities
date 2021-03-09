@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 public class ActiveSettlementComponent implements Component {
 

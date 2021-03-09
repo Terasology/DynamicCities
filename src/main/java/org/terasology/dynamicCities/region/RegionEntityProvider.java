@@ -29,15 +29,15 @@ import org.terasology.dynamicCities.region.components.UnregisteredRegionComponen
 import org.terasology.dynamicCities.settlements.SettlementFacet;
 import org.terasology.dynamicCities.sites.SiteFacet;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
-import org.terasology.entitySystem.entity.EntityStore;
-import org.terasology.logic.location.LocationComponent;
-import org.terasology.network.NetworkComponent;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.generation.EntityBuffer;
-import org.terasology.world.generation.EntityProvider;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generation.facets.ElevationFacet;
-import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
+import org.terasology.engine.entitySystem.entity.EntityStore;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.network.NetworkComponent;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.generation.EntityBuffer;
+import org.terasology.engine.world.generation.EntityProvider;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.facets.ElevationFacet;
+import org.terasology.engine.world.generation.facets.base.BaseFieldFacet2D;
 
 /**
  * Add an entity for each region to serve as storage for relevant data

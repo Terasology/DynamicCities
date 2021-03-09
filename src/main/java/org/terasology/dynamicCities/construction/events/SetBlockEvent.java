@@ -17,8 +17,8 @@ package org.terasology.dynamicCities.construction.events;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.entitySystem.event.ConsumableEvent;
-import org.terasology.world.block.Block;
+import org.terasology.engine.entitySystem.event.ConsumableEvent;
+import org.terasology.engine.world.block.Block;
 
 /**
  * Sent when a building has been rasterized and a given block should be set directly

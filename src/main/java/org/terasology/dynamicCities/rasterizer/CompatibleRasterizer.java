@@ -21,12 +21,12 @@ import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.dynamicCities.resource.ResourceType;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generation.WorldRasterizer;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.WorldRasterizer;
 
 /**
  */

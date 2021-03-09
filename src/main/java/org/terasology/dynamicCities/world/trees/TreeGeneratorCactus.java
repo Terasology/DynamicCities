@@ -16,10 +16,10 @@
 package org.terasology.dynamicCities.world.trees;
 
 import org.terasology.dynamicCities.facets.ResourceFacet;
-import org.terasology.utilities.random.Random;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
-import org.terasology.world.chunks.CoreChunk;
+import org.terasology.engine.utilities.random.Random;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.block.BlockUri;
+import org.terasology.engine.world.chunks.CoreChunk;
 
 /**
  * Cactus generator.

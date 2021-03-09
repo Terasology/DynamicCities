@@ -17,9 +17,9 @@ package org.terasology.dynamicCities.construction.events;
 
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.raster.RasterTarget;
-import org.terasology.entitySystem.event.ConsumableEvent;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.entitySystem.event.ConsumableEvent;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
 
 /**
  * Emitted when DynamicCities needs a {@link org.terasology.cities.raster.RasterTarget} for rasterizing buildings

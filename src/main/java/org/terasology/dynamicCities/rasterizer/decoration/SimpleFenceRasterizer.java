@@ -22,13 +22,12 @@ import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.fences.SimpleFence;
 import org.terasology.cities.surface.InfiniteSurfaceHeightFacet;
 import org.terasology.commonworld.Orientation;
-import org.terasology.math.Side;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.engine.world.block.BlockRegionc;
+import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.math.TeraMath;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockAreac;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.block.BlockRegionc;
-import org.terasology.world.chunks.CoreChunk;
 
 import java.util.EnumSet;
 

@@ -17,11 +17,11 @@ package org.terasology.dynamicCities.region;
 
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.FacetProvider;
-import org.terasology.world.generation.GeneratingRegion;
-import org.terasology.world.generation.Produces;
-import org.terasology.world.generator.plugin.RegisterPlugin;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.FacetProvider;
+import org.terasology.engine.world.generation.GeneratingRegion;
+import org.terasology.engine.world.generation.Produces;
+import org.terasology.engine.world.generator.plugin.RegisterPlugin;
 
 @RegisterPlugin
 @Produces(ResourceFacet.class)

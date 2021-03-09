@@ -16,10 +16,11 @@
 package org.terasology.dynamicCities.construction.components;
 
 
+import org.terasology.dynamicCities.construction.BufferedBlock;
+import org.terasology.engine.entitySystem.Component;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.terasology.dynamicCities.construction.BufferedBlock;
-import org.terasology.entitySystem.Component;
 
 
 public final class BlockBufferComponent implements Component {

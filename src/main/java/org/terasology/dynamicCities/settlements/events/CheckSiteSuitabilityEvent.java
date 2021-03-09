@@ -15,7 +15,7 @@
  */
 package org.terasology.dynamicCities.settlements.events;
 
-import org.terasology.entitySystem.event.ConsumableEvent;
+import org.terasology.engine.entitySystem.event.ConsumableEvent;
 
 /**
  * Issued when the settlement manager wants to know if a site is suitable for creating a settlement.

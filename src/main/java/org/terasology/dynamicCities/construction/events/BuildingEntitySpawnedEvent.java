@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.construction.events;
 
 
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.event.Event;
 
 public class BuildingEntitySpawnedEvent implements Event {
 }

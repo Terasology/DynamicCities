@@ -30,10 +30,10 @@ import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.geom.CircleUtility;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
+import org.terasology.engine.world.WorldProvider;
 import org.terasology.joml.geom.Circlef;
 import org.terasology.joml.geom.Rectanglef;
 import org.terasology.math.TeraMath;
-import org.terasology.world.WorldProvider;
 
 
 /**

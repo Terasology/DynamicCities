@@ -17,7 +17,7 @@ package org.terasology.dynamicCities.settlements.events;
 
 import org.terasology.dynamicCities.buildings.GenericBuildingComponent;
 import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.entitySystem.event.ConsumableEvent;
+import org.terasology.engine.entitySystem.event.ConsumableEvent;
 
 import java.util.Optional;
 

@@ -27,8 +27,8 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
+import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.math.TeraMath;
-import org.terasology.world.block.BlockAreac;
 
 import java.math.RoundingMode;
 

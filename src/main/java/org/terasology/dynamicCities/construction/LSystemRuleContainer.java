@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.construction;
 
 
-import org.terasology.math.LSystemRule;
+import org.terasology.engine.math.LSystemRule;
 import org.terasology.reflection.MappedContainer;
 
 @MappedContainer

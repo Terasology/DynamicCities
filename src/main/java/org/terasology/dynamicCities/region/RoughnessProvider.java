@@ -18,16 +18,16 @@ package org.terasology.dynamicCities.region;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.world.block.BlockAreac;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.Facet;
-import org.terasology.world.generation.FacetProvider;
-import org.terasology.world.generation.GeneratingRegion;
-import org.terasology.world.generation.Produces;
-import org.terasology.world.generation.Requires;
-import org.terasology.world.generation.facets.ElevationFacet;
-import org.terasology.world.generation.facets.SeaLevelFacet;
-import org.terasology.world.generator.plugin.RegisterPlugin;
+import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.Facet;
+import org.terasology.engine.world.generation.FacetProvider;
+import org.terasology.engine.world.generation.GeneratingRegion;
+import org.terasology.engine.world.generation.Produces;
+import org.terasology.engine.world.generation.Requires;
+import org.terasology.engine.world.generation.facets.ElevationFacet;
+import org.terasology.engine.world.generation.facets.SeaLevelFacet;
+import org.terasology.engine.world.generator.plugin.RegisterPlugin;
 
 @RegisterPlugin
 @Produces(RoughnessFacet.class)

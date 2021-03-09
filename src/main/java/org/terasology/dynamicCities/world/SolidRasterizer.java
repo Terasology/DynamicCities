@@ -22,13 +22,13 @@ import org.terasology.core.world.CoreBiome;
 import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
-import org.terasology.world.block.Block;
-import org.terasology.world.chunks.Chunks;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generation.facets.DensityFacet;
-import org.terasology.world.generation.facets.SeaLevelFacet;
-import org.terasology.world.generation.facets.SurfacesFacet;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.chunks.Chunks;
+import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.facets.DensityFacet;
+import org.terasology.engine.world.generation.facets.SeaLevelFacet;
+import org.terasology.engine.world.generation.facets.SurfacesFacet;
 
 /**
  */

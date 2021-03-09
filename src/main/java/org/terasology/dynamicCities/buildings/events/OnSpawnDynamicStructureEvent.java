@@ -15,8 +15,8 @@
  */
 package org.terasology.dynamicCities.buildings.events;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
 
 /**

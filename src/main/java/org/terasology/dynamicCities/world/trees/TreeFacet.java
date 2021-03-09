@@ -16,9 +16,9 @@
 package org.terasology.dynamicCities.world.trees;
 
 
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.SparseObjectFacet3D;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.facets.base.SparseObjectFacet3D;
 
 /**
  * Stores a random seed for a tree to be planted

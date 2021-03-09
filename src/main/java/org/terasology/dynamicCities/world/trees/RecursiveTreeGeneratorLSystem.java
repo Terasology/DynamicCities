@@ -16,17 +16,15 @@
 
 package org.terasology.dynamicCities.world.trees;
 
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.terasology.dynamicCities.facets.ResourceFacet;
-import org.terasology.math.LSystemRule;
+import org.terasology.engine.math.LSystemRule;
+import org.terasology.engine.utilities.collection.CharSequenceIterator;
+import org.terasology.engine.utilities.random.Random;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.math.TeraMath;
-import org.terasology.utilities.collection.CharSequenceIterator;
-import org.terasology.utilities.random.Random;
-import org.terasology.world.block.Block;
-import org.terasology.world.chunks.CoreChunk;
 
 import java.util.Map;
 

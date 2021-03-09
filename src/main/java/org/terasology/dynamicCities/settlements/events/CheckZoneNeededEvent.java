@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.settlements.events;
 
 
-import org.terasology.entitySystem.event.ConsumableEvent;
+import org.terasology.engine.entitySystem.event.ConsumableEvent;
 
 /**
  * Sent to check whether an entity needs a parcel of the given zone type

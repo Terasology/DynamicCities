@@ -17,12 +17,12 @@ package org.terasology.dynamicCities.facets;
 
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.facets.base.BaseFieldFacet2D;
 import org.terasology.math.TeraMath;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.facets.base.BaseFieldFacet2D;
 
 
 public class RoughnessFacet extends Grid2DFloatFacet {

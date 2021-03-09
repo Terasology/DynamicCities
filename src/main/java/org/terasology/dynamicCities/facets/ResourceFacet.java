@@ -18,8 +18,8 @@ package org.terasology.dynamicCities.facets;
 import com.google.common.base.Preconditions;
 import org.joml.Vector2ic;
 import org.terasology.dynamicCities.resource.Resource;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.generation.Border3D;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.generation.Border3D;
 
 import java.util.HashMap;
 import java.util.Map;

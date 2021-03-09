@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
-import org.terasology.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockArea;
 
 import java.util.Map;
 

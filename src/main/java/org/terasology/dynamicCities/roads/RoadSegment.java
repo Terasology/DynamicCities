@@ -19,8 +19,8 @@ package org.terasology.dynamicCities.roads;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
 
 /**
  * A rectangular piece of the road with a start and an end point

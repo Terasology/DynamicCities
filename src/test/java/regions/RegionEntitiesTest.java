@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.moduletestingenvironment.ModuleTestingEnvironment;
 
 import java.util.ArrayList;

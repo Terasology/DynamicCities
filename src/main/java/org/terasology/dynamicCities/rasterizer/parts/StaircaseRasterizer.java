@@ -24,13 +24,13 @@ import org.terasology.cities.bldg.StaircaseBuildingPart;
 import org.terasology.cities.common.Edges;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.Orientation;
+import org.terasology.commonworld.geom.OutlineIterator;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
-import org.terasology.commonworld.geom.OutlineIterator;
-import org.terasology.math.Side;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
 
 import java.util.Collections;
 import java.util.Iterator;
