@@ -58,7 +58,7 @@ import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.logic.nameTags.NameTagComponent;
-import org.terasology.engine.logic.players.MinimapSystem;
+import org.terasology.logic.players.MinimapSystem;
 import org.terasology.engine.network.NetworkComponent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
