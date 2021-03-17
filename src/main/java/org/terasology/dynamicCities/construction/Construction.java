@@ -72,7 +72,7 @@ import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
-import org.terasology.engine.logic.inventory.InventoryManager;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.math.Side;
 import org.terasology.engine.network.NetworkSystem;
