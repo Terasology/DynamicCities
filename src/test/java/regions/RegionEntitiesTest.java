@@ -1,53 +1,39 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package regions;
 
-import com.google.common.collect.Sets;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.logic.location.LocationComponent;
-import org.terasology.moduletestingenvironment.ModuleTestingEnvironment;
+import org.terasology.engine.registry.In;
+import org.terasology.moduletestingenvironment.MTEExtension;
+import org.terasology.moduletestingenvironment.extension.Dependencies;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RegionEntitiesTest extends ModuleTestingEnvironment {
-    private RegionEntityManager regionEntityManager;
+@ExtendWith(MTEExtension.class)
+@Dependencies({"DynamicCities"})
+public class RegionEntitiesTest {
+    @In
+    RegionEntityManager regionEntityManager;
 
     private EntityRef[] test;
     private Vector3f[] pos = new Vector3f[10];
-
-    @Override
-    public Set<String> getDependencies() {
-        return Sets.newHashSet("engine", "DynamicCities", "ModuleTestingEnvironment");
-    }
 
     @BeforeEach
     public void setupEntityRefs() {
@@ -61,8 +47,6 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         pos[7] = new Vector3f(-32, 0, 32);
         pos[8] = new Vector3f(-32, 0, -32);
         pos[9] = new Vector3f(97, 0, -97);
-
-        regionEntityManager = getHostContext().get(RegionEntityManager.class);
 
         test = new EntityRef[10];
         LocationComponent[] loc = new LocationComponent[test.length];
