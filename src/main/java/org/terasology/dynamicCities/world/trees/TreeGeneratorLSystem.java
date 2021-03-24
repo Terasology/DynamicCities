@@ -24,7 +24,7 @@ import org.terasology.engine.utilities.random.Random;
 import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.engine.world.block.BlockUri;
-import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.chunks.Chunk;
 
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class TreeGeneratorLSystem extends AbstractTreeGenerator {
     }
 
     @Override
-    public void generate(BlockManager blockManager, CoreChunk view, Random rand, int posX, int posY, int posZ, ResourceFacet resourceFacet) {
+    public void generate(BlockManager blockManager, Chunk view, Random rand, int posX, int posY, int posZ, ResourceFacet resourceFacet) {
         Vector3f position = new Vector3f(0f, 0f, 0f);
 
         final Quaternionf rotation = new Quaternionf().setAngleAxis(Math.PI / 2f, 0, 0, 1);

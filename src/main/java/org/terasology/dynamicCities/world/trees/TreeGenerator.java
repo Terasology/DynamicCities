@@ -19,7 +19,7 @@ package org.terasology.dynamicCities.world.trees;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.engine.utilities.random.Random;
 import org.terasology.engine.world.block.BlockManager;
-import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.chunks.Chunk;
 
 /**
  * Object generators are used to generate objects like trees etc.
@@ -37,5 +37,5 @@ public interface TreeGenerator {
      * @param posY Relative position on the y-axis (wrt. the chunk)
      * @param posZ Relative position on the z-axis (wrt. the chunk)
      */
-    void generate(BlockManager blockManager, CoreChunk view, Random rand, int posX, int posY, int posZ, ResourceFacet resourceFacet);
+    void generate(BlockManager blockManager, Chunk view, Random rand, int posX, int posY, int posZ, ResourceFacet resourceFacet);
 }
