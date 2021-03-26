@@ -23,8 +23,8 @@ import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
 import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
-import org.terasology.engine.world.chunks.CoreChunk;
 import org.terasology.engine.world.generation.Region;
 import org.terasology.engine.world.generation.facets.DensityFacet;
 import org.terasology.engine.world.generation.facets.SeaLevelFacet;
@@ -36,7 +36,7 @@ public class SolidRasterizer extends CompatibleRasterizer {
 
 
     @Override
-    public void generateChunk(CoreChunk chunk, Region chunkRegion) {
+    public void generateChunk(Chunk chunk, Region chunkRegion) {
         DensityFacet solidityFacet = chunkRegion.getFacet(DensityFacet.class);
         SurfacesFacet surfaceFacet = chunkRegion.getFacet(SurfacesFacet.class);
         BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);

@@ -23,7 +23,7 @@ import org.terasology.engine.math.LSystemRule;
 import org.terasology.engine.utilities.collection.CharSequenceIterator;
 import org.terasology.engine.utilities.random.Random;
 import org.terasology.engine.world.block.Block;
-import org.terasology.engine.world.chunks.CoreChunk;
+import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.math.TeraMath;
 
 import java.util.Map;
@@ -44,7 +44,7 @@ public class RecursiveTreeGeneratorLSystem {
         this.ruleSet = ruleSet;
     }
 
-    public void recurse(CoreChunk view, Random rand, int posX, int posY, int posZ, float angleOffset,
+    public void recurse(Chunk view, Random rand, int posX, int posY, int posZ, float angleOffset,
                         CharSequenceIterator axiomIterator, Vector3f position, Quaternionf rotation,
                         Block bark, Block leaf, int depth, AbstractTreeGenerator treeGenerator, ResourceFacet resourceFacet) {
         Quaternionf tempRotation = new Quaternionf();
