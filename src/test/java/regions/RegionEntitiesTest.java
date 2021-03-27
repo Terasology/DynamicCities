@@ -22,6 +22,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.terasology.dynamicCities.region.RegionEntityManager;
@@ -38,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("MteTest")
 public class RegionEntitiesTest extends ModuleTestingEnvironment {
     private RegionEntityManager regionEntityManager;
 
