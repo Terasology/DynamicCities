@@ -76,6 +76,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         }
     }
 
+    @Disabled
     @Test
     public void testSimpleGet() {
         for (int i = 0; i < test.length; i++) {
@@ -92,6 +93,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         assertEquals(test[3], regionEntityManager.getNearest(new Vector2i(-13, -19)));
     }
 
+    @Disabled
     @Test
     public void testIsLoaded() {
         assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(0, 0)));
