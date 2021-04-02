@@ -76,7 +76,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         }
     }
 
-    @Disabled
+    @Disabled("failing with resolution error with gestalt v5 - re-enable after gestalt v7 migration")
     @Test
     public void testSimpleGet() {
         for (int i = 0; i < test.length; i++) {
@@ -93,7 +93,7 @@ public class RegionEntitiesTest extends ModuleTestingEnvironment {
         assertEquals(test[3], regionEntityManager.getNearest(new Vector2i(-13, -19)));
     }
 
-    @Disabled
+    @Disabled("failing with resolution error with gestalt v5 - re-enable after gestalt v7 migration")
     @Test
     public void testIsLoaded() {
         assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(0, 0)));
