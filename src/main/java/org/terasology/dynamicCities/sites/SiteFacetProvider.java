@@ -6,15 +6,15 @@ package org.terasology.dynamicCities.sites;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.BlockRegion;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.ConfigurableFacetProvider;
+import org.terasology.engine.world.generation.Facet;
+import org.terasology.engine.world.generation.GeneratingRegion;
+import org.terasology.engine.world.generation.Produces;
+import org.terasology.engine.world.generation.Requires;
 import org.terasology.nui.properties.Range;
-import org.terasology.world.block.BlockRegion;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.ConfigurableFacetProvider;
-import org.terasology.world.generation.Facet;
-import org.terasology.world.generation.GeneratingRegion;
-import org.terasology.world.generation.Produces;
-import org.terasology.world.generation.Requires;
 
 /**
  * Marks sites suitable to build settlements on

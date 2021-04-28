@@ -17,7 +17,7 @@
 package org.terasology.dynamicCities.population;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 import java.util.HashMap;
 import java.util.List;

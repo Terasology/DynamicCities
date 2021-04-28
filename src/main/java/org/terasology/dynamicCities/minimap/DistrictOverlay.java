@@ -10,15 +10,15 @@ import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.joml.geom.Circlef;
 import org.terasology.joml.geom.Rectanglei;
-import org.terasology.logic.location.LocationComponent;
 import org.terasology.minimap.overlays.MinimapOverlay;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.Color;
 import org.terasology.nui.util.RectUtility;
-import org.terasology.world.block.BlockAreac;
 
 public class DistrictOverlay implements MinimapOverlay {
 

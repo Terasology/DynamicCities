@@ -20,7 +20,7 @@ import org.terasology.cities.bldg.Building;
 import org.terasology.cities.bldg.BuildingPart;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.world.WorldProvider;
+import org.terasology.engine.world.WorldProvider;
 
 public abstract class AbsDynBuildingRasterizer<T> {
     protected final BlockTheme theme;

@@ -18,7 +18,7 @@ package org.terasology.dynamicCities.economy;
 
 import org.terasology.dynamicCities.population.PopulationComponent;
 import org.terasology.economy.handler.StorageComponentHandler;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 import java.util.HashSet;
 import java.util.Set;

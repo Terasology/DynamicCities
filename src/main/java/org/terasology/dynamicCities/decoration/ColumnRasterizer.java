@@ -22,7 +22,7 @@ import org.terasology.cities.BlockType;
 import org.terasology.cities.deco.ColumnDecoration;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
-import org.terasology.math.Side;
+import org.terasology.engine.math.Side;
 
 import java.util.EnumSet;
 import java.util.Set;

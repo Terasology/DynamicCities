@@ -17,10 +17,10 @@ package org.terasology.dynamicCities.parcels;
 
 
 import org.terasology.cities.parcels.Parcel;
-import org.terasology.entitySystem.Component;
-import org.terasology.network.Replicate;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.network.Replicate;
+import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.world.block.BlockAreac;
 
 import java.util.ArrayList;
 import java.util.HashMap;

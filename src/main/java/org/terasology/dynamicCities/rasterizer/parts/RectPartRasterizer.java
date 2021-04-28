@@ -26,8 +26,8 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.rasterizer.AbsDynBuildingRasterizer;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.BlockAreac;
 
 /**
  * Converts a {@link RectBuildingPart} into blocks

@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.population;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 public class PopulationComponent implements Component {
 

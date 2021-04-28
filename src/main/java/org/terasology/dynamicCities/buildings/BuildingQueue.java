@@ -17,8 +17,8 @@ package org.terasology.dynamicCities.buildings;
 
 
 import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.entitySystem.Component;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.BlockAreac;
 
 import java.util.Collection;
 import java.util.Collections;

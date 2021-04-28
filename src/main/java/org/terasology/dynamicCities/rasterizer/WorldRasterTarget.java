@@ -19,12 +19,12 @@ import org.joml.Vector3i;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.BlockType;
 import org.terasology.cities.raster.RasterTarget;
-import org.terasology.math.Side;
-import org.terasology.world.WorldProvider;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
-import org.terasology.world.block.BlockRegion;
+import org.terasology.engine.math.Side;
+import org.terasology.engine.world.WorldProvider;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.engine.world.block.BlockRegion;
 
 import java.util.Set;
 

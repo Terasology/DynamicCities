@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.construction;
 
 import org.joml.Vector3i;
+import org.terasology.engine.world.block.Block;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.world.block.Block;
 
 @MappedContainer
 public final class BufferedBlock {

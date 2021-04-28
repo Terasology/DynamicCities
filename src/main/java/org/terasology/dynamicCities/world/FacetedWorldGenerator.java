@@ -35,14 +35,14 @@ import org.terasology.dynamicCities.region.RoughnessProvider;
 import org.terasology.dynamicCities.settlements.SettlementFacetProvider;
 import org.terasology.dynamicCities.sites.SiteFacetProvider;
 import org.terasology.dynamicCities.world.trees.DefaultTreeProvider;
-import org.terasology.engine.SimpleUri;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.spawner.FixedSpawner;
-import org.terasology.registry.In;
-import org.terasology.world.generation.BaseFacetedWorldGenerator;
-import org.terasology.world.generation.WorldBuilder;
-import org.terasology.world.generator.RegisterWorldGenerator;
-import org.terasology.world.generator.plugin.WorldGeneratorPluginLibrary;
+import org.terasology.engine.core.SimpleUri;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.spawner.FixedSpawner;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.generation.BaseFacetedWorldGenerator;
+import org.terasology.engine.world.generation.WorldBuilder;
+import org.terasology.engine.world.generator.RegisterWorldGenerator;
+import org.terasology.engine.world.generator.plugin.WorldGeneratorPluginLibrary;
 
 /**
  */

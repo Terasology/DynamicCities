@@ -21,10 +21,10 @@ import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
 
 import java.util.HashMap;
 import java.util.List;

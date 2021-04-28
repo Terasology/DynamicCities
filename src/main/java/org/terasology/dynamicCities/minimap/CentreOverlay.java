@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.minimap;
 
-import org.terasology.joml.geom.Rectanglef;
-import org.terasology.joml.geom.Rectanglei;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.location.LocationComponent;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.logic.location.LocationComponent;
+import org.terasology.engine.rendering.assets.texture.Texture;
+import org.terasology.engine.utilities.Assets;
+import org.terasology.joml.geom.Rectanglef;
+import org.terasology.joml.geom.Rectanglei;
 import org.terasology.minimap.overlays.MinimapOverlay;
-import org.terasology.nui.util.RectUtility;
-import org.terasology.rendering.assets.texture.Texture;
 import org.terasology.nui.Canvas;
-import org.terasology.utilities.Assets;
+import org.terasology.nui.util.RectUtility;
 
 import java.util.Optional;
 

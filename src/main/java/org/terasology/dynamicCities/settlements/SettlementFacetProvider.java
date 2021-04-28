@@ -19,14 +19,14 @@ package org.terasology.dynamicCities.settlements;
 
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.dynamicCities.sites.SiteFacet;
+import org.terasology.engine.utilities.procedural.WhiteNoise;
+import org.terasology.engine.world.generation.Border3D;
+import org.terasology.engine.world.generation.Facet;
+import org.terasology.engine.world.generation.FacetProvider;
+import org.terasology.engine.world.generation.GeneratingRegion;
+import org.terasology.engine.world.generation.Produces;
+import org.terasology.engine.world.generation.Requires;
 import org.terasology.math.TeraMath;
-import org.terasology.utilities.procedural.WhiteNoise;
-import org.terasology.world.generation.Border3D;
-import org.terasology.world.generation.Facet;
-import org.terasology.world.generation.FacetProvider;
-import org.terasology.world.generation.GeneratingRegion;
-import org.terasology.world.generation.Produces;
-import org.terasology.world.generation.Requires;
 
 /**
  * Generates the initial population for a settlement

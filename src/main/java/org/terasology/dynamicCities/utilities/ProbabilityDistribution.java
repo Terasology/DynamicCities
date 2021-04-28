@@ -18,8 +18,8 @@ package org.terasology.dynamicCities.utilities;
 import com.google.common.collect.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.engine.utilities.random.MersenneRandom;
 import org.terasology.math.TeraMath;
-import org.terasology.utilities.random.MersenneRandom;
 
 import java.util.HashMap;
 import java.util.Map;

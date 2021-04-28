@@ -21,12 +21,12 @@ import org.terasology.biomesAPI.BiomeRegistry;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.resource.Resource;
 import org.terasology.dynamicCities.resource.ResourceType;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.world.block.Block;
-import org.terasology.world.block.BlockManager;
-import org.terasology.world.chunks.CoreChunk;
-import org.terasology.world.generation.Region;
-import org.terasology.world.generation.WorldRasterizer;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.world.block.Block;
+import org.terasology.engine.world.block.BlockManager;
+import org.terasology.engine.world.chunks.Chunk;
+import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.WorldRasterizer;
 
 /**
  */
@@ -67,10 +67,10 @@ public abstract class CompatibleRasterizer implements WorldRasterizer {
     }
 
     @Override
-    public void generateChunk(CoreChunk chunk, Region chunkRegion) {
+    public void generateChunk(Chunk chunk, Region chunkRegion) {
     }
 
-    public void setBlock(CoreChunk chunk, Block block, Vector3ic pos, ResourceFacet resourceFacet) {
+    public void setBlock(Chunk chunk, Block block, Vector3ic pos, ResourceFacet resourceFacet) {
         chunk.setBlock(pos, block);
         Resource resource = getResourceType(block);
         if (resource.getType() != ResourceType.NULL) {

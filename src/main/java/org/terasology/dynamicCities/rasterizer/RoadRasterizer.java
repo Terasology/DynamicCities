@@ -23,7 +23,7 @@ import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.raster.RasterTarget;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.dynamicCities.roads.RoadSegment;
-import org.terasology.world.block.BlockRegion;
+import org.terasology.engine.world.block.BlockRegion;
 
 /**
  * A default implementation of a rasterizer for roads. Creates simple dirt roads.

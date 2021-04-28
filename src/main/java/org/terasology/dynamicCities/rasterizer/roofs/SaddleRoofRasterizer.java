@@ -25,7 +25,7 @@ import org.terasology.cities.raster.RasterTarget;
 import org.terasology.cities.raster.RasterUtil;
 import org.terasology.commonworld.heightmap.HeightMap;
 import org.terasology.commonworld.heightmap.HeightMaps;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.world.block.BlockAreac;
 
 import static org.terasology.commonworld.Orientation.EAST;
 import static org.terasology.commonworld.Orientation.WEST;

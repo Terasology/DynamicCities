@@ -17,7 +17,7 @@ package org.terasology.dynamicCities.buildings.components;
 
 
 import org.terasology.dynamicCities.parcels.DynParcel;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 public final class DynParcelRefComponent implements Component {
 

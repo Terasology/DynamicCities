@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.region.components;
 
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 public class ActiveRegionComponent implements Component {
 

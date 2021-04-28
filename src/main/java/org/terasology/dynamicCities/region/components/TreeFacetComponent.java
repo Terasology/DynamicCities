@@ -20,15 +20,14 @@ import org.joml.RoundingMode;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.dynamicCities.world.trees.RecursiveTreeGeneratorLSystem;
 import org.terasology.dynamicCities.world.trees.TreeFacet;
 import org.terasology.dynamicCities.world.trees.TreeGenerator;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorCactus;
 import org.terasology.dynamicCities.world.trees.TreeGeneratorLSystem;
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.reflection.MappedContainer;
-import org.terasology.world.block.BlockRegion;
 
 import java.util.Map;
 

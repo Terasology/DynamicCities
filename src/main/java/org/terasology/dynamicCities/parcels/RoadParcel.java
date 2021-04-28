@@ -18,8 +18,8 @@ package org.terasology.dynamicCities.parcels;
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.commonworld.Orientation;
 import org.terasology.dynamicCities.roads.RoadSegment;
-import org.terasology.world.block.BlockArea;
-import org.terasology.world.block.BlockAreac;
+import org.terasology.engine.world.block.BlockArea;
+import org.terasology.engine.world.block.BlockAreac;
 
 import java.util.HashSet;
 import java.util.Set;
