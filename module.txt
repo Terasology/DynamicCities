@@ -1,6 +1,6 @@
 {
     "id": "DynamicCities",
-    "version": "1.0.0",
+    "version": "1.1.0-SNAPSHOT",
     "author": "Cpt Crunchy",
     "displayName": "Dynamic Cities",
     "description": "Simulates complex city development over progressing game time based on the worlds resources. Needs a city culture to actually create cities.",
