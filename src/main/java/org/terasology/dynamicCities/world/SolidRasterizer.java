@@ -16,6 +16,7 @@
 package org.terasology.dynamicCities.world;
 
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.biomesAPI.Biome;
 import org.terasology.core.world.CoreBiome;
@@ -45,6 +46,7 @@ public class SolidRasterizer extends CompatibleRasterizer {
         int seaLevel = seaLevelFacet.getSeaLevel();
 
         Vector2i pos2d = new Vector2i();
+        Vector3i worldPos = new Vector3i();
         for (Vector3ic pos : Chunks.CHUNK_REGION) {
             pos2d.set(pos.x(), pos.z());
             Biome biome = biomeFacet.get(pos2d);
@@ -52,11 +54,12 @@ public class SolidRasterizer extends CompatibleRasterizer {
 
             int posY = pos.y() + chunk.getChunkWorldOffsetY();
             float density = solidityFacet.get(pos);
+            chunk.chunkToWorldPosition(pos,  worldPos);
 
             if (surfaceFacet.get(pos)) {
-                setBlock(chunk, biome.getSurfaceBlock(pos, seaLevel), pos, resourceFacet);
+                setBlock(chunk, biome.getSurfaceBlock(worldPos, seaLevel), pos, resourceFacet);
             } else if (density > 0) {
-                setBlock(chunk, biome.getBelowSurfaceBlock(pos, density), pos, resourceFacet);
+                setBlock(chunk, biome.getBelowSurfaceBlock(worldPos, density), pos, resourceFacet);
             } else if (posY == seaLevel && CoreBiome.SNOW == biome) {
                 setBlock(chunk, ice, pos, resourceFacet);
             } else if (posY <= seaLevel) {         // either OCEAN or SNOW
