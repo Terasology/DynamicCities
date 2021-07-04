@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.construction;
 
+import org.joml.Vector3fc;
 import org.joml.Vector3i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.block.BlockRegion;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,11 +62,13 @@ public class BlockBufferSystem extends BaseComponentSystem {
             blockBufferEntity.setAlwaysRelevant(true);
         }
         blockBufferComponent = blockBufferEntity.getComponent(BlockBufferComponent.class);
+        // If the entity does not exist we create it with a `BlockBufferComponent`, but we don't create the component if the entity already
+        // exists but does not have that component - why is that? And should we change that?
         if (blockBufferComponent.blockBuffer != null) {
             blockBufferComponent.blockBuffer.forEach(b -> buffer.put(b.pos, b.blockType));
         }
 
-        // This results in a null delayManager if the system is not marked as Authority (non-host client timing issue?)
+        // This results in a null delayManager if the system is not marked as Authority as the DelayManager is an authority-only system.
         delayManager.addPeriodicAction(blockBufferEntity, PLACE_BLOCKS_ACTION_ID, 1000, 1000);
     }
 
@@ -85,26 +87,38 @@ public class BlockBufferSystem extends BaseComponentSystem {
         }
     }
 
+    /**
+     * Dequeue blocks from the internal buffer and set them in the world.
+     * <p>
+     * The blocks to set are taken at random from the buffer. Only blocks at {@link WorldProvider#isBlockRelevant(Vector3fc) relevant
+     * positions} are considered for placement.
+     *
+     * @param maxBlocksToSet the upper limit of blocks that should be set at once.
+     */
     public void setBlocks(int maxBlocksToSet) {
-        Map<Vector3i, Block> blocksToPlace = new HashMap<>();
         int oldBufferSize = getBlockBufferSize();
 
-        Iterator<Map.Entry<Vector3i, Block>> iter = buffer.entrySet().iterator();
-        while (iter.hasNext() && blocksToPlace.size() < maxBlocksToSet) {
-            Map.Entry<Vector3i, Block> block = iter.next();
-            if (worldProvider.isBlockRelevant(block.getKey())) {
-                blocksToPlace.put(block.getKey(), block.getValue());
-                iter.remove();
-            }
-        }
+        //TODO: Can we do better on selecting which blocks to set next?
+        //      Similar to chunk generation, we may score this by some notion of relevance, e.g., the distance to active players, or we
+        //      could try to cluster blocks together such that buildings and other structures appear in a single step.
+        Map<Vector3i, Block> blocksToPlace = buffer.entrySet().stream()
+                .filter(block -> worldProvider.isBlockRelevant(block.getKey()))
+                .limit(maxBlocksToSet)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        blocksToPlace.forEach((pos, block) -> worldProvider.setBlock(pos, block));
+        blocksToPlace.forEach((pos, block) -> {
+            worldProvider.setBlock(pos, block);
+            buffer.remove(pos);
+        });
+
         if (logger.isDebugEnabled() && !blocksToPlace.isEmpty()) {
             logger.debug("Buffer before: {}, Placed: {}, Buffer after: {}", oldBufferSize, blocksToPlace.size(), getBlockBufferSize());
         }
     }
 
     public boolean isRegionProcessed(BlockRegion region) {
+        //FIXME: why do we check whether the block buffer component is empty, but compare the internal buffer (potentially newer that the
+        //       component against the region?
         if (!blockBufferComponent.blockBuffer.isEmpty()) {
             for (Vector3i pos : buffer.keySet()) {
                 if (region.contains(pos)) {
