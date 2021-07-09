@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements.components;
 
@@ -13,13 +13,13 @@ import org.terasology.dynamicCities.districts.Kmeans;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
 import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
-import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.network.Replicate;
 import org.terasology.engine.utilities.procedural.WhiteNoise;
 import org.terasology.engine.world.block.BlockArea;
 import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.engine.world.generation.Border3D;
+import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.math.TeraMath;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DistrictFacetComponent implements Component {
+public class DistrictFacetComponent implements Component<DistrictFacetComponent> {
 
     /**
      * TODO: Count the area for each district. Define consumption of zonearea for each district (evenly distributed atm).
