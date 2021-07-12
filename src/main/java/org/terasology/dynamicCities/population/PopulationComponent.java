@@ -29,4 +29,11 @@ public class PopulationComponent implements Component<PopulationComponent> {
     }
 
 
+    @Override
+    public void copy(PopulationComponent other) {
+        this.populationSize = other.populationSize;
+        this.health = other.health;
+        this.capacity = other.capacity;
+        this.popResourceType = other.popResourceType;
+    }
 }

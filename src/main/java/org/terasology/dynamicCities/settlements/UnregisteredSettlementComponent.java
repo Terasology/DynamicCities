@@ -10,4 +10,9 @@ public class UnregisteredSettlementComponent implements Component<UnregisteredSe
     public UnregisteredSettlementComponent() {
 
     }
+
+    @Override
+    public void copy(UnregisteredSettlementComponent other) {
+
+    }
 }

@@ -3,6 +3,8 @@
 package org.terasology.dynamicCities.region.components;
 
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.joml.Vector2i;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.gestalt.entitysystem.component.Component;
@@ -16,28 +18,30 @@ import java.util.Map;
 @MappedContainer
 public class RegionEntitiesComponent implements Component<RegionEntitiesComponent> {
 
-    public Map<Vector2i, EntityRef> regionEntities;
+    public Map<Vector2i, EntityRef> regionEntities = new HashMap<>();
     public int gridSize;
     //This stores information about the loaded state of several regions packed into a cell
-    public Map<Vector2i, Integer> cellGrid;
-    public List<String> processed;
+    public Map<Vector2i, Integer> cellGrid = Maps.newHashMap();
+    public List<String> processed = Lists.newArrayList();
     public int cellSize;
 
     public RegionEntitiesComponent() {
-        regionEntities = new HashMap<>();
-        cellGrid = new HashMap<>();
-        processed = new ArrayList<>();
     }
 
     public RegionEntitiesComponent(int gridSize) {
-        regionEntities = new HashMap<>();
-        cellGrid = new HashMap<>();
-        processed = new ArrayList<>();
         this.gridSize = gridSize;
-        cellSize = gridSize * gridSize / (32 * 32);
+        this.cellSize = gridSize * gridSize / (32 * 32);
     }
 
 
+    @Override
+    public void copy(RegionEntitiesComponent other) {
+        this.regionEntities = Maps.newHashMap(other.regionEntities);
+        this.gridSize = other.gridSize;
+        this.cellGrid = Maps.newHashMap(other.cellGrid);
+        this.processed = Lists.newArrayList(other.processed);
+        this.cellSize = other.cellSize;
+    }
 }
 
 

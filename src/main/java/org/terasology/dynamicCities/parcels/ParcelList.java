@@ -3,6 +3,8 @@
 package org.terasology.dynamicCities.parcels;
 
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.engine.network.Replicate;
 import org.terasology.engine.world.block.BlockAreac;
@@ -17,21 +19,21 @@ import java.util.Map;
 @MappedContainer
 public class ParcelList implements Component<ParcelList> {
 
-    public Map<String, Integer> areaPerZone;
+    public Map<String, Integer> areaPerZone = new HashMap<>();
     //The area in which buildings can currently be placed
     public float cityRadius;
     //The distance of the currently farthest away building (from city center)
     @Replicate
     public float builtUpRadius;
 
-    public List<Parcel> parcels;
+    public List<Parcel> parcels = Lists.newArrayList();
 
-    public ParcelList() { }
+    public ParcelList() {
+    }
+
     public ParcelList(int i) {
         builtUpRadius = 0;
         cityRadius = 60;
-        parcels = new ArrayList<>();
-        areaPerZone = new HashMap<>();
     }
 
     public void addParcel(Parcel parcel) {
@@ -68,4 +70,11 @@ public class ParcelList implements Component<ParcelList> {
         return copy;
     }
 
+    @Override
+    public void copy(ParcelList other) {
+        this.areaPerZone = Maps.newHashMap(other.areaPerZone);
+        this.cityRadius = other.cityRadius;
+        this.builtUpRadius = other.builtUpRadius;
+        this.parcels = Lists.newArrayList(other.parcels);
+    }
 }

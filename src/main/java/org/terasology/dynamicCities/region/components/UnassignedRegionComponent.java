@@ -10,4 +10,9 @@ public class UnassignedRegionComponent implements Component<UnassignedRegionComp
     public UnassignedRegionComponent() {
 
     }
+
+    @Override
+    public void copy(UnassignedRegionComponent other) {
+
+    }
 }

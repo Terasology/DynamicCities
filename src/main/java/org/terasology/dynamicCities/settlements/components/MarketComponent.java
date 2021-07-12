@@ -23,4 +23,10 @@ public class MarketComponent implements Component<MarketComponent> {
     public long getMarketId() {
         return marketId;
     }
+
+    @Override
+    public void copy(MarketComponent other) {
+        this.market = other.market;
+        this.marketId = other.marketId;
+    }
 }

@@ -179,4 +179,13 @@ public final class TreeFacetComponent implements Component<TreeFacetComponent> {
     }
 
 
+    @Override
+    public void copy(TreeFacetComponent other) {
+        this.privateToOwner = other.privateToOwner;
+        this.relData.clear();
+        this.relData.putAll(other.relData);
+        this.relativeRegion.set(other.relativeRegion);
+        this.worldRegion.set(other.worldRegion);
+        this.center.set(other.center);
+    }
 }

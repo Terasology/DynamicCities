@@ -31,4 +31,10 @@ public class SettlementComponent implements Component<SettlementComponent> {
         return name + " (" + coords + ")";
     }
 
+    @Override
+    public void copy(SettlementComponent other) {
+        this.coords.set(other.coords);
+        this.population = other.population;
+        this.name = other.name;
+    }
 }

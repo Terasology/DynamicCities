@@ -63,4 +63,9 @@ public class SiteComponent implements Component<SiteComponent> {
     public String toString() {
         return "SiteComponent [" + coords + " (" + radius + ")]";
     }
+
+    @Override
+    public void copy(SiteComponent other) {
+
+    }
 }

@@ -10,4 +10,9 @@ public class ActiveRegionComponent implements Component<ActiveRegionComponent> {
     public ActiveRegionComponent() {
 
     }
+
+    @Override
+    public void copy(ActiveRegionComponent other) {
+
+    }
 }

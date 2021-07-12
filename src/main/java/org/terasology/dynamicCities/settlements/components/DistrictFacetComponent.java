@@ -3,6 +3,8 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,15 +51,15 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
     @Replicate
     public Vector2i center = new Vector2i();
     @Replicate
-    public List<Integer> districtMap;
+    public List<Integer> districtMap = Lists.newArrayList();
     @Replicate
-    public List<Integer> districtSize;
+    public List<Integer> districtSize = Lists.newArrayList();
     @Replicate
-    public Map<String, DistrictType> districtTypeMap;
+    public Map<String, DistrictType> districtTypeMap = Maps.newHashMap();
     @Replicate
     public int districtCount;
     @Replicate
-    public List<Vector2i> districtCenters;
+    public List<Vector2i> districtCenters = Lists.newArrayList();
 
     public DistrictFacetComponent() { }
 
@@ -91,10 +94,7 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
                 * SettlementConstants.MAX_DISTRICTS));*/
         districtCount = SettlementConstants.MAX_DISTRICTS;
         int[] intMap = kmeans.kmeans(data, districtCount);
-        districtMap = new ArrayList<>();
         districtMap = IntStream.of(intMap).boxed().collect(Collectors.toList());
-        districtTypeMap = new HashMap<>(districtMap.size());
-        districtCenters = new ArrayList<>();
         for (Vector2i districtCenter : kmeans.getCenters()) {
             districtCenters.add(districtCenter.mul(gridSize).add(new Vector2i(worldRegion.minX(), worldRegion.minY())));
         }
@@ -280,4 +280,23 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
         return getWorld(pos.x(), pos.y());
     }
 
+    @Override
+    public void copy(DistrictFacetComponent other) {
+        this.relativeRegion = new BlockArea(other.relativeRegion);
+        this.worldRegion = new BlockArea(other.worldRegion);
+        this.gridWorldRegion = new BlockArea(other.gridWorldRegion);
+        this.gridRelativeRegion.set(other.gridRelativeRegion);
+        this.gridSize = other.gridSize;
+        this.center = other.center;
+        this.districtMap = Lists.newArrayList(other.districtMap);
+        this.districtSize = Lists.newArrayList(other.districtSize);
+        this.districtTypeMap = Maps.newHashMap(other.districtTypeMap);
+        this.districtCount = other.districtCount;
+        this.districtCenters = Lists.newArrayList(other.districtCenters).stream().map(new Function<Vector2i, Vector2i>() {
+            @Override
+            public Vector2i apply(Vector2i res) {
+                return new Vector2i(res);
+            }
+        }).collect(Collectors.toList());
+    }
 }

@@ -3,6 +3,7 @@
 package org.terasology.dynamicCities.buildings;
 
 
+import com.google.common.collect.Sets;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.gestalt.entitysystem.component.Component;
@@ -13,11 +14,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class BuildingQueue implements Component<BuildingQueue> {
-    public Set<DynParcel> buildingQueue;
+    public Set<DynParcel> buildingQueue = new HashSet<>();
 
 
     public BuildingQueue() {
-        buildingQueue = new HashSet<>();
+
     }
 
     public Collection<DynParcel> getParcels() {
@@ -35,5 +36,10 @@ public class BuildingQueue implements Component<BuildingQueue> {
             }
         }
         return true;
+    }
+
+    @Override
+    public void copy(BuildingQueue other) {
+        this.buildingQueue = Sets.newHashSet(other.buildingQueue);
     }
 }

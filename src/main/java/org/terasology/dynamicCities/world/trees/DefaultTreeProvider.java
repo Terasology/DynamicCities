@@ -127,5 +127,10 @@ public class DefaultTreeProvider extends SurfaceObjectProvider<Biome, TreeGenera
     public static class Configuration implements Component<Configuration> {
         @Range(min = 0, max = 1.0f, increment = 0.05f, precision = 2, description = "Define the overall tree density")
         public float density = 0.2f;
+
+        @Override
+        public void copy(Configuration other) {
+            this.density = other.density;
+        }
     }
 }

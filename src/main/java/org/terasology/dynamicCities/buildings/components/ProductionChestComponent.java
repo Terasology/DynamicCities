@@ -3,6 +3,7 @@
 package org.terasology.dynamicCities.buildings.components;
 
 
+import com.google.common.collect.Lists;
 import org.joml.Vector3i;
 import org.terasology.gestalt.entitysystem.component.Component;
 
@@ -12,5 +13,10 @@ public class ProductionChestComponent implements Component<ProductionChestCompon
     /**
      * Position of the chest of which resources should be stored in
      */
-    public List<Vector3i> positions;
+    public List<Vector3i> positions = Lists.newArrayList();
+
+    @Override
+    public void copy(ProductionChestComponent other) {
+        this.positions = Lists.newArrayList(other.positions);
+    }
 }

@@ -10,4 +10,9 @@ public class IncompleteSettlementComponent implements Component<IncompleteSettle
     public IncompleteSettlementComponent() {
 
     }
+
+    @Override
+    public void copy(IncompleteSettlementComponent other) {
+
+    }
 }

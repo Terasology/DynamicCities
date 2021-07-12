@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.roads;
 
+import com.google.common.collect.Sets;
 import org.terasology.cities.parcels.Parcel;
 import org.terasology.dynamicCities.parcels.RoadParcel;
 import org.terasology.engine.world.block.BlockAreac;
@@ -16,10 +17,9 @@ import java.util.Set;
  * Holds all parcels that are yet to be completed.
  */
 public class RoadQueue implements Component<RoadQueue> {
-    public Set<RoadParcel> roadQueue;
+    public Set<RoadParcel> roadQueue = new HashSet<>();
 
     public RoadQueue() {
-        roadQueue = new HashSet<>();
     }
 
     public Collection<RoadParcel> getParcels() {
@@ -39,5 +39,10 @@ public class RoadQueue implements Component<RoadQueue> {
             }
         }
         return true;
+    }
+
+    @Override
+    public void copy(RoadQueue other) {
+        this.roadQueue = Sets.newHashSet(other.roadQueue);
     }
 }

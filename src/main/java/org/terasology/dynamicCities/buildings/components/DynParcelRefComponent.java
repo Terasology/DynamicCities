@@ -16,4 +16,9 @@ public final class DynParcelRefComponent implements Component<DynParcelRefCompon
     public DynParcelRefComponent() {
 
     }
+
+    @Override
+    public void copy(DynParcelRefComponent other) {
+        this.dynParcel = other.dynParcel;
+    }
 }

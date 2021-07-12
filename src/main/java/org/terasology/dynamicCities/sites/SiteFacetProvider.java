@@ -90,5 +90,13 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
         // Spawn is assumed to be at (0, 0, 0) for this setting.
         @Range(label = "Minimum distance from spawn", min = 0, max = 1000, increment = 10, precision = 1)
         private int minSpawnGap = 200;
+
+        @Override
+        public void copy(SiteConfiguration other) {
+            this.minRadius = other.minRadius;
+            this.maxPopulation = other.maxPopulation;
+            this.minDistance = other.minDistance;
+            this.minSpawnGap = other.minSpawnGap;
+        }
     }
 }

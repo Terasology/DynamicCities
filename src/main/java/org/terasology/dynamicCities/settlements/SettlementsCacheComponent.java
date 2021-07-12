@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -15,10 +17,10 @@ import java.util.Map;
 
 public final class SettlementsCacheComponent implements Component<SettlementsCacheComponent> {
     @Replicate
-    public Map<Vector2i, EntityRef> settlementEntities;
+    public Map<Vector2i, EntityRef> settlementEntities = Maps.newHashMap();
 
     @Replicate
-    public List<EntityRef> networkCache;
+    public List<EntityRef> networkCache = Lists.newArrayList();
 
     public SettlementsCacheComponent() { }
 
@@ -30,5 +32,11 @@ public final class SettlementsCacheComponent implements Component<SettlementsCac
 
     public EntityRef get(Vector2i position) {
         return settlementEntities.get(position);
+    }
+
+    @Override
+    public void copy(SettlementsCacheComponent other) {
+        this.settlementEntities = Maps.newHashMap(other.settlementEntities);
+        this.networkCache = Lists.newArrayList(other.networkCache);
     }
 }

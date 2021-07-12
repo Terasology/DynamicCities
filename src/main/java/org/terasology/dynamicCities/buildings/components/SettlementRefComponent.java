@@ -18,4 +18,9 @@ public final class SettlementRefComponent implements Component<SettlementRefComp
     public SettlementRefComponent(EntityRef settlement) {
         this.settlement = settlement;
     }
+
+    @Override
+    public void copy(SettlementRefComponent other) {
+        this.settlement = other.settlement;
+    }
 }

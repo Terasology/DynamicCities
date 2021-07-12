@@ -199,4 +199,13 @@ public final class ResourceFacetComponent implements Component<ResourceFacetComp
         data.addAll(newData);
     }
 
+    @Override
+    public void copy(ResourceFacetComponent other) {
+        this.relativeRegion.set(other.relativeRegion);
+        this.worldRegion.set(other.worldRegion);
+        this.gridWorldRegion.set(other.gridWorldRegion);
+        this.gridRelativeRegion.set(other.gridRelativeRegion);
+        this.gridSize = other.gridSize;
+        this.center.set(other.center);
+    }
 }

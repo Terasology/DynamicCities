@@ -10,4 +10,9 @@ public class UnregisteredRegionComponent implements Component<UnregisteredRegion
     public UnregisteredRegionComponent() {
 
     }
+
+    @Override
+    public void copy(UnregisteredRegionComponent other) {
+
+    }
 }

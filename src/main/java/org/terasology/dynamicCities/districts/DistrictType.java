@@ -3,6 +3,7 @@
 package org.terasology.dynamicCities.districts;
 
 
+import com.google.common.collect.Lists;
 import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.nui.Color;
@@ -17,7 +18,7 @@ public class DistrictType implements Component<DistrictType> {
 
     public String name;
     public int color;
-    public List<String> zones;
+    public List<String> zones = Lists.newArrayList();
 
     public DistrictType ( ) { }
 
@@ -34,4 +35,10 @@ public class DistrictType implements Component<DistrictType> {
         return new Color(color);
     }
 
+    @Override
+    public void copy(DistrictType other) {
+        this.name = other.name;
+        this.color = other.color;
+        this.zones = Lists.newArrayList(other.zones);
+    }
 }

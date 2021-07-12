@@ -10,4 +10,9 @@ public class ActiveSettlementComponent implements Component<ActiveSettlementComp
     public ActiveSettlementComponent() {
 
     }
+
+    @Override
+    public void copy(ActiveSettlementComponent other) {
+
+    }
 }
