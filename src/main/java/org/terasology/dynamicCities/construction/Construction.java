@@ -145,7 +145,6 @@ public class Construction extends BaseComponentSystem {
     private BlockTheme roadTheme;
 
     private Block air;
-    private Block plant;
     private Block water;
     private Block defaultBlock;
     private int maxMinDeviation = 40;
@@ -206,7 +205,6 @@ public class Construction extends BaseComponentSystem {
         blockManager = CoreRegistry.get(BlockManager.class);
         air = blockManager.getBlock("engine:air");
         water = blockManager.getBlock("CoreAssets:Water");
-        plant = blockManager.getBlock("CoreAssets:plant");
         defaultBlock = blockManager.getBlock("CoreAssets:Dirt");
 
         stdRasterizers.add(new HollowBuildingPartRasterizer(cityTheme, worldProvider));
