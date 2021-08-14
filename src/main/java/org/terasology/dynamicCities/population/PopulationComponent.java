@@ -30,7 +30,7 @@ public class PopulationComponent implements Component<PopulationComponent> {
 
 
     @Override
-    public void copy(PopulationComponent other) {
+    public void copyFrom(PopulationComponent other) {
         this.populationSize = other.populationSize;
         this.health = other.health;
         this.capacity = other.capacity;

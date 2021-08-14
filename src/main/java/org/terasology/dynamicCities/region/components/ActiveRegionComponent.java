@@ -12,7 +12,7 @@ public class ActiveRegionComponent implements Component<ActiveRegionComponent> {
     }
 
     @Override
-    public void copy(ActiveRegionComponent other) {
+    public void copyFrom(ActiveRegionComponent other) {
 
     }
 }

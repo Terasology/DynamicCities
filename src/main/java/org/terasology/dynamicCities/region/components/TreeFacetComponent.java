@@ -180,7 +180,7 @@ public final class TreeFacetComponent implements Component<TreeFacetComponent> {
 
 
     @Override
-    public void copy(TreeFacetComponent other) {
+    public void copyFrom(TreeFacetComponent other) {
         this.privateToOwner = other.privateToOwner;
         this.relData.clear();
         this.relData.putAll(other.relData);

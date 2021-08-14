@@ -26,7 +26,7 @@ public class GenericBuildingComponent implements Component<GenericBuildingCompon
     public String resourceUrn;
 
     @Override
-    public void copy(GenericBuildingComponent other) {
+    public void copyFrom(GenericBuildingComponent other) {
         this.name = other.name;
         this.templateNames = Lists.newArrayList(other.templateNames);
         this.generatorNames = Lists.newArrayList(other.generatorNames);

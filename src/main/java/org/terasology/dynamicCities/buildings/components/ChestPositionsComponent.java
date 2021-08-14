@@ -17,7 +17,7 @@ public class ChestPositionsComponent implements Component<ChestPositionsComponen
     public List<Vector3i> positions = Lists.newArrayList();
 
     @Override
-    public void copy(ChestPositionsComponent other) {
+    public void copyFrom(ChestPositionsComponent other) {
         this.positions = Lists.newArrayList(other.positions);
     }
 }

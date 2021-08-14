@@ -12,7 +12,7 @@ public class UnassignedRegionComponent implements Component<UnassignedRegionComp
     }
 
     @Override
-    public void copy(UnassignedRegionComponent other) {
+    public void copyFrom(UnassignedRegionComponent other) {
 
     }
 }

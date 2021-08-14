@@ -21,7 +21,7 @@ public class RegionMainStoreComponent implements Component<RegionMainStoreCompon
 
 
     @Override
-    public void copy(RegionMainStoreComponent other) {
+    public void copyFrom(RegionMainStoreComponent other) {
         this.gridSize = other.gridSize;
         this.cellSize = other.cellSize;
     }

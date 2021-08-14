@@ -10,7 +10,6 @@ import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class RegionEntitiesComponent implements Component<RegionEntitiesComponen
 
 
     @Override
-    public void copy(RegionEntitiesComponent other) {
+    public void copyFrom(RegionEntitiesComponent other) {
         this.regionEntities = Maps.newHashMap(other.regionEntities);
         this.gridSize = other.gridSize;
         this.cellGrid = Maps.newHashMap(other.cellGrid);

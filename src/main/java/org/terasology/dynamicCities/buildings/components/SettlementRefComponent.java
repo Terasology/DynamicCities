@@ -20,7 +20,7 @@ public final class SettlementRefComponent implements Component<SettlementRefComp
     }
 
     @Override
-    public void copy(SettlementRefComponent other) {
+    public void copyFrom(SettlementRefComponent other) {
         this.settlement = other.settlement;
     }
 }

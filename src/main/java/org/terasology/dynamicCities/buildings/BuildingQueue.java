@@ -39,7 +39,7 @@ public class BuildingQueue implements Component<BuildingQueue> {
     }
 
     @Override
-    public void copy(BuildingQueue other) {
+    public void copyFrom(BuildingQueue other) {
         this.buildingQueue = Sets.newHashSet(other.buildingQueue);
     }
 }

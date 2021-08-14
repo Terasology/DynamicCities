@@ -36,7 +36,7 @@ public class DistrictType implements Component<DistrictType> {
     }
 
     @Override
-    public void copy(DistrictType other) {
+    public void copyFrom(DistrictType other) {
         this.name = other.name;
         this.color = other.color;
         this.zones = Lists.newArrayList(other.zones);

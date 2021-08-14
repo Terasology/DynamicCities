@@ -15,7 +15,7 @@ public class TownNameComponent implements Component<TownNameComponent> {
     public List<String> nameList = Lists.newArrayList();
 
     @Override
-    public void copy(TownNameComponent other) {
+    public void copyFrom(TownNameComponent other) {
         this.themeName = other.themeName;
         this.prefixes = Lists.newArrayList(other.prefixes);
         this.postfixes = Lists.newArrayList(other.postfixes);

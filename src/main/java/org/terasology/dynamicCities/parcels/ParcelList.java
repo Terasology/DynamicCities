@@ -11,7 +11,6 @@ import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +70,7 @@ public class ParcelList implements Component<ParcelList> {
     }
 
     @Override
-    public void copy(ParcelList other) {
+    public void copyFrom(ParcelList other) {
         this.areaPerZone = Maps.newHashMap(other.areaPerZone);
         this.cityRadius = other.cityRadius;
         this.builtUpRadius = other.builtUpRadius;

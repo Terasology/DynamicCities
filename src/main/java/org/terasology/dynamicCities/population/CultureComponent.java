@@ -50,7 +50,7 @@ public class CultureComponent implements Component<CultureComponent> {
     }
 
     @Override
-    public void copy(CultureComponent other) {
+    public void copyFrom(CultureComponent other) {
         this.buildingNeedPerZone = Maps.newHashMap(other.buildingNeedPerZone);
         this.name = other.name;
         this.availableBuildings = Lists.newArrayList(other.availableBuildings);

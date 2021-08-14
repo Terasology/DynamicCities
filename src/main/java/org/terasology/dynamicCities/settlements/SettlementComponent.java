@@ -32,7 +32,7 @@ public class SettlementComponent implements Component<SettlementComponent> {
     }
 
     @Override
-    public void copy(SettlementComponent other) {
+    public void copyFrom(SettlementComponent other) {
         this.coords.set(other.coords);
         this.population = other.population;
         this.name = other.name;

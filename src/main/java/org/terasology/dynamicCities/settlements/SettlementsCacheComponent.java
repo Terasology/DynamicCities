@@ -35,7 +35,7 @@ public final class SettlementsCacheComponent implements Component<SettlementsCac
     }
 
     @Override
-    public void copy(SettlementsCacheComponent other) {
+    public void copyFrom(SettlementsCacheComponent other) {
         this.settlementEntities = Maps.newHashMap(other.settlementEntities);
         this.networkCache = Lists.newArrayList(other.networkCache);
     }

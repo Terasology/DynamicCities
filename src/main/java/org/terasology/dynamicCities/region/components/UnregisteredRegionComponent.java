@@ -12,7 +12,7 @@ public class UnregisteredRegionComponent implements Component<UnregisteredRegion
     }
 
     @Override
-    public void copy(UnregisteredRegionComponent other) {
+    public void copyFrom(UnregisteredRegionComponent other) {
 
     }
 }

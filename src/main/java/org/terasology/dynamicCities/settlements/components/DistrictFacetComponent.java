@@ -281,7 +281,7 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
     }
 
     @Override
-    public void copy(DistrictFacetComponent other) {
+    public void copyFrom(DistrictFacetComponent other) {
         this.relativeRegion = new BlockArea(other.relativeRegion);
         this.worldRegion = new BlockArea(other.worldRegion);
         this.gridWorldRegion = new BlockArea(other.gridWorldRegion);

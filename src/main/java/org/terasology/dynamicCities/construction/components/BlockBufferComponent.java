@@ -16,7 +16,7 @@ public final class BlockBufferComponent implements Component<BlockBufferComponen
     }
 
     @Override
-    public void copy(BlockBufferComponent other) {
+    public void copyFrom(BlockBufferComponent other) {
         this.blockBuffer = Lists.newArrayList(other.blockBuffer);
     }
 }

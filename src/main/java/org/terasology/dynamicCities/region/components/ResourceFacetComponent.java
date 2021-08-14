@@ -200,7 +200,7 @@ public final class ResourceFacetComponent implements Component<ResourceFacetComp
     }
 
     @Override
-    public void copy(ResourceFacetComponent other) {
+    public void copyFrom(ResourceFacetComponent other) {
         this.relativeRegion.set(other.relativeRegion);
         this.worldRegion.set(other.worldRegion);
         this.gridWorldRegion.set(other.gridWorldRegion);

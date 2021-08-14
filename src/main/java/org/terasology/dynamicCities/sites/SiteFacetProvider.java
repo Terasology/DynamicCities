@@ -92,7 +92,7 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
         private int minSpawnGap = 200;
 
         @Override
-        public void copy(SiteConfiguration other) {
+        public void copyFrom(SiteConfiguration other) {
             this.minRadius = other.minRadius;
             this.maxPopulation = other.maxPopulation;
             this.minDistance = other.minDistance;

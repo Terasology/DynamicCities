@@ -179,7 +179,7 @@ public final class RoughnessFacetComponent implements Component<RoughnessFacetCo
     }
 
     @Override
-    public void copy(RoughnessFacetComponent other) {
+    public void copyFrom(RoughnessFacetComponent other) {
         this.relativeRegion.set(other.relativeRegion);
         this.worldRegion.set(other.worldRegion);
         this.gridWorldRegion.set(other.gridWorldRegion);

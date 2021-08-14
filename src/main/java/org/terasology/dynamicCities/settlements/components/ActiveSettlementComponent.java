@@ -12,7 +12,7 @@ public class ActiveSettlementComponent implements Component<ActiveSettlementComp
     }
 
     @Override
-    public void copy(ActiveSettlementComponent other) {
+    public void copyFrom(ActiveSettlementComponent other) {
 
     }
 }

@@ -65,7 +65,7 @@ public class SiteComponent implements Component<SiteComponent> {
     }
 
     @Override
-    public void copy(SiteComponent other) {
+    public void copyFrom(SiteComponent other) {
 
     }
 }

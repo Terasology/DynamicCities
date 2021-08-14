@@ -25,7 +25,7 @@ public class MarketComponent implements Component<MarketComponent> {
     }
 
     @Override
-    public void copy(MarketComponent other) {
+    public void copyFrom(MarketComponent other) {
         this.market = other.market;
         this.marketId = other.marketId;
     }

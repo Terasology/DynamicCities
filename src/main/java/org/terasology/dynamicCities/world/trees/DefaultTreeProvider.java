@@ -129,7 +129,7 @@ public class DefaultTreeProvider extends SurfaceObjectProvider<Biome, TreeGenera
         public float density = 0.2f;
 
         @Override
-        public void copy(Configuration other) {
+        public void copyFrom(Configuration other) {
             this.density = other.density;
         }
     }

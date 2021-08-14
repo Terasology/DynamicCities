@@ -12,7 +12,7 @@ public class IncompleteSettlementComponent implements Component<IncompleteSettle
     }
 
     @Override
-    public void copy(IncompleteSettlementComponent other) {
+    public void copyFrom(IncompleteSettlementComponent other) {
 
     }
 }

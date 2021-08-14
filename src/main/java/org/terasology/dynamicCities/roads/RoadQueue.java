@@ -42,7 +42,7 @@ public class RoadQueue implements Component<RoadQueue> {
     }
 
     @Override
-    public void copy(RoadQueue other) {
+    public void copyFrom(RoadQueue other) {
         this.roadQueue = Sets.newHashSet(other.roadQueue);
     }
 }

@@ -12,7 +12,7 @@ public class UnregisteredSettlementComponent implements Component<UnregisteredSe
     }
 
     @Override
-    public void copy(UnregisteredSettlementComponent other) {
+    public void copyFrom(UnregisteredSettlementComponent other) {
 
     }
 }
