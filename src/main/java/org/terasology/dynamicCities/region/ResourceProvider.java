@@ -29,7 +29,7 @@ public class ResourceProvider implements ScalableFacetProvider {
     @Override
     public void process(GeneratingRegion region, float scale) {
         Border3D border = region.getBorderForFacet(RoughnessFacet.class);
-        ResourceFacet facet = new ResourceFacet(region.getRegion(), border, TeraMath.ceilToInt(gridSize / scale));
+        ResourceFacet facet = new ResourceFacet(region.getRegion(), border, gridSize);
 
         region.setRegionFacet(ResourceFacet.class, facet);
     }
