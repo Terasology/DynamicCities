@@ -23,21 +23,28 @@ import org.terasology.core.world.CoreBiome;
 import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
-import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.ScalableWorldRasterizer;
 import org.terasology.engine.world.generation.facets.DensityFacet;
 import org.terasology.engine.world.generation.facets.SeaLevelFacet;
 import org.terasology.engine.world.generation.facets.SurfacesFacet;
 
 /**
  */
-public class SolidRasterizer extends CompatibleRasterizer {
+public class SolidRasterizer extends CompatibleRasterizer implements ScalableWorldRasterizer {
 
-
+    /**
+     * This override is required since the one in {@link CompatibleRasterizer} overrides the one in {@link ScalableWorldRasterizer}.
+     */
     @Override
     public void generateChunk(Chunk chunk, Region chunkRegion) {
+        generateChunk(chunk, chunkRegion, 1);
+    }
+
+    @Override
+    public void generateChunk(Chunk chunk, Region chunkRegion, float scale) {
         DensityFacet solidityFacet = chunkRegion.getFacet(DensityFacet.class);
         SurfacesFacet surfaceFacet = chunkRegion.getFacet(SurfacesFacet.class);
         BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
@@ -52,7 +59,7 @@ public class SolidRasterizer extends CompatibleRasterizer {
             Biome biome = biomeFacet.get(pos2d);
             biomeRegistry.setBiome(biome, chunk, pos.x(), pos.y(), pos.z());
 
-            int posY = pos.y() + chunk.getChunkWorldOffsetY();
+            float posY = (pos.y() + chunk.getChunkWorldOffsetY()) * scale;
             float density = solidityFacet.get(pos);
             chunk.chunkToWorldPosition(pos,  worldPos);
 
