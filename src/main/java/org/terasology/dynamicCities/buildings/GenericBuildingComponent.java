@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.buildings;
 
 
@@ -21,6 +8,11 @@ import org.terasology.engine.entitySystem.Component;
 
 import java.util.List;
 
+/**
+ * Describes a single building that can be constructed from structure templates or building generators.
+ *
+ * All referenced templates or generators contribute to the same composite building.
+ */
 public class GenericBuildingComponent implements Component {
 
     /**
@@ -28,7 +20,19 @@ public class GenericBuildingComponent implements Component {
      *  or a structured template
      */
     public String name;
+
+    /**
+     * Multiple templates are interpreted as parts of a composite building, and will all be applied in the order they are defined.
+     *
+     * Templates will be applied AFTER {@link #generatorNames}.
+     */
     public List<String> templateNames;
+
+    /**
+     * Multiple generators are interpreted as parts of a composite building, and will all be applied in the order they are defined.
+     *
+     * Generators will be applied BEFORE {@link #templateNames}.
+     */
     public List<String> generatorNames;
     public String zone;
     public Vector2i minSize;
