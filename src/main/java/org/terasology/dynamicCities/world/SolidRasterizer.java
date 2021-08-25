@@ -16,27 +16,35 @@
 package org.terasology.dynamicCities.world;
 
 import org.joml.Vector2i;
+import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.terasology.biomesAPI.Biome;
 import org.terasology.core.world.CoreBiome;
 import org.terasology.core.world.generator.facets.BiomeFacet;
 import org.terasology.dynamicCities.facets.ResourceFacet;
 import org.terasology.dynamicCities.rasterizer.CompatibleRasterizer;
-import org.terasology.engine.world.block.Block;
 import org.terasology.engine.world.chunks.Chunk;
 import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.engine.world.generation.Region;
+import org.terasology.engine.world.generation.ScalableWorldRasterizer;
 import org.terasology.engine.world.generation.facets.DensityFacet;
 import org.terasology.engine.world.generation.facets.SeaLevelFacet;
 import org.terasology.engine.world.generation.facets.SurfacesFacet;
 
 /**
  */
-public class SolidRasterizer extends CompatibleRasterizer {
+public class SolidRasterizer extends CompatibleRasterizer implements ScalableWorldRasterizer {
 
-
+    /**
+     * This override is required since the one in {@link CompatibleRasterizer} overrides the one in {@link ScalableWorldRasterizer}.
+     */
     @Override
     public void generateChunk(Chunk chunk, Region chunkRegion) {
+        generateChunk(chunk, chunkRegion, 1);
+    }
+
+    @Override
+    public void generateChunk(Chunk chunk, Region chunkRegion, float scale) {
         DensityFacet solidityFacet = chunkRegion.getFacet(DensityFacet.class);
         SurfacesFacet surfaceFacet = chunkRegion.getFacet(SurfacesFacet.class);
         BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
@@ -45,77 +53,25 @@ public class SolidRasterizer extends CompatibleRasterizer {
         int seaLevel = seaLevelFacet.getSeaLevel();
 
         Vector2i pos2d = new Vector2i();
+        Vector3i worldPos = new Vector3i();
         for (Vector3ic pos : Chunks.CHUNK_REGION) {
             pos2d.set(pos.x(), pos.z());
             Biome biome = biomeFacet.get(pos2d);
             biomeRegistry.setBiome(biome, chunk, pos.x(), pos.y(), pos.z());
 
-            int posY = pos.y() + chunk.getChunkWorldOffsetY();
+            float posY = (pos.y() + chunk.getChunkWorldOffsetY()) * scale;
             float density = solidityFacet.get(pos);
+            chunk.chunkToWorldPosition(pos,  worldPos);
 
             if (surfaceFacet.get(pos)) {
-                setBlock(chunk, getSurfaceBlock(biome, posY - seaLevel), pos, resourceFacet);
+                setBlock(chunk, biome.getSurfaceBlock(worldPos, seaLevel), pos, resourceFacet);
             } else if (density > 0) {
-                setBlock(chunk, getBelowSurfaceBlock(density, biome), pos, resourceFacet);
+                setBlock(chunk, biome.getBelowSurfaceBlock(worldPos, density), pos, resourceFacet);
             } else if (posY == seaLevel && CoreBiome.SNOW == biome) {
                 setBlock(chunk, ice, pos, resourceFacet);
             } else if (posY <= seaLevel) {         // either OCEAN or SNOW
                 setBlock(chunk, water, pos, resourceFacet);
             }
-        }
-    }
-
-    private Block getSurfaceBlock(Biome type, int heightAboveSea) {
-        if (type instanceof CoreBiome) {
-            switch ((CoreBiome) type) {
-                case FOREST:
-                case PLAINS:
-                case MOUNTAINS:
-                    if (heightAboveSea > 96) {
-                        return snow;
-                    } else if (heightAboveSea > 0) {
-                        return grass;
-                    } else {
-                        return dirt;
-                    }
-                case SNOW:
-                    if (heightAboveSea > 0) {
-                        return snow;
-                    } else {
-                        return dirt;
-                    }
-                case DESERT:
-                case OCEAN:
-                case BEACH:
-                    return sand;
-            }
-        }
-        return dirt;
-    }
-
-    private Block getBelowSurfaceBlock(float density, Biome type) {
-        if (type instanceof CoreBiome) {
-            switch ((CoreBiome) type) {
-                case DESERT:
-                    if (density > 8) {
-                        return stone;
-                    } else {
-                        return sand;
-                    }
-                case BEACH:
-                    if (density > 2) {
-                        return stone;
-                    } else {
-                        return sand;
-                    }
-                case OCEAN:
-                    return stone;
-            }
-        }
-        if (density > 32) {
-            return stone;
-        } else {
-            return dirt;
         }
     }
 }

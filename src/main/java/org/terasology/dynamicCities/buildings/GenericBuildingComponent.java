@@ -9,6 +9,11 @@ import org.terasology.gestalt.entitysystem.component.Component;
 
 import java.util.List;
 
+/**
+ * Describes a single building that can be constructed from structure templates or building generators.
+ *
+ * All referenced templates or generators contribute to the same composite building.
+ */
 public class GenericBuildingComponent implements Component<GenericBuildingComponent> {
 
     /**
@@ -16,8 +21,20 @@ public class GenericBuildingComponent implements Component<GenericBuildingCompon
      *  or a structured template
      */
     public String name;
-    public List<String> templateNames = Lists.newArrayList();
-    public List<String> generatorNames = Lists.newArrayList();
+
+    /**
+     * Multiple templates are interpreted as parts of a composite building, and will all be applied in the order they are defined.
+     *
+     * Templates will be applied AFTER {@link #generatorNames}.
+     */
+    public List<String> templateNames;
+
+    /**
+     * Multiple generators are interpreted as parts of a composite building, and will all be applied in the order they are defined.
+     *
+     * Generators will be applied BEFORE {@link #templateNames}.
+     */
+    public List<String> generatorNames;
     public String zone;
     public Vector2i minSize = new Vector2i();
     public Vector2i maxSize = new Vector2i();
