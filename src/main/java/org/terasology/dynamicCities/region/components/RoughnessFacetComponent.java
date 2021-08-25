@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.region.components;
 
 import com.google.common.base.Preconditions;
@@ -20,15 +7,15 @@ import com.google.common.collect.Lists;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.terasology.dynamicCities.facets.RoughnessFacet;
-import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.world.block.BlockArea;
 import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
 
 import java.util.List;
 
 @MappedContainer
-public final class RoughnessFacetComponent implements Component {
+public final class RoughnessFacetComponent implements Component<RoughnessFacetComponent> {
 
     public BlockArea relativeRegion = new BlockArea(BlockArea.INVALID);
     public BlockArea worldRegion = new BlockArea(BlockArea.INVALID);
@@ -191,4 +178,15 @@ public final class RoughnessFacetComponent implements Component {
         data.addAll(newData);
     }
 
+    @Override
+    public void copyFrom(RoughnessFacetComponent other) {
+        this.relativeRegion.set(other.relativeRegion);
+        this.worldRegion.set(other.worldRegion);
+        this.gridWorldRegion.set(other.gridWorldRegion);
+        this.gridRelativeRegion.set(other.gridRelativeRegion);
+        this.gridSize = other.gridSize;
+        this.center.set(other.center);
+        this.data = Lists.newArrayList(other.data);
+        this.meanDeviation = other.meanDeviation;
+    }
 }
