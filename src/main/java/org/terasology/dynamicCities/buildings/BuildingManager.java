@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.buildings;
 
 import com.google.common.collect.Multimap;
@@ -20,7 +7,6 @@ import com.google.common.collect.MultimapBuilder;
 import org.joml.Vector2i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.assets.management.AssetManager;
 import org.terasology.cities.bldg.gen.BuildingGenerator;
 import org.terasology.cities.bldg.gen.CommercialBuildingGenerator;
 import org.terasology.cities.bldg.gen.RectHouseGenerator;
@@ -43,6 +29,7 @@ import org.terasology.engine.registry.Share;
 import org.terasology.engine.utilities.random.MersenneRandom;
 import org.terasology.engine.world.WorldProvider;
 import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 
 import java.util.ArrayList;
@@ -52,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -240,37 +228,42 @@ public class BuildingManager extends BaseComponentSystem {
         }
     }
 
-    public Optional<List<EntityRef>> getTemplatesForBuilding(GenericBuildingComponent building) {
-        List<EntityRef> templateList = new ArrayList<>();
-
-        if (building.templateNames == null) {
-            return Optional.empty();
-        }
-
-        for (String name : building.templateNames) {
-            Optional<EntityRef> templateOptional = getTemplate(name);
-            if (templateOptional.isPresent()) {
-                templateList.add(templateOptional.get());
-            }
-
-        }
-        return Optional.of(templateList);
+    /**
+     * Attempt to resolve the given {@code names} with the given {@code resolver}.
+     *
+     * @param names the names to resolve with the resolver; may be null
+     * @param resolver function to resolve an object of type {@code T} from a name
+     * @param <T> the type of the object to resolve
+     * @return {@link Optional#empty()} if {@code names} is null, or some list containing the resolved objects.
+     */
+    static <T> Optional<List<T>> resolveFromNames(List<String> names, Function<String, Optional<T>> resolver) {
+        return Optional.ofNullable(names)
+                .map(templateNames ->
+                        templateNames.stream()
+                                .map(resolver)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toList())
+                );
     }
 
+    /**
+     * Some list of entities describing structure templates if {@link GenericBuildingComponent#templateNames} is set, or {@link
+     * Optional#empty()} otherwise.
+     *
+     * @param building the generic building component to derive the templates from
+     */
+    public Optional<List<EntityRef>> getTemplatesForBuilding(GenericBuildingComponent building) {
+        return resolveFromNames(building.templateNames, this::getTemplate);
+    }
+
+    /**
+     * Some list of building generators if {@link GenericBuildingComponent#generatorNames} is set, or {@link Optional#empty()} otherwise.
+     *
+     * @param building the generic building component to derive the generators from
+     */
     public Optional<List<BuildingGenerator>> getGeneratorsForBuilding(GenericBuildingComponent building) {
-        List<BuildingGenerator> generatorList = new ArrayList<>();
-
-        if (building.generatorNames == null) {
-            return Optional.empty();
-        }
-        for (String name : building.generatorNames) {
-            Optional<BuildingGenerator> generatorOptional = getGenerator(name);
-            if (generatorOptional.isPresent()) {
-                generatorList.add(generatorOptional.get());
-            }
-
-        }
-        return Optional.of(generatorList);
+        return resolveFromNames(building.generatorNames, this::getGenerator);
     }
 
     private List<Vector2i> getMinMaxForZone(String zone) {
@@ -329,10 +322,10 @@ public class BuildingManager extends BaseComponentSystem {
     }
 
     private boolean isFitting(BlockAreac shape, GenericBuildingComponent building) {
-        boolean checkNorthSouth = building.minSize.x < shape.getSizeX() && building.minSize.y < shape.getSizeY()
-                && building.maxSize.x > shape.getSizeX() && building.maxSize.y > shape.getSizeY();
-        boolean checkEastWest = building.minSize.x < shape.getSizeY() && building.minSize.y < shape.getSizeX()
-                && building.maxSize.x > shape.getSizeY() && building.maxSize.y > shape.getSizeX();
+        boolean checkNorthSouth = building.minSize.x <= shape.getSizeX() && building.minSize.y <= shape.getSizeY()
+                && building.maxSize.x <= shape.getSizeX() && building.maxSize.y <= shape.getSizeY();
+        boolean checkEastWest = building.minSize.x <= shape.getSizeY() && building.minSize.y <= shape.getSizeX()
+                && building.maxSize.x <= shape.getSizeY() && building.maxSize.y <= shape.getSizeX();
         return checkEastWest || checkNorthSouth;
     }
 

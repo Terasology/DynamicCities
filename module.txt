@@ -1,23 +1,63 @@
 {
     "id": "DynamicCities",
-    "version": "1.0.0-SNAPSHOT",
+    "version": "1.1.0-SNAPSHOT",
     "author": "Cpt Crunchy",
     "displayName": "Dynamic Cities",
     "description": "Simulates complex city development over progressing game time based on the worlds resources. Needs a city culture to actually create cities.",
     "dependencies": [
-        { "id": "BiomesAPI", "minVersion": "4.0.0" },
-        { "id": "Cities", "minVersion": "1.1.0" },
-        { "id": "CommonWorld", "minVersion": "1.0.0" },
-        { "id": "CoreAdvancedAssets", "minVersion": "1.1.0" },
-        { "id": "CoreAssets", "minVersion": "2.0.1" },
-        { "id": "CoreWorlds", "minVersion": "2.0.0-SNAPSHOT" },
-        { "id": "Economy", "minVersion": "1.0.0" },
-        { "id": "Inventory", "minVersion": "1.1.0" },
-        { "id": "Minimap", "minVersion": "1.0.0" },
-        { "id": "ModuleTestingEnvironment", "minVersion": "0.2.0", "optional": true },
-        { "id": "NameGenerator", "minVersion": "1.0.0" },
-        { "id": "StructureTemplates", "minVersion": "1.0.0" },
-        { "id": "StructuralResources", "minVersion": "2.1.0" }
+        {
+            "id": "BiomesAPI",
+            "minVersion": "4.0.0"
+        },
+        {
+            "id": "Cities",
+            "minVersion": "1.1.0"
+        },
+        {
+            "id": "CommonWorld",
+            "minVersion": "1.0.0"
+        },
+        {
+            "id": "CoreAdvancedAssets",
+            "minVersion": "1.1.0"
+        },
+        {
+            "id": "CoreAssets",
+            "minVersion": "2.0.1"
+        },
+        {
+            "id": "CoreWorlds",
+            "minVersion": "2.0.0-SNAPSHOT"
+        },
+        {
+            "id": "Economy",
+            "minVersion": "1.0.0"
+        },
+        {
+            "id": "Inventory",
+            "minVersion": "1.1.0"
+        },
+        {
+            "id": "Minimap",
+            "minVersion": "1.0.0"
+        },
+        {
+            "id": "ModuleTestingEnvironment",
+            "minVersion": "0.2.0",
+            "optional": true
+        },
+        {
+            "id": "NameGenerator",
+            "minVersion": "1.0.0"
+        },
+        {
+            "id": "StructureTemplates",
+            "minVersion": "1.0.0"
+        },
+        {
+            "id": "StructuralResources",
+            "minVersion": "2.1.0"
+        }
     ],
     "serverSideOnly": false,
     "defaultWorldGenerator": "DynamicCities:DynamicCities",

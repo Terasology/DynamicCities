@@ -1,37 +1,26 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.network.Replicate;
+import org.terasology.gestalt.entitysystem.component.Component;
 
 import java.util.List;
 import java.util.Map;
 
-public final class SettlementsCacheComponent implements Component {
+public final class SettlementsCacheComponent implements Component<SettlementsCacheComponent> {
     @Replicate
-    public Map<Vector2i, EntityRef> settlementEntities;
+    public Map<Vector2i, EntityRef> settlementEntities = Maps.newHashMap();
 
     @Replicate
-    public List<EntityRef> networkCache;
+    public List<EntityRef> networkCache = Lists.newArrayList();
 
     public SettlementsCacheComponent() { }
 
@@ -43,5 +32,11 @@ public final class SettlementsCacheComponent implements Component {
 
     public EntityRef get(Vector2i position) {
         return settlementEntities.get(position);
+    }
+
+    @Override
+    public void copyFrom(SettlementsCacheComponent other) {
+        this.settlementEntities = Maps.newHashMap(other.settlementEntities);
+        this.networkCache = Lists.newArrayList(other.networkCache);
     }
 }

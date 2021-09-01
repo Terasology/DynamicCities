@@ -1,50 +1,38 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.parcels;
 
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.terasology.cities.parcels.Parcel;
-import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.network.Replicate;
 import org.terasology.engine.world.block.BlockAreac;
+import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.reflection.MappedContainer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @MappedContainer
-public class ParcelList implements Component {
+public class ParcelList implements Component<ParcelList> {
 
-    public Map<String, Integer> areaPerZone;
+    public Map<String, Integer> areaPerZone = new HashMap<>();
     //The area in which buildings can currently be placed
     public float cityRadius;
     //The distance of the currently farthest away building (from city center)
     @Replicate
     public float builtUpRadius;
 
-    public List<Parcel> parcels;
+    public List<Parcel> parcels = Lists.newArrayList();
 
-    public ParcelList() { }
+    public ParcelList() {
+    }
+
     public ParcelList(int i) {
         builtUpRadius = 0;
         cityRadius = 60;
-        parcels = new ArrayList<>();
-        areaPerZone = new HashMap<>();
     }
 
     public void addParcel(Parcel parcel) {
@@ -81,4 +69,11 @@ public class ParcelList implements Component {
         return copy;
     }
 
+    @Override
+    public void copyFrom(ParcelList other) {
+        this.areaPerZone = Maps.newHashMap(other.areaPerZone);
+        this.cityRadius = other.cityRadius;
+        this.builtUpRadius = other.builtUpRadius;
+        this.parcels = Lists.newArrayList(other.parcels);
+    }
 }

@@ -1,39 +1,57 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.buildings;
 
 
+import com.google.common.collect.Lists;
 import org.joml.Vector2i;
-import org.terasology.engine.entitySystem.Component;
+import org.terasology.gestalt.entitysystem.component.Component;
 
 import java.util.List;
 
-public class GenericBuildingComponent implements Component {
+/**
+ * Describes a single building that can be constructed from structure templates or building generators.
+ *
+ * All referenced templates or generators contribute to the same composite building.
+ */
+public class GenericBuildingComponent implements Component<GenericBuildingComponent> {
 
     /**
      *  Can either store a composite genericBuildingData from the module cities
      *  or a structured template
      */
     public String name;
+
+    /**
+     * Multiple templates are interpreted as parts of a composite building, and will all be applied in the order they are defined.
+     *
+     * Templates will be applied AFTER {@link #generatorNames}.
+     */
     public List<String> templateNames;
+
+    /**
+     * Multiple generators are interpreted as parts of a composite building, and will all be applied in the order they are defined.
+     *
+     * Generators will be applied BEFORE {@link #templateNames}.
+     */
     public List<String> generatorNames;
     public String zone;
-    public Vector2i minSize;
-    public Vector2i maxSize;
+    public Vector2i minSize = new Vector2i();
+    public Vector2i maxSize = new Vector2i();
     public boolean isEntity;
     public boolean isScaledDown;
     public String resourceUrn;
+
+    @Override
+    public void copyFrom(GenericBuildingComponent other) {
+        this.name = other.name;
+        this.templateNames = Lists.newArrayList(other.templateNames);
+        this.generatorNames = Lists.newArrayList(other.generatorNames);
+        this.zone = other.zone;
+        this.minSize.set(other.minSize);
+        this.maxSize.set(other.maxSize);
+        this.isEntity = other.isEntity;
+        this.isScaledDown = other.isScaledDown;
+        this.resourceUrn = other.resourceUrn;
+    }
 }
