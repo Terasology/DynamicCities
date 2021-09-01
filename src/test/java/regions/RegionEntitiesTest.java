@@ -19,7 +19,6 @@ import org.terasology.engine.registry.In;
 import org.terasology.moduletestingenvironment.MTEExtension;
 import org.terasology.moduletestingenvironment.extension.Dependencies;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,13 +28,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("MteTest")
 @ExtendWith(MTEExtension.class)
-@Dependencies({"DynamicCities"})
+@Dependencies("DynamicCities")
 public class RegionEntitiesTest {
     @In
     RegionEntityManager regionEntityManager;
 
     private EntityRef[] test;
-    private Vector3f[] pos = new Vector3f[10];
+    private final Vector3f[] pos = new Vector3f[10];
 
     @BeforeEach
     public void setupEntityRefs() {
@@ -91,8 +90,7 @@ public class RegionEntitiesTest {
     @Disabled
     @Test
     public void testGetRegionsInCell() {
-        List<EntityRef> testList = new ArrayList<>();
-        testList.addAll(Arrays.asList(test).subList(0, 5));
+        List<EntityRef> testList = Arrays.asList(test).subList(0, 5);
         assertEquals(testList, regionEntityManager.getRegionsInCell(new Vector2i(0, 0)));
     }
 }
