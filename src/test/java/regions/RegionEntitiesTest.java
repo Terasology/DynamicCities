@@ -11,7 +11,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.logic.location.LocationComponent;
@@ -27,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("MteTest")
-@ExtendWith(MTEExtension.class)
+@ExtendWith({MTEExtension.class, MockitoExtension.class})
 @Dependencies("DynamicCities")
 public class RegionEntitiesTest {
     @In
@@ -59,7 +62,6 @@ public class RegionEntitiesTest {
         }
     }
 
-    @Disabled("failing with resolution error with gestalt v5 - re-enable after gestalt v7 migration")
     @Test
     public void testSimpleGet() {
         for (int i = 0; i < test.length; i++) {
@@ -67,24 +69,29 @@ public class RegionEntitiesTest {
         }
     }
 
-    @Disabled
-    @Test
-    public void testNearestGet() {
-        assertEquals(test[0], regionEntityManager.getNearest(new Vector2i(21, 13)));
-        assertEquals(test[1], regionEntityManager.getNearest(new Vector2i(14, -13)));
-        assertEquals(test[2], regionEntityManager.getNearest(new Vector2i(-22, 19)));
-        assertEquals(test[3], regionEntityManager.getNearest(new Vector2i(-13, -19)));
+    @ParameterizedTest(name = "{1}, {2} is nearest pos[{0}]")
+    @CsvSource({
+            "0, 21, 13",
+            "1, 14, -13",
+            "2, -22, 19",
+            "3, -13, -19"
+    })
+    public void testNearestGet(int index, int x, int y) {
+        assertEquals(test[index], regionEntityManager.getNearest(new Vector2i(x, y)));
     }
 
-    @Disabled("failing with resolution error with gestalt v5 - re-enable after gestalt v7 migration")
-    @Test
-    public void testIsLoaded() {
-        assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(0, 0)));
-        assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(16, 0)));
-        assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(0, -25)));
-        assertFalse(regionEntityManager.cellIsLoaded(new Vector2i(98, -124)));
-        assertFalse(regionEntityManager.cellIsLoaded(new Vector2i(351, 234)));
-        assertFalse(regionEntityManager.cellIsLoaded(new Vector2i(153, -134)));
+    @ParameterizedTest(name = "cell loaded at {0}, {1}")
+    @CsvSource({"0, 0", "16, 0", "0, -25"})
+    public void testCellsInRegionAreLoaded(int x, int y /*, ModuleTestingHelper mteHelp */) {
+        // forceAndWaitForGeneration does not improve the results here.
+        //   mteHelp.forceAndWaitForGeneration(new Vector3i(x, 0, y));
+        assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(x, y)));
+    }
+
+    @ParameterizedTest(name = "cell not loaded at {0}, {1}")
+    @CsvSource({"98, -124", "351, 234", "153, -134"})
+    public void testCellsOutsideRegionAreNotLoaded(int x, int y) {
+        assertFalse(regionEntityManager.cellIsLoaded(new Vector2i(x, y)));
     }
 
     @Disabled
