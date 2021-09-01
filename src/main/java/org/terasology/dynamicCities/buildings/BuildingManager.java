@@ -322,10 +322,10 @@ public class BuildingManager extends BaseComponentSystem {
     }
 
     private boolean isFitting(BlockAreac shape, GenericBuildingComponent building) {
-        boolean checkNorthSouth = building.minSize.x < shape.getSizeX() && building.minSize.y < shape.getSizeY()
-                && building.maxSize.x > shape.getSizeX() && building.maxSize.y > shape.getSizeY();
-        boolean checkEastWest = building.minSize.x < shape.getSizeY() && building.minSize.y < shape.getSizeX()
-                && building.maxSize.x > shape.getSizeY() && building.maxSize.y > shape.getSizeX();
+        boolean checkNorthSouth = building.minSize.x <= shape.getSizeX() && building.minSize.y <= shape.getSizeY()
+                && building.maxSize.x <= shape.getSizeX() && building.maxSize.y <= shape.getSizeY();
+        boolean checkEastWest = building.minSize.x <= shape.getSizeY() && building.minSize.y <= shape.getSizeX()
+                && building.maxSize.x <= shape.getSizeY() && building.maxSize.y <= shape.getSizeX();
         return checkEastWest || checkNorthSouth;
     }
 
