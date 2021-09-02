@@ -6,10 +6,12 @@ package org.terasology.dynamicCities.region;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.junit.jupiter.api.BeforeEach;
+import org.joml.Vector3fc;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,34 +31,32 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("MteTest")
-@ExtendWith({MTEExtension.class, MockitoExtension.class})
+@ExtendWith({MockitoExtension.class, MTEExtension.class})
 @Dependencies("DynamicCities")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RegionEntitiesTest {
     @In
-    RegionEntityManager regionEntityManager;
+    public RegionEntityManager regionEntityManager;
 
-    private EntityRef[] test;
-    private final Vector3f[] pos = new Vector3f[10];
+    private final Vector3fc[] pos = new Vector3f[] {
+        new Vector3f(16, 0, 16),
+        new Vector3f(16, 0, -16),
+        new Vector3f(-16, 0, 16),
+        new Vector3f(-16, 0, -16),
+        new Vector3f(0, 0, 0),
+        new Vector3f(32, 0, 32),
+        new Vector3f(32, 0, -32),
+        new Vector3f(-32, 0, 32),
+        new Vector3f(-32, 0, -32),
+        new Vector3f(97, 0, -97)
+    };
+    private final EntityRef[] test = new EntityRef[pos.length];
 
-    @BeforeEach
+    @BeforeAll
     public void setupEntityRefs() {
-        pos[0] = new Vector3f(16, 0, 16);
-        pos[1] = new Vector3f(16, 0, -16);
-        pos[2] = new Vector3f(-16, 0, 16);
-        pos[3] = new Vector3f(-16, 0, -16);
-        pos[4] = new Vector3f(0, 0, 0);
-        pos[5] = new Vector3f(32, 0, 32);
-        pos[6] = new Vector3f(32, 0, -32);
-        pos[7] = new Vector3f(-32, 0, 32);
-        pos[8] = new Vector3f(-32, 0, -32);
-        pos[9] = new Vector3f(97, 0, -97);
-
-        test = new EntityRef[10];
-        LocationComponent[] loc = new LocationComponent[test.length];
         for (int i = 0; i < test.length; i++) {
-            test[i] = Mockito.mock(EntityRef.class);
-            loc[i] = new LocationComponent(pos[i]);
-            Mockito.when(test[i].getComponent(LocationComponent.class)).thenReturn(loc[i]);
+            test[i] = Mockito.mock(EntityRef.class, "mock EntityRef#"  + i);
+            Mockito.when(test[i].getComponent(LocationComponent.class)).thenReturn(new LocationComponent(pos[i]));
             regionEntityManager.add(test[i]);
         }
     }
@@ -64,7 +64,8 @@ public class RegionEntitiesTest {
     @Test
     public void testSimpleGet() {
         for (int i = 0; i < test.length; i++) {
-            assertEquals(test[i], regionEntityManager.get(new Vector2i(pos[i].x(), pos[i].z(), RoundingMode.FLOOR)));
+            Vector2i position = new Vector2i(pos[i].x(), pos[i].z(), RoundingMode.FLOOR);
+            assertEquals(test[i], regionEntityManager.get(position));
         }
     }
 
