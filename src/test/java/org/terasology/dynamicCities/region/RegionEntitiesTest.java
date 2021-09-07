@@ -97,6 +97,8 @@ public class RegionEntitiesTest {
     @Test
     public void testGetRegionsInCell() {
         List<EntityRef> testList = Arrays.asList(test).subList(0, 5);
+        // FIXME: The method under test seems to be returning the correct values, but the list is
+        //     out-of-order and contains duplicates.
         assertEquals(testList, regionEntityManager.getRegionsInCell(new Vector2i(0, 0)));
     }
 }
