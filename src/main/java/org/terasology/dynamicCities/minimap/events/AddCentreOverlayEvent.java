@@ -15,8 +15,8 @@
  */
 package org.terasology.dynamicCities.minimap.events;
 
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.engine.network.BroadcastEvent;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 /**
  * Event to be used to add the centre overlay to the minimap when the player first enters a city.

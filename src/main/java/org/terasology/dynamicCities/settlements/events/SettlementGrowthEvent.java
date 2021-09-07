@@ -16,7 +16,7 @@
 package org.terasology.dynamicCities.settlements.events;
 
 
-import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 public class SettlementGrowthEvent implements Event{
 }

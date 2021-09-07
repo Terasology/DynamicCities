@@ -15,8 +15,8 @@
  */
 package org.terasology.dynamicCities.settlements.events;
 
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.engine.network.ServerEvent;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 @ServerEvent
 public class SettlementRegisterEvent implements Event {
