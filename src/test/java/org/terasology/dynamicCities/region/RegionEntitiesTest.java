@@ -56,7 +56,8 @@ public class RegionEntitiesTest {
     public void setupEntityRefs() {
         for (int i = 0; i < test.length; i++) {
             test[i] = Mockito.mock(EntityRef.class, "mock EntityRef#"  + i);
-            Mockito.when(test[i].getComponent(LocationComponent.class)).thenReturn(new LocationComponent(pos[i]));
+            Mockito.when(test[i].getComponent(LocationComponent.class))
+                    .thenReturn(new LocationComponent(pos[i]));
             regionEntityManager.add(test[i]);
         }
     }
@@ -82,9 +83,7 @@ public class RegionEntitiesTest {
 
     @ParameterizedTest(name = "cell loaded at {0}, {1}")
     @CsvSource({"0, 0", "16, 0", "0, -25"})
-    public void testCellsInRegionAreLoaded(int x, int y /*, ModuleTestingHelper mteHelp */) {
-        // forceAndWaitForGeneration does not improve the results here.
-        //   mteHelp.forceAndWaitForGeneration(new Vector3i(x, 0, y));
+    public void testCellsInRegionAreLoaded(int x, int y) {
         assertTrue(regionEntityManager.cellIsLoaded(new Vector2i(x, y)));
     }
 
