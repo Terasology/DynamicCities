@@ -120,8 +120,8 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public EntityRef getNearest(Vector2ic position) {
         Map<Vector2i, EntityRef> regionEntities = regionEntitiesComponent.regionEntities;
-        int x = Chunks.toChunkPosX(position.x()) * Chunks.SIZE_X + ((Chunks.SIZE_X / 2) - 1);
-        int y = Chunks.toChunkPosZ(position.y()) * Chunks.SIZE_Z + ((Chunks.SIZE_Z / 2) - 1);
+        int x = Chunks.toChunkPosX(position.x()) * Chunks.SIZE_X + Chunks.SIZE_X / 2;
+        int y = Chunks.toChunkPosZ(position.y()) * Chunks.SIZE_Z + Chunks.SIZE_Z / 2;
 
         Vector2i regionPos = new Vector2i(x, y);
         return regionEntities.get(regionPos);
