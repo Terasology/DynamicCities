@@ -14,7 +14,6 @@ import org.terasology.dynamicCities.settlements.SettlementCachingSystem;
 import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.dynamicCities.settlements.SettlementsCacheComponent;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
@@ -28,6 +27,7 @@ import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
 import org.terasology.engine.world.WorldComponent;
 import org.terasology.engine.world.chunks.event.PurgeWorldEvent;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.joml.geom.Circlef;
 import org.terasology.nui.FontColor;
 

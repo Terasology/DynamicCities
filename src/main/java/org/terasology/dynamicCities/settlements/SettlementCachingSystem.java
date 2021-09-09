@@ -26,7 +26,6 @@ import org.terasology.dynamicCities.settlements.components.ActiveSettlementCompo
 import org.terasology.dynamicCities.settlements.events.SettlementRegisterEvent;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
@@ -36,6 +35,7 @@ import org.terasology.engine.network.NetworkSystem;
 import org.terasology.engine.network.events.DisconnectedEvent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
