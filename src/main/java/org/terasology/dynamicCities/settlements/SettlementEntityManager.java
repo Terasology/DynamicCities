@@ -58,7 +58,6 @@ import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.logic.nameTags.NameTagComponent;
-import org.terasology.logic.players.MinimapSystem;
 import org.terasology.engine.network.NetworkComponent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
@@ -70,6 +69,7 @@ import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.engine.world.generation.Border3D;
 import org.terasology.engine.world.time.WorldTimeEvent;
 import org.terasology.joml.geom.Circlef;
+import org.terasology.logic.players.MinimapSystem;
 import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.nui.Color;
 
