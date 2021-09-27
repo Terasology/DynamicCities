@@ -32,6 +32,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class DistrictFacetComponent implements Component<DistrictFacetComponent> {
 
     /**
@@ -39,7 +41,7 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
      * TODO: Assign districts similar to parcels (look up if needs are already fulfilled before placement)
      */
     @Replicate
-    public BlockAreac relativeRegion =new BlockArea(BlockArea.INVALID);
+    public BlockAreac relativeRegion = new BlockArea(BlockArea.INVALID);
     @Replicate
     public BlockAreac worldRegion = new BlockArea(BlockArea.INVALID);
     @Replicate
@@ -63,7 +65,8 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
 
     public DistrictFacetComponent() { }
 
-    public DistrictFacetComponent(BlockRegion targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager, CultureComponent cultureComponent) {
+    public DistrictFacetComponent(BlockRegion targetRegion, Border3D border, int gridSize, long seed, DistrictManager districtManager,
+                                  CultureComponent cultureComponent) {
         worldRegion = border.expandTo2D(targetRegion);
         relativeRegion = border.expandTo2D(targetRegion.getSize(new Vector3i()));
         this.gridSize = gridSize;
@@ -110,6 +113,7 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
 
 
     private void mapDistrictTypes(DistrictManager districtManager, CultureComponent cultureComponent) {
+        checkArgument(!districtManager.getDistrictTypes().isEmpty(), "There are no district types!");
         Map<String, Float> zoneArea = new HashMap<>();
         ProbabilityDistribution<DistrictType> probabilityDistribution = new ProbabilityDistribution<>(districtManager.hashCode() | 413357);
         Map<String, Float> culturalNeedsPercentage = cultureComponent.getProcentualsForZone();
@@ -133,14 +137,14 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
                 totalAssignedArea += districtSize.get(i);
 
                 //Calculate probabilities
-                Map<DistrictType, Float> probabilites = new HashMap<>(districtManager.getDistrictTypes().size());
+                Map<DistrictType, Float> probabilities = new HashMap<>(districtManager.getDistrictTypes().size());
                 float totalDiff = 0;
 
                 for (DistrictType districtType : districtManager.getDistrictTypes()) {
                     float diff = 0;
                     Map<String, Float> tempZoneArea = new HashMap<>(zoneArea);
                     for (String zone : districtType.zones) {
-                        float area = districtSize.get(i) / districtType.zones.size();
+                        float area = (float) districtSize.get(i) / districtType.zones.size();
                         tempZoneArea.put(zone, tempZoneArea.getOrDefault(zone, 0f) + area);
                         if (!culturalNeedsPercentage.containsKey(zone)) {
                             diff = Float.MAX_VALUE;
@@ -152,18 +156,18 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
                     }
 
                     diff = (diff == 0) ? 0 : 1 / diff;
-                    probabilites.put(districtType, diff);
+                    probabilities.put(districtType, diff);
                     totalDiff += diff;
                 }
                 for (DistrictType districtType : districtManager.getDistrictTypes()) {
-                    probabilites.put(districtType, probabilites.getOrDefault(districtType, 0f) / totalDiff);
+                    probabilities.put(districtType, probabilities.getOrDefault(districtType, 0f) / totalDiff);
                 }
 
                 //Assign District
-                probabilityDistribution.initialise(probabilites);
+                probabilityDistribution.initialise(probabilities);
                 DistrictType nextDistrict = probabilityDistribution.get();
                 for (String zone : nextDistrict.zones) {
-                    float area = districtSize.get(i) / nextDistrict.zones.size();
+                    float area = (float) districtSize.get(i) / nextDistrict.zones.size();
                     zoneArea.put(zone, zoneArea.getOrDefault(zone, 0f) + area);
                 }
                 districtTypeMap.put(Integer.toString(districtCenters.indexOf(minCenter)), nextDistrict);

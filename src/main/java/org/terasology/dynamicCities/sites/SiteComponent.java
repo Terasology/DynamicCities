@@ -66,6 +66,7 @@ public class SiteComponent implements Component<SiteComponent> {
 
     @Override
     public void copyFrom(SiteComponent other) {
-
+        this.coords.set(other.coords);
+        this.radius = other.radius;
     }
 }
