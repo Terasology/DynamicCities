@@ -37,7 +37,7 @@ import org.terasology.namegenerator.town.TownAssetTheme;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -108,6 +108,6 @@ class SettlementEntityManagerTest {
                 new Vector3i(center, RoundingMode.FLOOR), zone, parcels, buildingQueue,
                 settlement.getComponent(DistrictFacetComponent.class), MAX_PLACEMENT_ATTEMPTS
         );
-        assertTrue(parcel.isPresent());
+        assertThat(parcel).isPresent();
     }
 }
