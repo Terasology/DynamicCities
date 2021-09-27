@@ -14,9 +14,10 @@ import org.terasology.dynamicCities.districts.DistrictType;
 import org.terasology.dynamicCities.districts.Kmeans;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.settlements.SettlementConstants;
-import org.terasology.dynamicCities.utilities.ProbabilityDistribution;
 import org.terasology.engine.network.Replicate;
 import org.terasology.engine.utilities.procedural.WhiteNoise;
+import org.terasology.engine.utilities.random.DiscreteDistribution;
+import org.terasology.engine.utilities.random.MersenneRandom;
 import org.terasology.engine.world.block.BlockArea;
 import org.terasology.engine.world.block.BlockAreac;
 import org.terasology.engine.world.block.BlockRegion;
@@ -115,7 +116,8 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
     private void mapDistrictTypes(DistrictManager districtManager, CultureComponent cultureComponent) {
         checkArgument(!districtManager.getDistrictTypes().isEmpty(), "There are no district types!");
         Map<String, Float> zoneArea = new HashMap<>();
-        ProbabilityDistribution<DistrictType> probabilityDistribution = new ProbabilityDistribution<>(districtManager.hashCode() | 413357);
+        DiscreteDistribution<DistrictType> probabilityDistribution = new DiscreteDistribution<>();
+        MersenneRandom rng = new MersenneRandom(districtManager.hashCode() | 413357);
         Map<String, Float> culturalNeedsPercentage = cultureComponent.getProcentualsForZone();
         int totalAssignedArea = 0;
 
@@ -137,9 +139,6 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
                 totalAssignedArea += districtSize.get(i);
 
                 //Calculate probabilities
-                Map<DistrictType, Float> probabilities = new HashMap<>(districtManager.getDistrictTypes().size());
-                float totalDiff = 0;
-
                 for (DistrictType districtType : districtManager.getDistrictTypes()) {
                     float diff = 0;
                     Map<String, Float> tempZoneArea = new HashMap<>(zoneArea);
@@ -156,16 +155,11 @@ public class DistrictFacetComponent implements Component<DistrictFacetComponent>
                     }
 
                     diff = (diff == 0) ? 0 : 1 / diff;
-                    probabilities.put(districtType, diff);
-                    totalDiff += diff;
-                }
-                for (DistrictType districtType : districtManager.getDistrictTypes()) {
-                    probabilities.put(districtType, probabilities.getOrDefault(districtType, 0f) / totalDiff);
+                    probabilityDistribution.add(districtType, diff);
                 }
 
                 //Assign District
-                probabilityDistribution.initialise(probabilities);
-                DistrictType nextDistrict = probabilityDistribution.get();
+                DistrictType nextDistrict = probabilityDistribution.sample(rng);
                 for (String zone : nextDistrict.zones) {
                     float area = (float) districtSize.get(i) / nextDistrict.zones.size();
                     zoneArea.put(zone, zoneArea.getOrDefault(zone, 0f) + area);
