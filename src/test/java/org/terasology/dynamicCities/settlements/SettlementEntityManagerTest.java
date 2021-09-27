@@ -3,9 +3,10 @@
 
 package org.terasology.dynamicCities.settlements;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.joml.RoundingMode;
 import org.joml.Vector2i;
-import org.joml.Vector2ic;
 import org.joml.Vector3fc;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
@@ -34,8 +35,6 @@ import org.terasology.moduletestingenvironment.MTEExtension;
 import org.terasology.moduletestingenvironment.extension.Dependencies;
 import org.terasology.namegenerator.town.TownAssetTheme;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,7 +49,7 @@ class SettlementEntityManagerTest {
 
     static final int MAX_PLACEMENT_ATTEMPTS = 20;
     static final String zone = "TestZone";
-    static final Vector2ic buildingSize = new Vector2i(9, 9);
+    static final Vector2i buildingSize = new Vector2i(9, 9);
     static final Vector3ic siteLocation = new Vector3i(1234, 0, -5678);
     static final int population = 3;
 
@@ -63,7 +62,7 @@ class SettlementEntityManagerTest {
         //   Should have a way for this test to add a building prefab,
         //   or a way to add to BuildingManager without prefabs.
         BuildingManager buildingManager = spy(context.get(BuildingManager.class));
-        when(buildingManager.getMinMaxSizePerZone()).thenReturn(Map.of(zone, List.of(buildingSize, buildingSize)));
+        when(buildingManager.getMinMaxSizePerZone()).thenReturn(ImmutableMap.of(zone, ImmutableList.of(buildingSize, buildingSize)));
         context.put(BuildingManager.class, buildingManager);
 
         // re-inject this so it has the mock version.
@@ -97,15 +96,15 @@ class SettlementEntityManagerTest {
     }
 
     @Test
-    void placeParcel(SettlementEntityManager manager) {
+    void placeParcel(SettlementEntityManager settlements) {
         ParcelList parcels = new ParcelList();
         BuildingQueue buildingQueue = new BuildingQueue();
 
         EntityRef site = newSite();
-        EntityRef settlement = manager.createSettlement(site);
+        EntityRef settlement = settlements.createSettlement(site);
         Vector3fc center = settlement.getComponent(LocationComponent.class).getLocalPosition();
 
-        Optional<DynParcel> parcel = manager.placeParcel(
+        Optional<DynParcel> parcel = settlements.placeParcel(
                 new Vector3i(center, RoundingMode.FLOOR), zone, parcels, buildingQueue,
                 settlement.getComponent(DistrictFacetComponent.class), MAX_PLACEMENT_ATTEMPTS
         );

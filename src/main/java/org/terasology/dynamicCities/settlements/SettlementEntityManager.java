@@ -267,7 +267,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         return true;
     }
 
-    private EntityRef createSettlement(EntityRef siteRegion) {
+    EntityRef createSettlement(EntityRef siteRegion) {
         EntityRef settlementEntity = entityManager.create();
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
@@ -352,7 +352,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         float radius = parcelList.cityRadius;
         int size = Math.max(Math.round(radius / 32), 1);
         BlockArea settlementRectArea = new BlockArea(-size, -size, size, size);
-        Circlef settlementCircle = new Circlef(pos.x,pos.y, radius);
+        Circlef settlementCircle = new Circlef(pos.x, pos.y, radius);
         Vector2i regionWorldPos = new Vector2i();
 
         for (Vector2ic regionPos : settlementRectArea) {
@@ -628,8 +628,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         sourceSettlement.saveComponent(parcelList);
     }
 
-    private Optional<DynParcel> placeParcel(Vector3ic center, String zone, ParcelList parcels,
-                                            BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
+    Optional<DynParcel> placeParcel(Vector3ic center, String zone, ParcelList parcels,
+                                    BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
         int iter = 0;
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
         int minSize = (minMaxSizes.get(zone).get(0).x() < minMaxSizes.get(zone).get(0).y())
