@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.terasology.dynamicCities.buildings.BuildingManager;
 import org.terasology.dynamicCities.buildings.BuildingQueue;
 import org.terasology.dynamicCities.districts.DistrictManager;
@@ -23,6 +24,7 @@ import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
+import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.engine.context.Context;
@@ -42,7 +44,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @Tag("MteTest")
-@ExtendWith(MTEExtension.class)
+@ExtendWith({MTEExtension.class, MockitoExtension.class})
 @Dependencies("DynamicCities")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettlementEntityManagerTest {
@@ -96,12 +98,17 @@ class SettlementEntityManagerTest {
     }
 
     @Test
-    void placeParcel(SettlementEntityManager settlements) {
+    void placeParcel(SettlementEntityManager settlements, RegionEntityManager regions) {
         ParcelList parcels = new ParcelList();
         BuildingQueue buildingQueue = new BuildingQueue();
 
         EntityRef site = newSite();
+
+        // What are regions and how are we supposed to add them?
+        regions.add(site);
+
         EntityRef settlement = settlements.createSettlement(site);
+
         Vector3fc center = settlement.getComponent(LocationComponent.class).getLocalPosition();
 
         Optional<DynParcel> parcel = settlements.placeParcel(
