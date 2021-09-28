@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
 class SettlementEntityManagerTest {
 
     static final int MAX_PLACEMENT_ATTEMPTS = 20;
-    static final String zone = "TestZone";
+    static final String zone = "testzone";  // lowercase
     static final Vector2i buildingSize = new Vector2i(9, 9);
     static final Vector3ic siteLocation = new Vector3i(1234, 0, -5678);
     static final int population = 3;
