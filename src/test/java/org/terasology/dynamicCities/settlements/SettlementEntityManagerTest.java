@@ -24,7 +24,6 @@ import org.terasology.dynamicCities.parcels.DynParcel;
 import org.terasology.dynamicCities.parcels.ParcelList;
 import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
-import org.terasology.dynamicCities.region.RegionEntityManager;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.engine.context.Context;
@@ -34,7 +33,9 @@ import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.InjectionHelper;
 import org.terasology.moduletestingenvironment.MTEExtension;
+import org.terasology.moduletestingenvironment.ModuleTestingHelper;
 import org.terasology.moduletestingenvironment.extension.Dependencies;
+import org.terasology.moduletestingenvironment.extension.UseWorldGenerator;
 import org.terasology.namegenerator.town.TownAssetTheme;
 
 import java.util.Optional;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.when;
 @Tag("MteTest")
 @ExtendWith({MTEExtension.class, MockitoExtension.class})
 @Dependencies("DynamicCities")
+@UseWorldGenerator("DynamicCities:DynamicCities")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettlementEntityManagerTest {
 
@@ -98,14 +100,19 @@ class SettlementEntityManagerTest {
     }
 
     @Test
-    void placeParcel(SettlementEntityManager settlements, RegionEntityManager regions) {
+    void placeParcel(SettlementEntityManager settlements, ModuleTestingHelper mte) {
         ParcelList parcels = new ParcelList();
         BuildingQueue buildingQueue = new BuildingQueue();
 
-        EntityRef site = newSite();
+        // Regions are initialized during world generation.
+        mte.forceAndWaitForGeneration(siteLocation);
+        // Loading a wider area requires https://github.com/Terasology/ModuleTestingEnvironment/pull/66
+//        mte.runUntil(mte.makeBlocksRelevant(
+//                new BlockRegion(siteLocation)
+//                        .expand(Chunks.SIZE_X * 4, Chunks.SIZE_Y, Chunks.SIZE_Z * 4)
+//        ));
 
-        // What are regions and how are we supposed to add them?
-        regions.add(site);
+        EntityRef site = newSite();
 
         EntityRef settlement = settlements.createSettlement(site);
 
