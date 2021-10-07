@@ -295,10 +295,14 @@ public class RegionEntityManager extends BaseComponentSystem {
     public List<EntityRef> getRegionsInArea(BlockAreac area) {
         List<EntityRef> result = new ArrayList<>();
         for (Vector2ic pos : area) {
-            EntityRef region = getNearest(new Vector2i(pos.x(), pos.y()));
+            EntityRef region = getNearest(pos);
 
             if (region == null || !region.isActive() || !region.exists()) {
-                logger.debug("Failed to get nearest region for " + pos.toString());
+                logger.debug("Failed to get nearest region for {}: {}, {}, {}",
+                        pos, region,
+                        region != null && region.isActive(),
+                        region != null && region.exists()
+                        );
             } else if (!result.contains(region)) {
                 result.add(region);
             }

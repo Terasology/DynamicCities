@@ -43,7 +43,7 @@
         },
         {
             "id": "ModuleTestingEnvironment",
-            "minVersion": "0.2.0",
+            "minVersion": "0.3.2",
             "optional": true
         },
         {
