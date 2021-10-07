@@ -99,8 +99,8 @@ public class RegionEntityProvider implements EntityProvider {
 
         positions[0] = new Vector2i(max.x(), max.z());
         positions[1] = new Vector2i(min.x(), min.z());
-        positions[2] = new Vector2i(min.x() + worldRegion.getSizeX(), min.z());
-        positions[3] = new Vector2i(min.x(), min.z() + worldRegion.getSizeZ());
+        positions[2] = new Vector2i(max.x(), min.z());
+        positions[3] = new Vector2i(min.x(), max.z());
         positions[4] = new Vector2i(worldRegion.center(new Vector3f()).x, worldRegion.center(new Vector3f()).z,
             RoundingMode.FLOOR);
 
