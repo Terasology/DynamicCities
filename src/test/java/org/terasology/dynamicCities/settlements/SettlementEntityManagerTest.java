@@ -26,6 +26,7 @@ import org.terasology.dynamicCities.population.CultureComponent;
 import org.terasology.dynamicCities.population.CultureManager;
 import org.terasology.dynamicCities.settlements.components.DistrictFacetComponent;
 import org.terasology.dynamicCities.sites.SiteComponent;
+import org.terasology.dynamicCities.world.testbench.FlatFacetedWorld;
 import org.terasology.engine.context.Context;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
@@ -47,14 +48,14 @@ import static org.mockito.Mockito.when;
 @Tag("MteTest")
 @ExtendWith({MTEExtension.class, MockitoExtension.class})
 @Dependencies("DynamicCities")
-@UseWorldGenerator("DynamicCities:DynamicCities")
+@UseWorldGenerator("DynamicCities:FlatFaceted")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettlementEntityManagerTest {
 
     static final int MAX_PLACEMENT_ATTEMPTS = 20;
     static final String zone = "testzone";  // lowercase
     static final Vector2i buildingSize = new Vector2i(9, 9);
-    static final Vector3ic siteLocation = new Vector3i(1234, 0, -5678);
+    static final Vector3ic siteLocation = new Vector3i(1234, FlatFacetedWorld.SURFACE_HEIGHT, -5678);
     static final int population = 3;
 
     @In
