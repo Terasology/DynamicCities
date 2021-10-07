@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.world;
 
 import org.joml.Vector2i;
@@ -31,8 +18,8 @@ import org.terasology.engine.world.generation.facets.DensityFacet;
 import org.terasology.engine.world.generation.facets.SeaLevelFacet;
 import org.terasology.engine.world.generation.facets.SurfacesFacet;
 
-/**
- */
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class SolidRasterizer extends CompatibleRasterizer implements ScalableWorldRasterizer {
 
     /**
@@ -47,10 +34,20 @@ public class SolidRasterizer extends CompatibleRasterizer implements ScalableWor
     public void generateChunk(Chunk chunk, Region chunkRegion, float scale) {
         DensityFacet solidityFacet = chunkRegion.getFacet(DensityFacet.class);
         SurfacesFacet surfaceFacet = chunkRegion.getFacet(SurfacesFacet.class);
-        BiomeFacet biomeFacet = chunkRegion.getFacet(BiomeFacet.class);
         ResourceFacet resourceFacet = chunkRegion.getFacet(ResourceFacet.class);
         SeaLevelFacet seaLevelFacet = chunkRegion.getFacet(SeaLevelFacet.class);
-        int seaLevel = seaLevelFacet.getSeaLevel();
+
+        // FIXME: How should this handle a lack of sea level?
+        //   Or should there be some facet dependency declared to make sure
+        //   there always is a sea level facet?
+        int seaLevel = (seaLevelFacet != null)
+                ? seaLevelFacet.getSeaLevel()
+                : Integer.MIN_VALUE;
+
+        // FIXME: BiomeFacet does depend on SeaLevelFacet, but that doesn't help if
+        //    there is no BiomeFacet!
+        BiomeFacet biomeFacet = checkNotNull(chunkRegion.getFacet(BiomeFacet.class),
+                "world must have a biome facet");
 
         Vector2i pos2d = new Vector2i();
         Vector3i worldPos = new Vector3i();
@@ -60,7 +57,11 @@ public class SolidRasterizer extends CompatibleRasterizer implements ScalableWor
             biomeRegistry.setBiome(biome, chunk, pos.x(), pos.y(), pos.z());
 
             float posY = (pos.y() + chunk.getChunkWorldOffsetY()) * scale;
-            float density = solidityFacet.get(pos);
+
+            // FIXME: require DensityFacet
+            float density = (solidityFacet != null)
+                    ? solidityFacet.get(pos)
+                    : 1f;
             chunk.chunkToWorldPosition(pos,  worldPos);
 
             if (surfaceFacet.get(pos)) {

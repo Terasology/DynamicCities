@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 
 package org.terasology.dynamicCities.region;
 
@@ -57,7 +44,6 @@ public class RegionEntityProvider implements EntityProvider {
         if (checkCorners(worldRegion, elevationFacet)) {
             RoughnessFacet roughnessFacet = region.getFacet(RoughnessFacet.class);
             ResourceFacet resourceFacet = region.getFacet(ResourceFacet.class);
-            TreeFacet treeFacet = region.getFacet(TreeFacet.class);
             SiteFacet siteFacet = region.getFacet(SiteFacet.class);
             SettlementFacet settlementFacet = region.getFacet(SettlementFacet.class);
 
@@ -65,10 +51,15 @@ public class RegionEntityProvider implements EntityProvider {
 
             RoughnessFacetComponent roughnessFacetComponent = new RoughnessFacetComponent(roughnessFacet);
             ResourceFacetComponent resourceFacetComponent = new ResourceFacetComponent(resourceFacet);
-            TreeFacetComponent treeFacetComponent = new TreeFacetComponent(treeFacet);
             entityStore.addComponent(roughnessFacetComponent);
             entityStore.addComponent(resourceFacetComponent);
-            entityStore.addComponent(treeFacetComponent);
+
+            // FIXME: is TreeFacet optional?
+            TreeFacet treeFacet = region.getFacet(TreeFacet.class);
+            if (treeFacet != null) {
+                TreeFacetComponent treeFacetComponent = new TreeFacetComponent(treeFacet);
+                entityStore.addComponent(treeFacetComponent);
+            }
 
             LocationComponent locationComponent = new LocationComponent(worldRegion.center(new Vector3f()));
             entityStore.addComponent(locationComponent);
@@ -99,8 +90,8 @@ public class RegionEntityProvider implements EntityProvider {
 
         positions[0] = new Vector2i(max.x(), max.z());
         positions[1] = new Vector2i(min.x(), min.z());
-        positions[2] = new Vector2i(min.x() + worldRegion.getSizeX(), min.z());
-        positions[3] = new Vector2i(min.x(), min.z() + worldRegion.getSizeZ());
+        positions[2] = new Vector2i(max.x(), min.z());
+        positions[3] = new Vector2i(min.x(), max.z());
         positions[4] = new Vector2i(worldRegion.center(new Vector3f()).x, worldRegion.center(new Vector3f()).z,
             RoundingMode.FLOOR);
 

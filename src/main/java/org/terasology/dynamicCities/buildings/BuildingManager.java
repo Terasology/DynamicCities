@@ -209,7 +209,7 @@ public class BuildingManager extends BaseComponentSystem {
 
 
     private Optional<BuildingGenerator> getGenerator(String generatorName) {
-        Class generatorClass = GeneratorRegistry.GENERATORS.get(generatorName);
+        Class<?> generatorClass = GeneratorRegistry.GENERATORS.get(generatorName);
         for (BuildingGenerator generator : generators) {
             if (generator.getClass() == generatorClass) {
                 return Optional.of(generator);

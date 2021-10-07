@@ -1,24 +1,10 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.population;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.dynamicCities.utilities.Toolbox;
 import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
@@ -27,6 +13,7 @@ import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
 import org.terasology.engine.utilities.random.MersenneRandom;
+import org.terasology.gestalt.assets.management.AssetManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -49,27 +36,7 @@ public class CultureManager extends BaseComponentSystem {
             //Get building data
             if (prefab.hasComponent(CultureComponent.class)) {
                 CultureComponent cultureComponent = prefab.getComponent(CultureComponent.class);
-                if (cultureComponent.theme != null) {
-                    cultureComponent.theme = cultureComponent.theme.toLowerCase();
-                } else {
-                    logger.warn("No theme defined for culture " + cultureComponent.name);
-                }
-                if (!cultureComponent.buildingNeedPerZone.isEmpty()) {
-                    cultureComponents.add(cultureComponent);
-                    cultureComponent.buildingNeedPerZone = Toolbox.stringsToLowerCase(cultureComponent.buildingNeedPerZone);
-                } else {
-                    logger.warn("Found culture prefab with empty buildingNeedPerZone list");
-                }
-                if (cultureComponent.availableBuildings != null) {
-                    Toolbox.stringsToLowerCase(cultureComponent.availableBuildings);
-                } else {
-                    logger.warn("No available Buildings defined for culture " + cultureComponent.name);
-                }
-                if (cultureComponent.residentialZones != null) {
-                    Toolbox.stringsToLowerCase(cultureComponent.residentialZones);
-                } else {
-                    logger.warn("No residential zones defined for culture " + cultureComponent.name);
-                }
+                addCulture(cultureComponent);
             }
         }
 
@@ -83,13 +50,37 @@ public class CultureManager extends BaseComponentSystem {
         rng = new MersenneRandom(assetManager.hashCode() * 5 + this.hashCode());
     }
 
+    public void addCulture(CultureComponent cultureComponent) {
+        if (cultureComponent.theme != null) {
+            cultureComponent.theme = cultureComponent.theme.toLowerCase();
+        } else {
+            logger.warn("No theme defined for culture " + cultureComponent.name);
+        }
+        if (!cultureComponent.buildingNeedPerZone.isEmpty()) {
+            cultureComponents.add(cultureComponent);
+            cultureComponent.buildingNeedPerZone = Toolbox.stringsToLowerCase(cultureComponent.buildingNeedPerZone);
+        } else {
+            logger.warn("Found culture prefab with empty buildingNeedPerZone list");
+        }
+        if (cultureComponent.availableBuildings != null) {
+            Toolbox.stringsToLowerCase(cultureComponent.availableBuildings);
+        } else {
+            logger.warn("No available Buildings defined for culture " + cultureComponent.name);
+        }
+        if (cultureComponent.residentialZones != null) {
+            Toolbox.stringsToLowerCase(cultureComponent.residentialZones);
+        } else {
+            logger.warn("No residential zones defined for culture " + cultureComponent.name);
+        }
+    }
+
     public CultureComponent getRandomCulture() {
         if (!cultureComponents.isEmpty()) {
             int max = cultureComponents.size();
             int index = rng.nextInt(max);
             return (CultureComponent) cultureComponents.toArray()[index];
         }
-        logger.error("No culture found...barbarians..." );
+        logger.error("No culture found...barbarians...");
         return null;
     }
 

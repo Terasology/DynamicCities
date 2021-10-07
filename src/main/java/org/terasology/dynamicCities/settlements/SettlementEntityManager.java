@@ -1,4 +1,4 @@
-// Copyright 2020 The Terasology Foundation
+// Copyright 2021 The Terasology Foundation
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.dynamicCities.settlements;
 
@@ -58,7 +58,6 @@ import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.logic.nameTags.NameTagComponent;
-import org.terasology.logic.players.MinimapSystem;
 import org.terasology.engine.network.NetworkComponent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
@@ -70,6 +69,7 @@ import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.engine.world.generation.Border3D;
 import org.terasology.engine.world.time.WorldTimeEvent;
 import org.terasology.joml.geom.Circlef;
+import org.terasology.logic.players.MinimapSystem;
 import org.terasology.namegenerator.town.TownNameProvider;
 import org.terasology.nui.Color;
 
@@ -81,9 +81,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Vector;
 
-@Share(value = SettlementEntityManager.class)
+@Share(SettlementEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class SettlementEntityManager extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
 
     @In
     private EntityManager entityManager;
@@ -123,8 +124,6 @@ public class SettlementEntityManager extends BaseComponentSystem {
     private int cyclesLeft = 2; // 1 cycle = approx. 20 seconds
     private Random rng;
     private Multimap<String, String> roadCache = MultimapBuilder.hashKeys().hashSetValues().build();
-
-    private Logger logger = LoggerFactory.getLogger(SettlementEntityManager.class);
 
     @Override
     public void postBegin() {
@@ -183,7 +182,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
      * @param event
      * @param siteRegion
      */
-    @ReceiveEvent(components = {SiteComponent.class})
+    @ReceiveEvent(components = SiteComponent.class)
     public void filterSettlement(CheckSiteSuitabilityEvent event, EntityRef siteRegion) {
         boolean checkDistance = checkMinDistance(siteRegion);
         boolean checkBuildArea = checkBuildArea(siteRegion);
@@ -267,7 +266,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         return true;
     }
 
-    private EntityRef createSettlement(EntityRef siteRegion) {
+    EntityRef createSettlement(EntityRef siteRegion) {
         EntityRef settlementEntity = entityManager.create();
 
         SiteComponent siteComponent = siteRegion.getComponent(SiteComponent.class);
@@ -352,7 +351,7 @@ public class SettlementEntityManager extends BaseComponentSystem {
         float radius = parcelList.cityRadius;
         int size = Math.max(Math.round(radius / 32), 1);
         BlockArea settlementRectArea = new BlockArea(-size, -size, size, size);
-        Circlef settlementCircle = new Circlef(pos.x,pos.y, radius);
+        Circlef settlementCircle = new Circlef(pos.x, pos.y, radius);
         Vector2i regionWorldPos = new Vector2i();
 
         for (Vector2ic regionPos : settlementRectArea) {
@@ -628,8 +627,8 @@ public class SettlementEntityManager extends BaseComponentSystem {
         sourceSettlement.saveComponent(parcelList);
     }
 
-    private Optional<DynParcel> placeParcel(Vector3ic center, String zone, ParcelList parcels,
-                                            BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
+    Optional<DynParcel> placeParcel(Vector3ic center, String zone, ParcelList parcels,
+                                    BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, int maxIterations) {
         int iter = 0;
         Map<String, List<Vector2i>> minMaxSizes = buildingManager.getMinMaxSizePerZone();
         int minSize = (minMaxSizes.get(zone).get(0).x() < minMaxSizes.get(zone).get(0).y())
@@ -640,19 +639,19 @@ public class SettlementEntityManager extends BaseComponentSystem {
         int sizeY = rng.nextInt(minSize, maxSize);
         BlockArea shape;
         Orientation orientation = Orientation.NORTH.getRotated(90 * rng.nextInt(5));
-        Vector2i rectPosition = new Vector2i();
         float radius;
+        ParcelLocationValidator parcelLocationValidator = new ParcelLocationValidator(parcels, buildingQueue, districtFacetComponent,
+                zone, regionEntityManager);
         do {
             iter++;
             float angle = rng.nextFloat(0, 360);
             //Subtract the maximum tree radius (13) from the parcel radius -> Some bigger buildings still could cause issues
             radius = rng.nextFloat(0, parcels.cityRadius - 32);
-            rectPosition.set((int) Math.round(radius * Math.sin((double) angle) + center.x()),
-                    (int) Math.round(radius * Math.cos((double) angle)) + center.z());
-            shape = new BlockArea(rectPosition.x(), rectPosition.y()).setSize(sizeX, sizeY);
-        } while ((!parcels.isNotIntersecting(shape) || !buildingQueue.isNotIntersecting(shape)
-                || !(districtFacetComponent.getDistrict(rectPosition.x(), rectPosition.y()).isValidType(zone)) || !checkIfTerrainIsBuildable(shape))
-                && iter != maxIterations);
+            int x = (int) Math.round(radius * Math.sin(angle)) + center.x();
+            int z = (int) Math.round(radius * Math.cos(angle)) + center.z();
+            shape = new BlockArea(x, z).setSize(sizeX, sizeY);
+        } while (!parcelLocationValidator.isValid(shape) && iter < maxIterations);
+
         //Keep track of the most distant building to the center
         if (radius > parcels.builtUpRadius) {
             parcels.builtUpRadius = radius;
@@ -664,26 +663,52 @@ public class SettlementEntityManager extends BaseComponentSystem {
         }
     }
 
-    private boolean checkIfTerrainIsBuildable(BlockAreac area) {
-        List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
-        if (regions.isEmpty()) {
-            //logger.debug("No regions found in area " + area.toString());
-            return false;
+    static class ParcelLocationValidator {
+        private final ParcelList parcels;
+        private final BuildingQueue buildingQueue;
+        private final DistrictFacetComponent districtFacetComponent;
+        private final String zone;
+        private final RegionEntityManager regionEntityManager;
+
+        ParcelLocationValidator(ParcelList parcels, BuildingQueue buildingQueue, DistrictFacetComponent districtFacetComponent, String zone, RegionEntityManager regionEntityManager) {
+            this.parcels = parcels;
+            this.buildingQueue = buildingQueue;
+            this.districtFacetComponent = districtFacetComponent;
+            this.zone = zone;
+            this.regionEntityManager = regionEntityManager;
         }
-        for (EntityRef region : regions) {
-            RoughnessFacetComponent roughnessFacetComponent = region.getComponent(RoughnessFacetComponent.class);
-            ResourceFacetComponent resourceFacetComponent = region.getComponent(ResourceFacetComponent.class);
-            if (roughnessFacetComponent == null) {
-                logger.error("No RoughnessFacetComponent found for region");
+
+        private boolean checkIfTerrainIsBuildable(BlockAreac area) {
+            List<EntityRef> regions = regionEntityManager.getRegionsInArea(area);
+            if (regions.isEmpty()) {
+                logger.debug("No regions found in area {}", area);
                 return false;
             }
-            if (roughnessFacetComponent.meanDeviation > SettlementConstants.MAX_BUILDABLE_ROUGHNESS) {
-                return false;
+            for (EntityRef region : regions) {
+                RoughnessFacetComponent roughnessFacetComponent = region.getComponent(RoughnessFacetComponent.class);
+                ResourceFacetComponent resourceFacetComponent = region.getComponent(ResourceFacetComponent.class);
+                if (roughnessFacetComponent == null) {
+                    logger.error("No RoughnessFacetComponent found for region");
+                    return false;
+                }
+                if (roughnessFacetComponent.meanDeviation > SettlementConstants.MAX_BUILDABLE_ROUGHNESS) {
+                    return false;
+                }
+                if (resourceFacetComponent.getResourceSum(ResourceType.WATER.toString()) != 0) {
+                    return false;
+                }
             }
-            if (resourceFacetComponent.getResourceSum(ResourceType.WATER.toString()) != 0) {
-                return false;
-            }
+            return true;
         }
-        return true;
+
+        boolean isValid(BlockAreac shape) {
+            // TODO: This no longer short-circuits on the first false, is that a performance problem?
+            boolean freeOfOtherParcels = parcels.isNotIntersecting(shape);
+            boolean freeOfOtherBuildings = buildingQueue.isNotIntersecting(shape);
+            boolean districtAllowsZone = districtFacetComponent.getDistrict(shape.minX(), shape.minY()).isValidType(zone);
+            boolean terrainBuildable = checkIfTerrainIsBuildable(shape);
+            logger.debug("P:{} B:{} Z:{} T:{}", freeOfOtherBuildings, freeOfOtherBuildings, districtAllowsZone, terrainBuildable);
+            return freeOfOtherParcels && freeOfOtherBuildings && districtAllowsZone && terrainBuildable;
+        }
     }
 }

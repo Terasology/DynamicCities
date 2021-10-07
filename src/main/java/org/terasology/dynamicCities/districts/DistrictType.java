@@ -9,6 +9,7 @@ import org.terasology.gestalt.entitysystem.component.Component;
 import org.terasology.nui.Color;
 import org.terasology.reflection.MappedContainer;
 
+import java.util.Arrays;
 import java.util.List;
 
 //TODO: give mixing factors for zones
@@ -20,7 +21,12 @@ public class DistrictType implements Component<DistrictType> {
     public int color;
     public List<String> zones = Lists.newArrayList();
 
-    public DistrictType ( ) { }
+    public DistrictType() { }
+
+    public DistrictType(String name, String... zones) {
+        this.name = name;
+        this.zones.addAll(Arrays.asList(zones));
+    };
 
     public boolean isValidType(DynParcel parcel) {
         String zone = parcel.getZone();

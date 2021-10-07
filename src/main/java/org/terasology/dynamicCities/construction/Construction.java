@@ -8,7 +8,6 @@ import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.gestalt.assets.management.AssetManager;
 import org.terasology.cities.BlockTheme;
 import org.terasology.cities.DefaultBlockType;
 import org.terasology.cities.bldg.Building;
@@ -72,7 +71,6 @@ import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
-import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.math.Side;
 import org.terasology.engine.network.NetworkSystem;
@@ -89,6 +87,8 @@ import org.terasology.engine.world.block.BlockRegion;
 import org.terasology.engine.world.block.entity.placement.PlaceBlocks;
 import org.terasology.engine.world.generation.Border3D;
 import org.terasology.engine.world.generation.facets.ElevationFacet;
+import org.terasology.gestalt.assets.management.AssetManager;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.structureTemplates.components.SpawnBlockRegionsComponent;
 import org.terasology.structureTemplates.interfaces.StructureTemplateProvider;
 import org.terasology.structureTemplates.util.BlockRegionTransform;
@@ -554,7 +554,7 @@ public class Construction extends BaseComponentSystem {
 
             // Flatten the rect
             // TODO: Find a way to store the surface height at that point to the segment here.
-            segment.height = flatten(segment.getRect().expand(rectExpansionFactor,new BlockArea(BlockArea.INVALID)), segmentHeight);
+            segment.height = flatten(segment.getRect().expand(rectExpansionFactor, new BlockArea(BlockArea.INVALID)), segmentHeight);
 
             // Create raster targets
             RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, roadTheme, segment.rect);
