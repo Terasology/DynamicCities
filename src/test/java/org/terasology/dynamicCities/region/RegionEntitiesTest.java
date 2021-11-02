@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.registry.In;
+import org.terasology.engine.world.chunks.Chunks;
 import org.terasology.moduletestingenvironment.MTEExtension;
 import org.terasology.moduletestingenvironment.extension.Dependencies;
 
@@ -35,14 +36,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Dependencies("DynamicCities")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RegionEntitiesTest {
+    private static final int HALF_X = Chunks.SIZE_X / 2;
+    private static final int HALF_Z = Chunks.SIZE_Z / 2;
+
     @In
     public RegionEntityManager regionEntityManager;
 
     private final Vector3fc[] pos = new Vector3f[] {
-        new Vector3f(16, 0, 16),
-        new Vector3f(16, 0, -16),
-        new Vector3f(-16, 0, 16),
-        new Vector3f(-16, 0, -16),
+        // These first four are used by the test for #getNearest, which resolves to
+        // the center of chunks. Something around the time of the JOML migration shifted
+        // that value down by one.
+        new Vector3f(HALF_X - 1, 0, HALF_Z - 1),
+        new Vector3f(HALF_X - 1, 0, -HALF_Z - 1),
+        new Vector3f(-HALF_X - 1, 0, HALF_Z - 1),
+        new Vector3f(-HALF_X - 1, 0, -HALF_Z - 1),
+            
+        // …then why does this also have these locations that are at the corners of chunks
+        // instead of their centers?
         new Vector3f(0, 0, 0),
         new Vector3f(32, 0, 32),
         new Vector3f(32, 0, -32),
