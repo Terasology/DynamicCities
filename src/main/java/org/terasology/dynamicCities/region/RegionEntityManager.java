@@ -21,6 +21,7 @@ import org.terasology.dynamicCities.settlements.SettlementEntityManager;
 import org.terasology.dynamicCities.sites.SiteComponent;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.internal.EntityScope;
 import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnActivatedComponent;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
@@ -30,7 +31,6 @@ import org.terasology.engine.logic.console.commandSystem.annotations.Command;
 import org.terasology.engine.logic.console.commandSystem.annotations.Sender;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.logic.nameTags.NameTagComponent;
-import org.terasology.engine.logic.permission.PermissionManager;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.Share;
 import org.terasology.engine.world.block.BlockArea;
@@ -40,13 +40,13 @@ import org.terasology.math.TeraMath;
 import org.terasology.nui.Color;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 @Share(value = RegionEntityManager.class)
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class RegionEntityManager extends BaseComponentSystem {
+    private static final Logger logger = LoggerFactory.getLogger(RegionEntityManager.class);
 
     @In
     private EntityManager entityManager;
@@ -59,14 +59,11 @@ public class RegionEntityManager extends BaseComponentSystem {
 
 
     private final int gridSize = 96;
-    private Logger logger = LoggerFactory.getLogger(RegionEntityManager.class);
     private boolean toggledNameTags = false;
 
     @Override
     public void postBegin() {
-        Iterator<EntityRef> regionEntitiesIterator = entityManager.getEntitiesWith(RegionEntitiesComponent.class).iterator();
-        while (regionEntitiesIterator.hasNext()) {
-            EntityRef regionStore = regionEntitiesIterator.next();
+        for (EntityRef regionStore : entityManager.getEntitiesWith(RegionEntitiesComponent.class)) {
             if (regionStore.hasComponent(RegionMainStoreComponent.class)) {
                 regionStoreEntity = regionStore;
                 regionEntitiesComponent = regionStore.getComponent(RegionEntitiesComponent.class);
@@ -75,18 +72,18 @@ public class RegionEntityManager extends BaseComponentSystem {
         }
         regionEntitiesComponent = new RegionEntitiesComponent(gridSize);
         regionStoreEntity = entityManager.create(regionEntitiesComponent, new RegionMainStoreComponent());
-        regionStoreEntity.setAlwaysRelevant(true);
+        regionStoreEntity.setScope(EntityScope.GLOBAL);
     }
 
-    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class, ResourceFacetComponent.class})
+    @ReceiveEvent(components = {UnregisteredRegionComponent.class, LocationComponent.class, RoughnessFacetComponent.class,
+            ResourceFacetComponent.class})
     public void registerRegion(OnActivatedComponent event, EntityRef region) {
         add(region);
         region.removeComponent(UnregisteredRegionComponent.class);
         region.addComponent(new UnassignedRegionComponent());
-
     }
 
-    @ReceiveEvent(components = {UnassignedRegionComponent.class})
+    @ReceiveEvent(components = UnassignedRegionComponent.class)
     public void assignRegion(AssignRegionEvent event, EntityRef region) {
         region.addComponent(new ActiveRegionComponent());
         region.removeComponent(UnassignedRegionComponent.class);
@@ -148,8 +145,8 @@ public class RegionEntityManager extends BaseComponentSystem {
 
     public boolean cellIsLoaded(Vector2ic position) {
         Map<Vector2i, Integer> cellGrid = regionEntitiesComponent.cellGrid;
-        int cellSize = regionEntitiesComponent.cellSize;
-        return cellGrid.containsKey(toCellPos(position)) && (cellGrid.get(toCellPos(position)) == cellSize);
+        Vector2i cellPos = toCellPos(position);
+        return cellGrid.containsKey(cellPos) && (cellGrid.get(cellPos) == regionEntitiesComponent.cellSize);
     }
 
     public List<EntityRef> getRegionsInCell(Vector2ic position) {
@@ -157,7 +154,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         List<EntityRef> regions = new ArrayList<>();
 
         Vector2i cellCenter = toCellPos(position);
-        int edgeLength = Math.round((float)Math.sqrt(cellSize));
+        int edgeLength = Math.round((float) Math.sqrt(cellSize));
         BlockArea cellRegion = new BlockArea(-edgeLength, -edgeLength, edgeLength, edgeLength);
         Vector2i regionWorldPos = new Vector2i();
         for (Vector2ic pos : cellRegion) {
@@ -178,12 +175,12 @@ public class RegionEntityManager extends BaseComponentSystem {
         LocationComponent regionLocation = region.getComponent(LocationComponent.class);
         Vector3fc loc = regionLocation.getLocalPosition();
         Vector2i pos = new Vector2i(loc.x(), loc.z(), RoundingMode.FLOOR);
-        return  getRegionsInCell(pos);
+        return getRegionsInCell(pos);
     }
 
     public boolean checkSidesLoadedLong(Vector2ic pos) {
         Vector2i temp = new Vector2i();
-        return (cellIsLoaded(pos.add(3 * gridSize, 0, temp)) && cellIsLoaded(pos.add(-3 * gridSize, 0,temp))
+        return (cellIsLoaded(pos.add(3 * gridSize, 0, temp)) && cellIsLoaded(pos.add(-3 * gridSize, 0, temp))
             && cellIsLoaded(pos.add(0, 3 * gridSize, temp)) && cellIsLoaded(pos.add(0, -3 * gridSize, temp)));
     }
 
@@ -202,7 +199,9 @@ public class RegionEntityManager extends BaseComponentSystem {
         //       not finding any suitable location at all (in MetalRenegades)
 //        return (cellIsLoaded(pos.add(gridSize,0, temp)) && cellIsLoaded(pos.add(-gridSize, 0, temp))
 //                && cellIsLoaded(pos.add(0, gridSize, temp)) && cellIsLoaded(pos.add(0, -gridSize, temp))); // horribly hacky logic but ok?
-        return cellIsLoaded(pos) && cellIsLoaded(pos.add(gridSize,0, temp)) && cellIsLoaded(pos.add(0, gridSize, temp));
+        return cellIsLoaded(pos)
+                && cellIsLoaded(pos.add(gridSize, 0, temp))
+                && cellIsLoaded(pos.add(0, gridSize, temp));
     }
 
     public boolean checkSidesLoadedNear(EntityRef region) {
@@ -215,7 +214,7 @@ public class RegionEntityManager extends BaseComponentSystem {
     public boolean checkFullLoaded(Vector2ic pos) {
         BlockArea cube = new BlockArea(-1, -1, 1, 1);
         Vector2i cellPos = new Vector2i();
-        for(Vector2ic cubePos : cube) {
+        for (Vector2ic cubePos : cube) {
             cellPos.set(pos.x() + cubePos.x() * gridSize, pos.y() + cubePos.y() * gridSize);
             if (!cellIsLoaded(cellPos)) {
                 return false;
@@ -255,7 +254,7 @@ public class RegionEntityManager extends BaseComponentSystem {
         SiteComponent siteComponent = region.getComponent(SiteComponent.class);
         nT.text = "Roughness: "
                 + roughnessFacetComponent.meanDeviation + " Grass: " + resourceFacetComponent.getResourceSum("Grass")
-                + locationComponent.getWorldPosition(new Vector3f()).toString();
+                + locationComponent.getWorldPosition(new Vector3f());
         nT.yOffset = 10;
         nT.scale = 10;
 
@@ -273,10 +272,8 @@ public class RegionEntityManager extends BaseComponentSystem {
         region.addComponent(nT);
     }
 
-    @Command(shortDescription = "Toggles the view of nametags for region entities", runOnServer = true,
-            requiredPermission = PermissionManager.DEBUG_PERMISSION)
-    public String toggleRegionTags(
-            @Sender EntityRef client) {
+    @Command(shortDescription = "Toggles the view of name tags for region entities", runOnServer = true)
+    public String toggleRegionTags(@Sender EntityRef client) {
         if (toggledNameTags) {
             for (EntityRef region : regionEntitiesComponent.regionEntities.values()) {
                 region.removeComponent(NameTagComponent.class);
