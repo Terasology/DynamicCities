@@ -16,8 +16,8 @@
 package org.terasology.dynamicCities.minimap.events;
 
 
-import org.terasology.engine.entitySystem.event.Event;
 import org.terasology.engine.network.BroadcastEvent;
+import org.terasology.gestalt.entitysystem.event.Event;
 
 
 @BroadcastEvent
