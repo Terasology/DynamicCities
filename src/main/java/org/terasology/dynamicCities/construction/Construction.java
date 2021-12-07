@@ -554,7 +554,7 @@ public class Construction extends BaseComponentSystem {
 
             // Flatten the rect
             // TODO: Find a way to store the surface height at that point to the segment here.
-            segment.height = flatten(segment.getRect().expand(rectExpansionFactor,new BlockArea(BlockArea.INVALID)), segmentHeight);
+            segment.height = flatten(segment.getRect().expand(rectExpansionFactor, new BlockArea(BlockArea.INVALID)), segmentHeight);
 
             // Create raster targets
             RasterTarget rasterTarget = new BufferRasterTarget(blockBufferSystem, roadTheme, segment.rect);
