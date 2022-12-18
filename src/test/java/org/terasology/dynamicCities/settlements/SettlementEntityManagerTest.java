@@ -11,7 +11,6 @@ import org.joml.Vector3fc;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,9 +30,7 @@ import org.terasology.engine.context.Context;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.integrationenvironment.ModuleTestingHelper;
-import org.terasology.engine.integrationenvironment.jupiter.Dependencies;
-import org.terasology.engine.integrationenvironment.jupiter.MTEExtension;
-import org.terasology.engine.integrationenvironment.jupiter.UseWorldGenerator;
+import org.terasology.engine.integrationenvironment.jupiter.IntegrationEnvironment;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.registry.InjectionHelper;
@@ -45,10 +42,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-@Tag("MteTest")
-@ExtendWith({MTEExtension.class, MockitoExtension.class})
-@Dependencies("DynamicCities")
-@UseWorldGenerator("DynamicCities:FlatFaceted")
+@ExtendWith(MockitoExtension.class)
+@IntegrationEnvironment(dependencies = "DynamicCities", worldGenerator = "DynamicCities:FlatFaceted")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettlementEntityManagerTest {
 
