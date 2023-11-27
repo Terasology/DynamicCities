@@ -9,20 +9,18 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.integrationenvironment.jupiter.Dependencies;
 import org.terasology.engine.integrationenvironment.jupiter.MTEExtension;
 import org.terasology.engine.logic.location.LocationComponent;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.world.chunks.Chunks;
+import org.terasology.engine.integrationenvironment.jupiter.IntegrationEnvironment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Tag("MteTest")
-@ExtendWith({MockitoExtension.class, MTEExtension.class})
-@Dependencies("DynamicCities")
+@IntegrationEnvironment(dependencies={"DynamicCities"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RegionEntitiesTest {
     private static final int HALF_X = Chunks.SIZE_X / 2;
