@@ -16,8 +16,8 @@ import java.util.Objects;
 @MappedContainer
 public class SiteComponent implements Component<SiteComponent> {
 
-    private Vector2i coords = new Vector2i();
-    private float radius;
+    public Vector2i coords = new Vector2i();
+    public float radius;
 
     /**
      * @param bx the x world coord (in blocks)
