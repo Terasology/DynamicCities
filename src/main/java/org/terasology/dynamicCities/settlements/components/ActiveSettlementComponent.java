@@ -3,16 +3,11 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import org.terasology.gestalt.entitysystem.component.Component;
+import org.terasology.gestalt.entitysystem.component.EmptyComponent;
 
-public class ActiveSettlementComponent implements Component<ActiveSettlementComponent> {
+public class ActiveSettlementComponent extends EmptyComponent<ActiveSettlementComponent> {
 
     public ActiveSettlementComponent() {
-
-    }
-
-    @Override
-    public void copyFrom(ActiveSettlementComponent other) {
 
     }
 }
