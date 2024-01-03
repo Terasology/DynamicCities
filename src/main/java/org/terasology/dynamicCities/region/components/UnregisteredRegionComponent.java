@@ -3,16 +3,11 @@
 package org.terasology.dynamicCities.region.components;
 
 
-import org.terasology.gestalt.entitysystem.component.Component;
+import org.terasology.gestalt.entitysystem.component.EmptyComponent;
 
-public class UnregisteredRegionComponent implements Component<UnregisteredRegionComponent> {
+public class UnregisteredRegionComponent extends EmptyComponent<UnregisteredRegionComponent> {
 
     public UnregisteredRegionComponent() {
-
-    }
-
-    @Override
-    public void copyFrom(UnregisteredRegionComponent other) {
 
     }
 }

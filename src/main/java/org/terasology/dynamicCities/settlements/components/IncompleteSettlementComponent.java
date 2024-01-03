@@ -3,16 +3,11 @@
 package org.terasology.dynamicCities.settlements.components;
 
 
-import org.terasology.gestalt.entitysystem.component.Component;
+import org.terasology.gestalt.entitysystem.component.EmptyComponent;
 
-public class IncompleteSettlementComponent implements Component<IncompleteSettlementComponent> {
+public class IncompleteSettlementComponent extends EmptyComponent<IncompleteSettlementComponent> {
 
     public IncompleteSettlementComponent() {
-
-    }
-
-    @Override
-    public void copyFrom(IncompleteSettlementComponent other) {
 
     }
 }

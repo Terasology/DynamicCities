@@ -3,16 +3,11 @@
 package org.terasology.dynamicCities.region.components;
 
 
-import org.terasology.gestalt.entitysystem.component.Component;
+import org.terasology.gestalt.entitysystem.component.EmptyComponent;
 
-public class ActiveRegionComponent implements Component<ActiveRegionComponent> {
+public class ActiveRegionComponent extends EmptyComponent<ActiveRegionComponent> {
 
     public ActiveRegionComponent() {
-
-    }
-
-    @Override
-    public void copyFrom(ActiveRegionComponent other) {
 
     }
 }
