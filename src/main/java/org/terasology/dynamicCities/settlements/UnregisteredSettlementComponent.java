@@ -3,16 +3,11 @@
 package org.terasology.dynamicCities.settlements;
 
 
-import org.terasology.gestalt.entitysystem.component.Component;
+import org.terasology.gestalt.entitysystem.component.EmptyComponent;
 
-public class UnregisteredSettlementComponent implements Component<UnregisteredSettlementComponent> {
+public class UnregisteredSettlementComponent extends EmptyComponent<UnregisteredSettlementComponent> {
 
     public UnregisteredSettlementComponent() {
-
-    }
-
-    @Override
-    public void copyFrom(UnregisteredSettlementComponent other) {
 
     }
 }
