@@ -76,20 +76,20 @@ public class SiteFacetProvider implements ConfigurableFacetProvider {
     }
 
 
-    private static class SiteConfiguration implements Component<SiteConfiguration> {
+    public static class SiteConfiguration implements Component<SiteConfiguration> {
 
         @Range(label = "Minimal town size", description = "Minimal town size in blocks", min = 1, max = 150, increment = 10, precision = 1)
-        private int minRadius = 50;
+        public int minRadius = 50;
 
         @Range(label = "Maximum town population", description = "Maximum town population", min = 10, max = 350, increment = 10, precision = 1)
-        private int maxPopulation = 100;
+        public int maxPopulation = 100;
 
         @Range(label = "Minimum distance between towns", min = 10, max = 1000, increment = 10, precision = 1)
-        private int minDistance = 128;
+        public int minDistance = 128;
 
         // Spawn is assumed to be at (0, 0, 0) for this setting.
         @Range(label = "Minimum distance from spawn", min = 0, max = 1000, increment = 10, precision = 1)
-        private int minSpawnGap = 200;
+        public int minSpawnGap = 200;
 
         @Override
         public void copyFrom(SiteConfiguration other) {
