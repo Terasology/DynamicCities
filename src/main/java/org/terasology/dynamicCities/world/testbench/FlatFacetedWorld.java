@@ -4,7 +4,9 @@
 package org.terasology.dynamicCities.world.testbench;
 
 import org.terasology.core.world.CoreBiome;
+import org.terasology.core.world.generator.facetProviders.FlatSurfaceHeightProvider;
 import org.terasology.core.world.generator.facetProviders.SeaLevelProvider;
+import org.terasology.core.world.generator.facetProviders.SurfaceToDensityProvider;
 import org.terasology.dynamicCities.region.RegionEntityProvider;
 import org.terasology.dynamicCities.region.ResourceProvider;
 import org.terasology.dynamicCities.region.RoughnessProvider;
@@ -17,7 +19,6 @@ import org.terasology.engine.world.generation.BaseFacetedWorldGenerator;
 import org.terasology.engine.world.generation.WorldBuilder;
 import org.terasology.engine.world.generator.RegisterWorldGenerator;
 import org.terasology.engine.world.generator.plugin.WorldGeneratorPluginLibrary;
-import org.terasology.moduletestingenvironment.fixtures.FlatSurfaceHeightProvider;
 
 @RegisterWorldGenerator(id = "FlatFaceted", displayName = "Faceted world with one uniform flat surface.")
 public class FlatFacetedWorld extends BaseFacetedWorldGenerator {
@@ -38,6 +39,10 @@ public class FlatFacetedWorld extends BaseFacetedWorldGenerator {
                 .addProvider(new FlatSurfaceHeightProvider(SURFACE_HEIGHT))
                 .addProvider(new SeaLevelProvider(SEA_LEVEL))
                 .addProvider(new ConstantBiomeProvider(BIOME))
+                // Turns the elevation into a DensityFacet (and the SurfacesFacet that goes with
+                // it). Without it SolidRasterizer falls back to a density of 1 everywhere and
+                // generates a world of solid rock with no air to stand in, so nothing can spawn.
+                .addProvider(new SurfaceToDensityProvider())
                 .addProvider(new RoughnessProvider())
                 .addProvider(new SiteFacetProvider())
                 .addProvider(new SettlementFacetProvider())

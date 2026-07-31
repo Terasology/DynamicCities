@@ -42,11 +42,6 @@
             "minVersion": "1.0.0"
         },
         {
-            "id": "ModuleTestingEnvironment",
-            "minVersion": "0.3.2",
-            "optional": true
-        },
-        {
             "id": "NameGenerator",
             "minVersion": "1.0.0"
         },
